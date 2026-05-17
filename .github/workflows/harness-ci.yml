@@ -1,0 +1,70 @@
+name: Harness CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - run: pip install ruff
+      - run: ruff check .
+
+  typecheck:
+    name: Mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - run: pip install -e ".[dev]"
+      - run: mypy .
+
+  tests:
+    name: Pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - run: pip install -e ".[dev]"
+      - run: pytest
+
+  docs-check:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check if HANDOFF.md was updated
+        run: |
+          git diff --name-only origin/main...HEAD 2>/dev/null | grep -q "HANDOFF.md" || \
+          echo "::notice::HANDOFF.md was not updated in this PR"
+      - name: Validate STATUS.json if it exists
+        run: |
+          if [ -f STATUS.json ]; then
+            python3 -c "import json; json.load(open('STATUS.json'))" && echo "STATUS.json is valid"
+          else
+            echo "::notice::STATUS.json is missing — optional in React-only projects"
+          fi
+
+  harness-gate:
+    name: Harness Gate
+    needs: [lint, typecheck, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Harness approved. Ready for human review."

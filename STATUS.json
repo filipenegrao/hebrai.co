@@ -1,0 +1,231 @@
+{
+  "project": "hebrai.co",
+  "last_updated": "2026-05-17",
+  "version": "0.1.0",
+  "release_phase": "foundation",
+  "domains": [
+    {
+      "name": "foundation",
+      "status": "in_progress",
+      "quality_grade": "N/A",
+      "features": [
+        {
+          "id": "foundation-001",
+          "name": "Project scaffold",
+          "status": "done",
+          "tests": false,
+          "notes": "Git repo initialized with .gitignore, .env.example, and docker-compose.yml per foundation plan Task 1. Directories created. No sensors applicable yet \u2014 repo has no application code. NEXT_PUBLIC_BETTER_AUTH_URL intentionally added early as a harmless placeholder needed by the Better Auth client config in Task 7. QA approved with reservations; required corrections completed. Security verdict: ADVISORY only. Follow-ups: runtime rejection of placeholder secrets and broader env-file ignore coverage before deployment work."
+        },
+        {
+          "id": "foundation-002",
+          "name": "Nginx config",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 2."
+        },
+        {
+          "id": "foundation-003",
+          "name": "PostgreSQL schema migration",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 3."
+        },
+        {
+          "id": "foundation-004",
+          "name": "Hebrew seed data and import script",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 4."
+        },
+        {
+          "id": "foundation-005",
+          "name": "FastAPI stub",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 5."
+        },
+        {
+          "id": "foundation-006",
+          "name": "Next.js scaffold",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 6."
+        },
+        {
+          "id": "foundation-007",
+          "name": "Better Auth configuration",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 7."
+        },
+        {
+          "id": "foundation-008",
+          "name": "Auth pages",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 8."
+        },
+        {
+          "id": "foundation-009",
+          "name": "Route protection and dashboard shell",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 9."
+        },
+        {
+          "id": "foundation-010",
+          "name": "Full stack smoke test",
+          "status": "pending",
+          "tests": false,
+          "notes": "Foundation plan Task 10."
+        }
+      ]
+    },
+    {
+      "name": "core-engine",
+      "status": "pending",
+      "quality_grade": "N/A",
+      "features": [
+        {
+          "id": "core-001",
+          "name": "Backend infrastructure",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 1."
+        },
+        {
+          "id": "core-002",
+          "name": "FSRS scheduling service",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 2."
+        },
+        {
+          "id": "core-003",
+          "name": "AI content generation service",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 3."
+        },
+        {
+          "id": "core-004",
+          "name": "Session router",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 4."
+        },
+        {
+          "id": "core-005",
+          "name": "Session proxy routes",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 5."
+        },
+        {
+          "id": "core-006",
+          "name": "HebrewWord component",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 6."
+        },
+        {
+          "id": "core-007",
+          "name": "Exercise UI components",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 7."
+        },
+        {
+          "id": "core-008",
+          "name": "Session page",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 8."
+        },
+        {
+          "id": "core-009",
+          "name": "End-to-end smoke test",
+          "status": "pending",
+          "tests": false,
+          "notes": "Core engine plan Task 9."
+        }
+      ]
+    },
+    {
+      "name": "dashboard-deploy",
+      "status": "pending",
+      "quality_grade": "N/A",
+      "features": [
+        {
+          "id": "dash-001",
+          "name": "Daily stats endpoint",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 1."
+        },
+        {
+          "id": "dash-002",
+          "name": "Settings endpoint",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 2."
+        },
+        {
+          "id": "dash-003",
+          "name": "Stats and settings proxy routes",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 3."
+        },
+        {
+          "id": "dash-004",
+          "name": "Dashboard UI",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 4."
+        },
+        {
+          "id": "dash-005",
+          "name": "Settings page",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 5."
+        },
+        {
+          "id": "dash-006",
+          "name": "Hebrew typography",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 6."
+        },
+        {
+          "id": "dash-007",
+          "name": "HTTPS Nginx configuration",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 7."
+        },
+        {
+          "id": "dash-008",
+          "name": "VPS deployment scripts",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 8."
+        },
+        {
+          "id": "dash-009",
+          "name": "Full end-to-end verification",
+          "status": "pending",
+          "tests": false,
+          "notes": "Dashboard/deploy plan Task 9."
+        }
+      ]
+    }
+  ],
+  "architectural_drift": [],
+  "open_decisions": [
+    "Confirm the initial Hebrew seed list size and source before production import.",
+    "Confirm the production AI provider priority order behind LiteLLM.",
+    "Confirm final VPS hostname and certificate issuance details before deploy work."
+  ]
+}
