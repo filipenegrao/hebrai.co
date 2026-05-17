@@ -5,34 +5,33 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-002
-- Feature name: Nginx config
+- Feature ID: foundation-003
+- Feature name: PostgreSQL schema migration
 - Domain: foundation
 
 ## Review objective
 
-Validate that the initial reverse-proxy config preserves the intended exposure boundaries.
+Validate that the initial schema introduces no obvious trust-boundary or data-protection regressions.
 
 ## Expected scope
 
-1. `nginx/nginx.conf` reverse-proxy behavior.
-2. Public exposure only through Nginx.
-3. Preservation of FastAPI internal-only topology.
+1. Initial SQL schema for domain tables.
+2. Constraints and indexes defined in the plan.
+3. No live credential material.
 
 ## Must not be included in this delivery
 
-1. Full production TLS review from later deployment work.
-2. Runtime security review of code that does not exist yet.
-3. Broad review outside the Task 2 diff.
+1. Runtime auth review.
+2. Seed-data review.
+3. Broad review outside the migration diff.
 
 ## Mandatory checklist
 
-1. Nginx exposes only the intended public surface.
-2. FastAPI is not routed publicly.
-3. No secrets or sensitive values are introduced.
-4. Proxy configuration does not add obvious unsafe behavior within the reviewed scope.
-5. Security-relevant residual risks are documented.
-6. Applicable verification commands were executed and reported.
+1. No credentials or secrets are introduced.
+2. User-scoped tables preserve explicit `user_id` boundaries where planned.
+3. The migration does not introduce obvious unsafe defaults in reviewed scope.
+4. Security-relevant residual risks are documented.
+5. Applicable verification commands were executed and reported.
 
 ## Required report format
 

@@ -5,32 +5,32 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-002
-- Feature name: Nginx config
+- Feature ID: foundation-003
+- Feature name: PostgreSQL schema migration
 - Domain: foundation
 
 ## Review objective
 
-Validate that the initial Nginx configuration matches foundation plan Task 2 and does not expose later-task behavior.
+Validate that the initial migration matches foundation plan Task 3 and does not include later-task work.
 
 ## Expected scope
 
-1. `nginx/nginx.conf` creation.
-2. Proxying external traffic to the `next` service.
+1. `database/migrations/001_initial_schema.sql`.
+2. Initial schema objects from the foundation plan.
 3. State-doc updates for the completed slice.
 
 ## Must not be included in this delivery
 
-1. Database schema or seed work.
-2. FastAPI, Next.js, auth, or UI implementation.
-3. HTTPS/TLS production config from later plans.
+1. Seed data import work.
+2. Better Auth-generated tables.
+3. FastAPI or frontend implementation.
 
 ## Mandatory checklist
 
-1. Scope follows foundation plan Task 2 only.
-2. Nginx routes the intended traffic to `next`.
-3. FastAPI remains internal-only and is not exposed through Nginx.
-4. No unrelated config or implementation files are added.
+1. Scope follows foundation plan Task 3 only.
+2. Required extension, tables, constraints, and indexes are present.
+3. SQL is internally coherent and matches the plan intent.
+4. No credentials or unrelated schema changes are introduced.
 5. `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md` are updated consistently.
 6. Applicable verification commands were executed and reported.
 

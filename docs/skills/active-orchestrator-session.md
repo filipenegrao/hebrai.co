@@ -20,8 +20,8 @@ the delivery with validated state docs and repository handoff.
 
 ## Active feature for this session
 
-- Feature ID: foundation-002
-- Feature name: Nginx config
+- Feature ID: foundation-003
+- Feature name: PostgreSQL schema migration
 - Domain: foundation
 
 ## Orchestration steps

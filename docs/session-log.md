@@ -156,3 +156,42 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 
 - Begin `foundation-002` — Nginx config.
 - Make the initial commit only when the user explicitly requests it.
+
+## 2026-05-17 — foundation-002: Nginx config
+
+### What was done
+
+- Created `nginx/nginx.conf` with reverse-proxy configuration matching foundation plan Task 2 exactly.
+- Nginx listens on port 80; proxies all `/` traffic to `http://next:3000`.
+- Includes proxy headers: `Upgrade`, `Connection`, `Host`, `X-Real-IP`, `proxy_cache_bypass`.
+- FastAPI (`fastapi:8000`) is not exposed via Nginx — internal-only as per architecture.
+- Updated `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md`.
+
+### Decisions
+
+- No `server_name` changes — kept `hebrai.co www.hebrai.co` from the plan.
+- No HTTPS/443 listener configuration beyond the port mapping already in `docker-compose.yml` — TLS configuration belongs to the later dashboard/deploy plan.
+- Docker/Nginx tooling unavailable locally — verification done via file content checks (grep) rather than `nginx -t`.
+
+### Follow-ups
+
+- Proceed to `foundation-003` — PostgreSQL schema migration.
+- Make the initial git commit when explicitly requested.
+
+## 2026-05-17 — foundation-002 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED` for `foundation-002`.
+- Processed Security verdict `CLEAN` for `foundation-002`.
+- Confirmed the initial reverse-proxy config preserves the planned boundary: public traffic reaches `next`, not `fastapi`.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-003`.
+
+### Decisions
+
+- Runtime Nginx syntax validation remains a residual risk until tooling is available; it is not a blocker because the delivered file matches the plan exactly.
+- HTTPS/TLS hardening remains intentionally deferred to the later deployment plan.
+
+### Follow-ups
+
+- Begin `foundation-003` — PostgreSQL schema migration.

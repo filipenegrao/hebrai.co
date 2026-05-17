@@ -11,7 +11,6 @@ Updated: 2026-05-17
 ## Backlog
 
 ### Foundation
-- [ ] `foundation-002` — Nginx config
 - [ ] `foundation-003` — PostgreSQL schema migration
 - [ ] `foundation-004` — Hebrew seed data and import script
 - [ ] `foundation-005` — FastAPI stub
@@ -29,5 +28,6 @@ Updated: 2026-05-17
 
 ## Done
 
+- [x] `foundation-002` — Nginx config
 - [x] `foundation-001` — Project scaffold
 - [x] Harness updated for Builder -> QA -> Security workflow

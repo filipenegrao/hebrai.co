@@ -19,9 +19,9 @@
         {
           "id": "foundation-002",
           "name": "Nginx config",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 2."
+          "notes": "Nginx reverse-proxy config at nginx/nginx.conf. Proxies / to next:3000 with proper headers. FastAPI not publicly routed. QA verdict: APPROVED. Security verdict: CLEAN. Residual risk: local nginx syntax validation deferred until tooling/runtime is available."
         },
         {
           "id": "foundation-003",
