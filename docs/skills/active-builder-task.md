@@ -5,16 +5,16 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Task
 
-- Feature ID: foundation-004
-- Feature name: Hebrew seed data and import script
+- Feature ID: foundation-005
+- Feature name: FastAPI stub
 - Domain: foundation
-- Goal: Add the initial Hebrew word seed dataset and import script exactly as described in foundation plan Task 4.
+- Goal: Add the initial internal FastAPI service scaffold exactly as described in foundation plan Task 5.
 
 ## Mandatory scope
 
-1. Create `database/seed/words.csv` with the planned initial Biblical Hebrew seed list.
-2. Create `database/seed/seed_words.py` following the foundation plan Task 4.
-3. Keep the import idempotent using the planned `ON CONFLICT DO NOTHING` behavior.
+1. Create `backend/requirements.txt` following the foundation plan Task 5.
+2. Create `backend/main.py` with the planned health-check endpoint.
+3. Create `backend/Dockerfile` using the refreshed Python baseline from the plan.
 4. Update docs and state:
    - `HANDOFF.md`
    - `STATUS.json`
@@ -23,16 +23,16 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Out of scope
 
-1. Expanding beyond the planned initial seed list.
-2. Running live imports unless tooling/runtime is available.
-3. FastAPI, frontend, or auth implementation.
-4. Changing the existing schema beyond what Task 4 requires.
+1. Session endpoints or business logic.
+2. Database access implementation.
+3. Frontend or auth implementation.
+4. Exposing FastAPI publicly through Nginx.
 
 ## Acceptance criteria
 
-1. `database/seed/words.csv` matches the foundation plan Task 4 intent.
-2. `database/seed/seed_words.py` matches the planned import behavior.
-3. Import logic is safe to rerun without duplicating rows.
+1. The backend files match foundation plan Task 5 intent.
+2. FastAPI exposes only the planned health-check behavior.
+3. The Dockerfile uses the refreshed Python baseline.
 4. State docs reflect the real result of this task.
 5. Applicable verification commands are executed and reported.
 

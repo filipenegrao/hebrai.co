@@ -239,3 +239,66 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 ### Follow-ups
 
 - Begin `foundation-004` — Hebrew seed data and import script.
+
+## 2026-05-17 — foundation-004: Hebrew seed data and import script
+
+### What was done
+
+- Created `database/seed/words.csv` with the top-20 Biblical Hebrew frequency list, matching foundation plan Task 4 Step 1 exactly.
+- Created `database/seed/seed_words.py` — a Python script that reads UTF-8 CSV and inserts into the PostgreSQL `words` table.
+- Importer uses: `DATABASE_URL` from environment, parameterized (`%s`) queries, `ON CONFLICT DO NOTHING` for idempotent reruns.
+- Reports `{inserted} inserted, {skipped} skipped` after completion.
+- Updated `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md`.
+
+### Decisions
+
+- Live import was not executed — Docker/psql tooling unavailable locally. The scripts were written verbatim from the plan.
+- The import script dynamically loads `morphology` from the CSV as JSON for extensibility beyond the initial top-20 list.
+
+### Follow-ups
+
+- Proceed to `foundation-005` — FastAPI stub.
+- Run the live import when PostgreSQL is available (Task 10 full stack smoke test).
+- Replace the top-20 seed list with the full frequency corpus before production launch.
+
+## 2026-05-17 — foundation-004 QA correction pass
+
+### What was done
+
+- QA verdict: `REJECTED` — importer was not genuinely idempotent.
+- **Fix 1 (blocking):** Added `UNIQUE` constraint to `words.hebrew` in `001_initial_schema.sql`.
+- **Fix 2 (blocking):** Changed `ON CONFLICT DO NOTHING` to `ON CONFLICT (hebrew) DO NOTHING` in `seed_words.py`.
+- **Recommended improvement:** Fixed `אֶרֶץ` gloss from duplicated `terra / terra` to `terra / país` in `words.csv`.
+- **Recommended improvement:** Default CSV path now uses `os.path.dirname(os.path.abspath(__file__))` so it resolves relative to the script location regardless of caller cwd.
+- **Recommended improvement:** Wrapped connection/cursor lifecycle in `try/finally` for proper cleanup on failure.
+- Updated `HANDOFF.md`, `STATUS.json`, and `docs/session-log.md`.
+
+### Decisions
+
+- All three recommended QA notes applied — each was a single-line or minimal-scope change.
+- Schema change (`UNIQUE` on `hebrew`) is safe because no live database has been seeded yet.
+
+### Follow-ups
+
+- Resubmit to QA for re-evaluation.
+- Proceed to `foundation-005` — FastAPI stub.
+
+## 2026-05-17 — foundation-004 closeout
+
+### What was done
+
+- Processed initial QA verdict `REJECTED` for `foundation-004`.
+- Corrected the broken idempotency contract by adding `UNIQUE` to `words.hebrew` and changing the importer to `ON CONFLICT (hebrew) DO NOTHING`.
+- Applied the recommended local improvements: fixed the duplicated `אֶרֶץ` gloss, made the default CSV path script-relative, and added explicit cleanup.
+- Processed QA recheck verdict `APPROVED`.
+- Processed Security verdict `CLEAN`.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-005`.
+
+### Decisions
+
+- The seed importer is only considered idempotent when schema and conflict target agree.
+- Live import validation remains deferred until PostgreSQL tooling is available.
+
+### Follow-ups
+
+- Begin `foundation-005` — FastAPI stub.

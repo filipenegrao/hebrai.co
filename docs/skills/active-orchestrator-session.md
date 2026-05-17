@@ -20,8 +20,8 @@ the delivery with validated state docs and repository handoff.
 
 ## Active feature for this session
 
-- Feature ID: foundation-004
-- Feature name: Hebrew seed data and import script
+- Feature ID: foundation-005
+- Feature name: FastAPI stub
 - Domain: foundation
 
 ## Orchestration steps

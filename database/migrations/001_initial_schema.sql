@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS words (
     id              SERIAL PRIMARY KEY,
-    hebrew          TEXT NOT NULL,
+    hebrew          TEXT NOT NULL UNIQUE,
     transliteration TEXT NOT NULL,
     gloss_pt        TEXT NOT NULL,
     morphology      JSONB NOT NULL DEFAULT '{}',

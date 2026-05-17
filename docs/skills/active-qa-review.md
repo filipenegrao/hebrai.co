@@ -5,34 +5,37 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-004
-- Feature name: Hebrew seed data and import script
+- Feature ID: foundation-005
+- Feature name: FastAPI stub
 - Domain: foundation
 
 ## Review objective
 
-Validate that the seed dataset and importer match foundation plan Task 4, are safe to rerun, and do not pull later tasks forward.
+Validate that the initial FastAPI scaffold matches foundation plan Task 5 and stays intentionally minimal.
 
 ## Expected scope
 
-1. `database/seed/words.csv`.
-2. `database/seed/seed_words.py`.
-3. State-doc updates for the completed slice.
+1. `backend/requirements.txt`.
+2. `backend/main.py`.
+3. `backend/Dockerfile`.
+4. State-doc updates for the completed slice.
 
 ## Must not be included in this delivery
 
-1. Expanded word lists beyond plan scope.
-2. Live database migration changes.
-3. FastAPI/frontend/auth implementation.
+1. Session/business endpoints.
+2. Database access implementation.
+3. Frontend/auth work.
+4. Public FastAPI exposure.
 
 ## Mandatory checklist
 
-1. Scope follows foundation plan Task 4 only.
-2. Seed data format and row set match the plan intent.
-3. Importer is idempotent and uses parameterized SQL.
-4. No credentials or unrelated files are introduced.
-5. `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md` are updated consistently.
-6. Applicable verification commands were executed and reported.
+1. Scope follows foundation plan Task 5 only.
+2. Requirements match the plan intent.
+3. `GET /health` behavior is correct and minimal.
+4. Dockerfile matches the refreshed baseline and expected run command.
+5. No credentials or unrelated files are introduced.
+6. `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md` are updated consistently.
+7. Applicable verification commands were executed and reported.
 
 ## Required report format
 

@@ -33,9 +33,9 @@
         {
           "id": "foundation-004",
           "name": "Hebrew seed data and import script",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 4."
+          "notes": "Top-20 Biblical Hebrew words in database/seed/words.csv with idempotent importer (seed_words.py). Uses ON CONFLICT (hebrew) DO NOTHING against UNIQUE hebrew column, parameterized queries, DATABASE_URL from env. Default CSV path resolved relative to script location. Connection cleanup via try/finally. Initial QA rejected dead-code idempotency; correction added UNIQUE words.hebrew plus ON CONFLICT (hebrew), fixed the duplicated erets gloss, made the default CSV path script-relative, and added explicit cleanup. QA recheck: APPROVED. Security verdict: CLEAN."
         },
         {
           "id": "foundation-005",

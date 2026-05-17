@@ -5,32 +5,32 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-004
-- Feature name: Hebrew seed data and import script
+- Feature ID: foundation-005
+- Feature name: FastAPI stub
 - Domain: foundation
 
 ## Review objective
 
-Validate that the import path introduces no obvious injection, secret-handling, or unsafe automation issue.
+Validate that the initial backend scaffold introduces no obvious exposure, secret-handling, or unsafe default issue.
 
 ## Expected scope
 
-1. Seed CSV contents.
-2. Python importer behavior.
-3. Environment-driven DB connection use.
+1. Backend dependency declaration.
+2. Health-check endpoint only.
+3. Container runtime definition.
 
 ## Must not be included in this delivery
 
-1. Runtime service review.
-2. Broad schema redesign.
-3. Review outside the Task 4 diff.
+1. Runtime review of future endpoints.
+2. Broad Docker hardening beyond the narrow slice.
+3. Public-route changes outside Task 5.
 
 ## Mandatory checklist
 
 1. No credentials or secrets are introduced.
-2. Database access uses environment configuration, not hardcoded secrets.
-3. SQL execution is parameterized where user/file values are inserted.
-4. Import behavior is safe to rerun.
+2. Only the intended minimal health endpoint exists.
+3. Container config does not create an obvious exposure regression in reviewed scope.
+4. FastAPI remains internal-only in the planned topology.
 5. Security-relevant residual risks are documented.
 6. Applicable verification commands were executed and reported.
 
