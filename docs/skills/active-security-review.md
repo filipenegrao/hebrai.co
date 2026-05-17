@@ -5,33 +5,34 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-003
-- Feature name: PostgreSQL schema migration
+- Feature ID: foundation-004
+- Feature name: Hebrew seed data and import script
 - Domain: foundation
 
 ## Review objective
 
-Validate that the initial schema introduces no obvious trust-boundary or data-protection regressions.
+Validate that the import path introduces no obvious injection, secret-handling, or unsafe automation issue.
 
 ## Expected scope
 
-1. Initial SQL schema for domain tables.
-2. Constraints and indexes defined in the plan.
-3. No live credential material.
+1. Seed CSV contents.
+2. Python importer behavior.
+3. Environment-driven DB connection use.
 
 ## Must not be included in this delivery
 
-1. Runtime auth review.
-2. Seed-data review.
-3. Broad review outside the migration diff.
+1. Runtime service review.
+2. Broad schema redesign.
+3. Review outside the Task 4 diff.
 
 ## Mandatory checklist
 
 1. No credentials or secrets are introduced.
-2. User-scoped tables preserve explicit `user_id` boundaries where planned.
-3. The migration does not introduce obvious unsafe defaults in reviewed scope.
-4. Security-relevant residual risks are documented.
-5. Applicable verification commands were executed and reported.
+2. Database access uses environment configuration, not hardcoded secrets.
+3. SQL execution is parameterized where user/file values are inserted.
+4. Import behavior is safe to rerun.
+5. Security-relevant residual risks are documented.
+6. Applicable verification commands were executed and reported.
 
 ## Required report format
 

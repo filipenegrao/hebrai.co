@@ -6,23 +6,27 @@
 ## Last update
 
 - **Date:** 2026-05-17
-- **Session:** Closed `foundation-002` through Builder -> QA -> Security and rotated the harness to `foundation-003`.
-- **Branch / HEAD:** `main` at `93f2fc6`; current foundation-002 changes are uncommitted.
+- **Session:** Closed `foundation-003` through Builder -> QA -> Security and rotated the harness to `foundation-004`.
+- **Branch / HEAD:** `main` at `f1fa1d9`; current foundation-003 changes are uncommitted.
 
 ## Goals completed this session
 
-- Completed `foundation-002` — Nginx config.
+- Completed `foundation-003` — PostgreSQL schema migration.
 - QA verdict: `APPROVED`.
-- Security verdict: `CLEAN`.
-- Confirmed the intended exposure boundary: Nginx routes public traffic to `next`; FastAPI remains internal-only.
-- Rotated active workflow files to `foundation-003` — PostgreSQL schema migration.
+- Security verdict: `ADVISORY`.
+- Captured schema follow-ups for later work:
+  - enforce `review_log.user_id` consistency with `cards.user_id`
+  - define cleanup behavior for soft Better Auth user references
+  - verify FSRS due serialization format before relying on the JSONB expression index
+  - later decide provider allowlist and AI cache expiry policy
+- Rotated active workflow files to `foundation-004` — Hebrew seed data and import script.
 
 ## WIP (in-progress at handoff)
 
 - No feature implementation is currently in progress.
-- `foundation-002` changes are not yet committed.
+- `foundation-003` changes are not yet committed.
 
 ## Suggested next steps
 
-- Start `foundation-003` — PostgreSQL schema migration.
-- When convenient, validate the Nginx config mechanically in an environment with Nginx tooling available.
+- Start `foundation-004` — Hebrew seed data and import script.
+- Preserve the recorded schema hardening notes for the later slices that own those concerns.

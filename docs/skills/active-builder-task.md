@@ -5,16 +5,16 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Task
 
-- Feature ID: foundation-003
-- Feature name: PostgreSQL schema migration
+- Feature ID: foundation-004
+- Feature name: Hebrew seed data and import script
 - Domain: foundation
-- Goal: Add the initial PostgreSQL schema exactly as described in foundation plan Task 3.
+- Goal: Add the initial Hebrew word seed dataset and import script exactly as described in foundation plan Task 4.
 
 ## Mandatory scope
 
-1. Create `database/migrations/001_initial_schema.sql` following `docs/superpowers/plans/2026-05-17-foundation.md` Task 3.
-2. Define the planned extension, tables, constraints, and indexes for words, cards, review_log, ai_content_cache, and user_settings.
-3. Preserve the plan's relationship to Better Auth users without creating later auth implementation work.
+1. Create `database/seed/words.csv` with the planned initial Biblical Hebrew seed list.
+2. Create `database/seed/seed_words.py` following the foundation plan Task 4.
+3. Keep the import idempotent using the planned `ON CONFLICT DO NOTHING` behavior.
 4. Update docs and state:
    - `HANDOFF.md`
    - `STATUS.json`
@@ -23,16 +23,16 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Out of scope
 
-1. Seed data import.
-2. Better Auth table generation.
-3. FastAPI or Next.js implementation.
-4. Running a live database migration unless tooling is available and explicitly scoped.
+1. Expanding beyond the planned initial seed list.
+2. Running live imports unless tooling/runtime is available.
+3. FastAPI, frontend, or auth implementation.
+4. Changing the existing schema beyond what Task 4 requires.
 
 ## Acceptance criteria
 
-1. `database/migrations/001_initial_schema.sql` matches the foundation plan Task 3 intent.
-2. The expected tables, constraints, and indexes are present.
-3. No unrelated schema work is added.
+1. `database/seed/words.csv` matches the foundation plan Task 4 intent.
+2. `database/seed/seed_words.py` matches the planned import behavior.
+3. Import logic is safe to rerun without duplicating rows.
 4. State docs reflect the real result of this task.
 5. Applicable verification commands are executed and reported.
 

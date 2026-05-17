@@ -195,3 +195,47 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 ### Follow-ups
 
 - Begin `foundation-003` — PostgreSQL schema migration.
+
+## 2026-05-17 — foundation-003: PostgreSQL schema migration
+
+### What was done
+
+- Created `database/migrations/001_initial_schema.sql` with the 5 application tables specified in foundation plan Task 3.
+- Tables created: `words`, `cards`, `review_log`, `ai_content_cache`, `user_settings`.
+- Constraints included: `UNIQUE (user_id, word_id)` on cards, `UNIQUE (word_id, provider, prompt_hash)` on ai_content_cache, `CHECK` on rating (1-4) and format_override, `REFERENCES` with `ON DELETE CASCADE`.
+- Indexes added: `idx_cards_user_due` (expression index on fsrs_state->>'due'), `idx_review_log_card`, `idx_ai_cache_lookup`.
+- Better Auth table management left to Better Auth's own migration system — referenced via comments only.
+- Updated `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md`.
+
+### Decisions
+
+- SQL syntax was not validated against a live PostgreSQL instance — Docker/psql tooling unavailable locally. The file was written verbatim from the plan template.
+- Better Auth tables (`users`, `sessions`, `accounts`, `verifications`) are intentionally excluded — they are managed by `npx better-auth migrate` in Task 7.
+
+### Follow-ups
+
+- Proceed to `foundation-004` — Hebrew seed data and import script.
+- Validate the migration against a live PostgreSQL instance when the full stack boots in Task 10.
+- Make the initial git commit when explicitly requested.
+
+## 2026-05-17 — foundation-003 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED` for `foundation-003`.
+- Processed Security verdict `ADVISORY` for `foundation-003`.
+- Recorded the schema hardening notes surfaced during review instead of losing them after approval.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-004`.
+
+### Decisions
+
+- The initial migration is acceptable as the foundation baseline.
+- Carry forward these non-blocking follow-ups:
+  - enforce `review_log.user_id` consistency with `cards.user_id`
+  - define cleanup behavior for soft Better Auth user references
+  - verify FSRS due serialization format before relying on the JSONB expression index
+  - later decide provider allowlist and AI cache expiry policy
+
+### Follow-ups
+
+- Begin `foundation-004` — Hebrew seed data and import script.

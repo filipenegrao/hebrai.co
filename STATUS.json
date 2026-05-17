@@ -26,9 +26,9 @@
         {
           "id": "foundation-003",
           "name": "PostgreSQL schema migration",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 3."
+          "notes": "Initial schema created at database/migrations/001_initial_schema.sql. 5 tables: words, cards, review_log, ai_content_cache, user_settings with CHECK, UNIQUE, REFERENCES constraints and 3 indexes for hot query paths. QA verdict: APPROVED. Security verdict: ADVISORY. Follow-ups: enforce review_log.user_id consistency with cards.user_id; define cleanup for soft Better Auth user references; verify FSRS due serialization; later decide provider allowlist and AI cache expiry policy."
         },
         {
           "id": "foundation-004",
@@ -226,6 +226,7 @@
   "open_decisions": [
     "Confirm the initial Hebrew seed list size and source before production import.",
     "Confirm the production AI provider priority order behind LiteLLM.",
-    "Confirm final VPS hostname and certificate issuance details before deploy work."
+    "Confirm final VPS hostname and certificate issuance details before deploy work.",
+    "Decide how to enforce review_log.user_id consistency with cards.user_id before production data paths rely on it."
   ]
 }
