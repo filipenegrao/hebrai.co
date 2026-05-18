@@ -54,9 +54,9 @@
         {
           "id": "foundation-007",
           "name": "Better Auth configuration",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 7. Entry preconditions from foundation-006 review: audit/remove @better-auth/client if unnecessary, move shadcn to devDependencies, and repair frontend/CLAUDE.md root-contract linkage before auth implementation."
+          "notes": "Better Auth 1.6.11 configured. Server config in src/lib/auth.ts (PostgreSQL pool, email+password). Browser client in src/lib/auth-client.ts (better-auth/client stable subpath). Catch-all route at src/app/api/auth/[...all]/route.ts. @better-auth/client removed (redundant pre-alpha). shadcn moved to devDeps. frontend/CLAUDE.md links root contract. QA verdict: APPROVED WITH RESERVATIONS; doc corrections completed. Security verdict: CLEAN. Better Auth DB migration deferred until PostgreSQL is available."
         },
         {
           "id": "foundation-008",
@@ -227,7 +227,6 @@
     "Confirm the initial Hebrew seed list size and source before production import.",
     "Confirm the production AI provider priority order behind the internal provider adapter.",
     "Confirm final VPS hostname and certificate issuance details before deploy work.",
-    "Decide how to enforce review_log.user_id consistency with cards.user_id before production data paths rely on it.",
-    "Before foundation-007, confirm whether @better-auth/client is needed at all; if not, remove the pre-alpha package and use the stable better-auth/client sub-path from the main package."
+    "Decide how to enforce review_log.user_id consistency with cards.user_id before production data paths rely on it."
   ]
 }

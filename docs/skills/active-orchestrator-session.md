@@ -20,8 +20,8 @@ the delivery with validated state docs and repository handoff.
 
 ## Active feature for this session
 
-- Feature ID: foundation-007
-- Feature name: Better Auth configuration
+- Feature ID: foundation-008
+- Feature name: Auth pages
 - Domain: foundation
 
 ## Orchestration steps

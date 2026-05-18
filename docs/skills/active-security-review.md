@@ -5,35 +5,33 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-007
-- Feature name: Better Auth configuration
+- Feature ID: foundation-008
+- Feature name: Auth pages
 - Domain: foundation
 
 ## Review objective
 
-Validate that the initial auth configuration and the precondition cleanups introduce no avoidable secret-handling or dependency risk.
+Validate that the auth UI introduces no obvious credential-handling or client-side exposure issue.
 
 ## Expected scope
 
-1. Better Auth config files.
-2. Removal/justification of `@better-auth/client`.
-3. `shadcn` dependency-scope cleanup.
-4. Frontend operational-contract linkage repair.
+1. Login/register pages.
+2. Existing auth-client usage.
+3. UI-only error/loading behavior.
 
 ## Must not be included in this delivery
 
-1. Full auth UX review.
-2. Route-protection middleware review.
-3. Broad deployment hardening outside this diff.
+1. Route-protection middleware review.
+2. Backend auth internals.
+3. Broad frontend hardening outside this diff.
 
 ## Mandatory checklist
 
 1. No credentials or secrets are hardcoded.
-2. Auth config reads secrets from environment.
-3. No unnecessary pre-alpha auth package remains unless explicitly justified.
-4. Runtime dependency footprint is reduced appropriately.
-5. Security-relevant residual risks are documented.
-6. Applicable verification commands were executed and reported.
+2. Password handling remains client-to-auth-client only; no unsafe logging is introduced.
+3. Error states do not expose sensitive implementation detail.
+4. Security-relevant residual risks are documented.
+5. Applicable verification commands were executed and reported.
 
 ## Required report format
 

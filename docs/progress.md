@@ -2,7 +2,7 @@
 
 > Human-readable roadmap. Canonical task state is `STATUS.json`.
 
-Updated: 2026-05-17
+Updated: 2026-05-18
 
 ## In progress
 
@@ -11,7 +11,6 @@ Updated: 2026-05-17
 ## Backlog
 
 ### Foundation
-- [ ] `foundation-007` — Better Auth configuration
 - [ ] `foundation-008` — Auth pages
 - [ ] `foundation-009` — Route protection and dashboard shell
 - [ ] `foundation-010` — Full stack smoke test
@@ -24,6 +23,7 @@ Updated: 2026-05-17
 
 ## Done
 
+- [x] `foundation-007` — Better Auth configuration
 - [x] `foundation-006` — Next.js scaffold
 - [x] `foundation-005` — FastAPI stub
 - [x] `foundation-004` — Hebrew seed data and import script

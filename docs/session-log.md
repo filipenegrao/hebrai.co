@@ -420,3 +420,49 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 ### Follow-ups
 
 - Begin `foundation-007` — Better Auth configuration.
+
+## 2026-05-18 — foundation-007: Better Auth configuration
+
+### What was done
+
+**Preconditions resolved:**
+1. Removed `@better-auth/client` (v0.0.2-alpha.3 — pre-alpha). `better-auth` v1.6.11 exports a stable `./client` subpath (`node_modules/better-auth/client/index.mjs`), making the separate package redundant. 12 transitive packages cleaned.
+2. Moved `shadcn` (v4.7.0) from `dependencies` to `devDependencies` — it is a CLI tool, not a runtime dependency.
+3. Rewrote `frontend/CLAUDE.md`: now references `@../../AGENTS.md` and instructs agents to consult `node_modules/next/dist/docs/` for Next.js 16 API changes.
+
+**Better Auth files created:**
+- `frontend/src/lib/auth.ts` — server config: PostgreSQL pool via `DATABASE_URL`, email/password enabled, `trustedOrigins` from `BETTER_AUTH_URL`.
+- `frontend/src/lib/auth-client.ts` — browser client using `better-auth/client` (stable subpath, not pre-alpha package).
+- `frontend/src/app/api/auth/[...all]/route.ts` — catch-all handler via `toNextJsHandler(auth)`.
+
+Verified: `npm run build` (compiled successfully, route shows `/api/auth/[...all]` dynamic), `npm run lint` (clean).
+
+### Decisions
+
+- Better Auth schema migration/generation was not attempted — PostgreSQL is not running locally. Deferred to full stack smoke test (Task 10).
+- `.env.example` already contained `NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000` (added early in `foundation-001`).
+- Build-time Better Auth warnings ("default secret", "Base URL could not be determined") are expected — these resolve when `.env` is populated with real values.
+
+### Follow-ups
+
+- Proceed to `foundation-008` — Auth pages (login/register).
+- Run `npx better-auth migrate` when PostgreSQL is available to create auth tables.
+
+## 2026-05-18 — foundation-007 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED WITH RESERVATIONS` for `foundation-007`.
+- Applied the required documentation corrections before Security review.
+- Processed Security verdict `CLEAN`.
+- Confirmed the auth slice also resolved all mandatory carry-over preconditions from `foundation-006`.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-008`.
+
+### Decisions
+
+- The separate `@better-auth/client` package is unnecessary for this implementation and should stay removed.
+- Better Auth schema generation remains deferred until PostgreSQL is available.
+
+### Follow-ups
+
+- Begin `foundation-008` — Auth pages.
