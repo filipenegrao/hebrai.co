@@ -6,26 +6,27 @@
 ## Last update
 
 - **Date:** 2026-05-18
-- **Session:** Closed `foundation-007` through Builder -> QA -> Security and rotated the harness to `foundation-008`.
-- **Branch / HEAD:** `main` at `8ac0409`; current foundation-007 changes are uncommitted.
+- **Session:** Closed `foundation-008` through Builder -> QA -> Security and rotated the harness to `foundation-009`.
+- **Branch / HEAD:** `main` at `826ad3f`; current foundation-008 changes are uncommitted.
 
 ## Goals completed this session
 
-- Completed `foundation-007` — Better Auth configuration.
-- Resolved the three mandatory carry-over preconditions from `foundation-006`:
-  - removed the redundant pre-alpha `@better-auth/client` package
-  - moved `shadcn` to `devDependencies`
-  - repaired `frontend/CLAUDE.md` root-contract linkage
-- QA verdict: `APPROVED WITH RESERVATIONS`; documentation corrections completed.
-- Security verdict: `CLEAN`.
-- Rotated active workflow files to `foundation-008` — Auth pages.
+- Completed `foundation-008` — Auth pages.
+- QA verdict: `APPROVED WITH RESERVATIONS`.
+- Applied immediate QA corrections:
+  - clear stale error state when toggling login/register mode
+  - fall back to `Erro desconhecido` if Better Auth returns an empty message
+- Security verdict: `ADVISORY`.
+- Captured a required pre-Task-10 follow-up:
+  - map raw Better Auth errors to safe user-facing Portuguese messages to reduce enumeration/info-leak risk
+- Rotated active workflow files to `foundation-009` — Route protection and dashboard shell.
 
 ## WIP (in-progress at handoff)
 
 - No feature implementation is currently in progress.
-- `foundation-007` changes are not yet committed.
+- `foundation-008` changes are not yet committed.
 
 ## Suggested next steps
 
-- Start `foundation-008` — Auth pages.
-- Create Better Auth tables when PostgreSQL tooling/runtime becomes available.
+- Start `foundation-009` — Route protection and dashboard shell.
+- Before `foundation-010`, implement safe auth error-message mapping.

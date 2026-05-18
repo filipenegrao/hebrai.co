@@ -5,33 +5,34 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-008
-- Feature name: Auth pages
+- Feature ID: foundation-009
+- Feature name: Route protection and dashboard shell
 - Domain: foundation
 
 ## Review objective
 
-Validate that the auth UI introduces no obvious credential-handling or client-side exposure issue.
+Validate that route protection introduces no obvious auth-bypass or cookie-handling issue within the planned scope.
 
 ## Expected scope
 
-1. Login/register pages.
-2. Existing auth-client usage.
-3. UI-only error/loading behavior.
+1. Middleware route guard.
+2. Dashboard shell behavior.
+3. Planned cookie/session checks.
 
 ## Must not be included in this delivery
 
-1. Route-protection middleware review.
-2. Backend auth internals.
-3. Broad frontend hardening outside this diff.
+1. Full authorization model review.
+2. Dashboard metric review.
+3. Broad deployment hardening.
 
 ## Mandatory checklist
 
-1. No credentials or secrets are hardcoded.
-2. Password handling remains client-to-auth-client only; no unsafe logging is introduced.
-3. Error states do not expose sensitive implementation detail.
-4. Security-relevant residual risks are documented.
-5. Applicable verification commands were executed and reported.
+1. Protected routes are guarded as planned.
+2. Public auth routes remain reachable as intended.
+3. Cookie/session handling does not introduce an obvious bypass.
+4. No credentials or secrets are hardcoded.
+5. Security-relevant residual risks are documented.
+6. Applicable verification commands were executed and reported.
 
 ## Required report format
 

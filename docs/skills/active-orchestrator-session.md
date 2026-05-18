@@ -20,8 +20,8 @@ the delivery with validated state docs and repository handoff.
 
 ## Active feature for this session
 
-- Feature ID: foundation-008
-- Feature name: Auth pages
+- Feature ID: foundation-009
+- Feature name: Route protection and dashboard shell
 - Domain: foundation
 
 ## Orchestration steps

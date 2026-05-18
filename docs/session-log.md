@@ -466,3 +466,67 @@ Verified: `npm run build` (compiled successfully, route shows `/api/auth/[...all
 ### Follow-ups
 
 - Begin `foundation-008` — Auth pages.
+
+## 2026-05-18 — foundation-008: Auth pages
+
+### What was done
+
+- Created `frontend/src/app/login/page.tsx` — combined login/register client page matching foundation plan Task 8.
+- Mode toggle: `"login"` (default) / `"register"`, driven by a `useState` toggling between the two.
+- Register mode shows an additional Name field; login mode shows Email + Password only.
+- Error state: surface Better Auth error messages or a generic Portuguese fallback.
+- Loading state: submit button disabled and shows `"..."` while the async call is in flight.
+- On success: `router.push("/")` redirects to the root route (default scaffold page until Task 9 replaces it with the protected dashboard shell).
+- Uses `authClient.signIn.email` and `authClient.signUp.email` from `src/lib/auth-client.ts`.
+- Uses shadcn Card, CardHeader, CardTitle, CardContent, Input, Label, Button components.
+- Verified: `npm run build` (compiled successfully, `/login` route appears in the build output) and `npm run lint` (no issues found).
+
+### Decisions
+
+- Page code matches the foundation plan Task 8 template exactly — no deviations.
+- `router.push("/")` lands on the default create-next-app template page until Task 9 builds the protected dashboard. This is expected and correct at this stage.
+- The mode-toggle link is a bare `<button type="button">`, not the shadcn Button — matching the plan intentionally to avoid the variant styling on the toggle.
+- Build-time Better Auth warnings ("Base URL could not be determined", "default secret") are expected and pre-existing from Task 7.
+
+### Follow-ups
+
+- Proceed to `foundation-009` — Route protection middleware and dashboard shell.
+- Run `npx better-auth migrate` and validate end-to-end sign-up/sign-in when PostgreSQL becomes available.
+
+## 2026-05-18 — foundation-008 QA correction pass
+
+### What was done
+
+- Applied two QA-required corrections to `frontend/src/app/login/page.tsx`:
+  1. Mode toggle `onClick` now calls `setError("")` before switching modes — clears stale error state when the user switches between login and register.
+  2. Both `signIn.email` and `signUp.email` error branches now use `error.message ?? "Erro desconhecido"` — guards against undefined message fields.
+- Verified: `npm run build` (compiled successfully) and `npm run lint` (no issues found).
+- Recorded the follow-up in `STATUS.json` and `HANDOFF.md`: map raw Better Auth error strings to safe Portuguese messages before the `foundation-010` smoke test.
+
+### Decisions
+
+- Both fixes are minimal single-expression changes targeting the exact lines QA flagged; no surrounding code was altered.
+- The error-message mapping follow-up is non-blocking for `foundation-009` and is tracked in state docs for pre-`foundation-010` resolution.
+
+### Follow-ups
+
+- Proceed to `foundation-009` — Route protection middleware and dashboard shell.
+
+## 2026-05-18 — foundation-008 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED WITH RESERVATIONS` for `foundation-008`.
+- Applied the two required UI corrections before Security review.
+- Processed Security verdict `ADVISORY`.
+- Recorded safe auth error-message mapping as a required pre-`foundation-010` follow-up.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-009`.
+
+### Decisions
+
+- Task 8 can close without implementing safe auth-error translation yet, but raw Better Auth messages must not survive into end-to-end smoke testing.
+
+### Follow-ups
+
+- Begin `foundation-009` — Route protection and dashboard shell.
+- Before `foundation-010`, map Better Auth errors to safe Portuguese UI messages.

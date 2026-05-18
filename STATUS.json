@@ -61,9 +61,9 @@
         {
           "id": "foundation-008",
           "name": "Auth pages",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 8."
+          "notes": "Login/register page at frontend/src/app/login/page.tsx. Combined mode toggle (login/register), email+password fields, name field for register, error and loading state, redirects to / on success. Uses authClient.signIn.email and authClient.signUp.email. shadcn Card/Input/Label/Button components. Build and lint green. QA corrections: mode toggle clears stale error; error.message uses ?? fallback. End-to-end flow deferred \u2014 Better Auth tables not yet migrated. Follow-up before foundation-010: map raw Better Auth error strings to safe Portuguese messages instead of forwarding server text verbatim. QA verdict: APPROVED WITH RESERVATIONS; corrections completed (clear stale errors on mode toggle; safe undefined-message fallback). Security verdict: ADVISORY. Before foundation-010, replace raw Better Auth error forwarding with safe user-facing Portuguese messages to reduce user-enumeration/info-leak risk."
         },
         {
           "id": "foundation-009",

@@ -5,16 +5,16 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Task
 
-- Feature ID: foundation-008
-- Feature name: Auth pages
+- Feature ID: foundation-009
+- Feature name: Route protection and dashboard shell
 - Domain: foundation
-- Goal: Add the login/register pages exactly as described in foundation plan Task 8.
+- Goal: Add the planned route-protection middleware and protected dashboard shell exactly as described in foundation plan Task 9.
 
 ## Mandatory scope
 
-1. Create the planned auth UI pages.
-2. Reuse the planned Better Auth client helper and shadcn/ui components.
-3. Preserve the current auth architecture without adding middleware or dashboard behavior yet.
+1. Create the planned middleware for route protection.
+2. Replace the default root page with the planned protected dashboard shell.
+3. Preserve auth-page work from Task 8 without expanding into later dashboard metrics.
 4. Update docs and state:
    - `HANDOFF.md`
    - `STATUS.json`
@@ -23,16 +23,16 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Out of scope
 
-1. Route-protection middleware.
-2. Dashboard shell behavior.
-3. Backend/session endpoints.
-4. Deployment work.
+1. Real dashboard metrics.
+2. Core-engine session flows.
+3. Deployment work.
+4. Auth DB migration.
 
 ## Acceptance criteria
 
-1. Auth pages match foundation plan Task 8 intent.
-2. Pages use the existing auth client helper correctly.
-3. No middleware or later-feature behavior is pulled forward.
+1. Middleware and dashboard shell match foundation plan Task 9 intent.
+2. Public/protected route behavior is represented as planned.
+3. No later dashboard features are pulled forward.
 4. State docs reflect the real result of this task.
 5. Applicable verification commands are executed and reported.
 

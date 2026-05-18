@@ -5,32 +5,32 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-008
-- Feature name: Auth pages
+- Feature ID: foundation-009
+- Feature name: Route protection and dashboard shell
 - Domain: foundation
 
 ## Review objective
 
-Validate the login/register UI against foundation plan Task 8 without reopening later route-protection work.
+Validate route protection and the initial dashboard shell against foundation plan Task 9.
 
 ## Expected scope
 
-1. Login/register page implementation.
-2. Auth-client usage.
+1. Middleware / route protection.
+2. Root dashboard shell page.
 3. State-doc updates.
 
 ## Must not be included in this delivery
 
-1. Route-protection middleware.
-2. Dashboard shell logic.
-3. Backend/session features.
+1. Real dashboard metrics.
+2. Core-engine/session logic.
+3. Deployment work.
 
 ## Mandatory checklist
 
-1. Scope follows foundation plan Task 8 only.
-2. Pages use the auth client correctly.
-3. Error/loading behavior matches the plan intent.
-4. No hardcoded credentials or later-feature behavior are introduced.
+1. Scope follows foundation plan Task 9 only.
+2. Middleware protects the intended routes and preserves `/login` access.
+3. Dashboard shell matches the plan intent.
+4. No hardcoded secrets or later-feature behavior are introduced.
 5. `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md` are updated consistently.
 6. Applicable verification commands were executed and reported.
 
