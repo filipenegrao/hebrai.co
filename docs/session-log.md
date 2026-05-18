@@ -626,3 +626,27 @@ Stack torn down cleanly with `docker compose down`.
 - Add `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker `build.args` entry before production deployment.
 - Map Better Auth raw errors to safe Portuguese UI messages (carried from foundation-008 security advisory).
 - Begin `core-001` — Backend infrastructure.
+
+## 2026-05-18 — foundation section closeout
+
+### What was done
+
+- Processed `foundation-010` QA verdict: `APPROVED`.
+- Processed `foundation-010` Security verdict: `ADVISORY`.
+- Confirmed the full foundation section (`foundation-001` through `foundation-010`) is complete and committed at `1840e83`.
+- Promoted the tracker from `foundation` to `core-engine` for the next working phase.
+- Moved the remaining infra/auth/security advisories into explicit `core-001` entry constraints in `STATUS.json`.
+
+### Decisions
+
+- Foundation is considered closed even though several follow-ups remain; those follow-ups are phase-entry constraints for `core-engine`, not reopening items for foundation tasks.
+- The Docker AppTranslocation path issue is machine-specific context only; it should stay in session history and handoff notes, not be generalized into repository-wide runtime assumptions.
+
+### Follow-ups
+
+- Start `core-001` with the recorded constraints:
+  - run `npx better-auth migrate` before auth E2E work
+  - add `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg before non-local deploy paths are considered valid
+  - document `docker-entrypoint-initdb.d` first-init-only behavior for DB resets
+  - add `.env.example` placeholders and guidance for `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`
+  - replace raw Better Auth error forwarding with safe Portuguese user-facing messages before enabling auth flows

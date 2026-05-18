@@ -1,12 +1,12 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-18T23:30Z",
+  "last_updated": "2026-05-18T23:55Z",
   "version": "0.1.0",
-  "release_phase": "foundation",
+  "release_phase": "core-engine",
   "domains": [
     {
       "name": "foundation",
-      "status": "in_progress",
+      "status": "done",
       "quality_grade": "N/A",
       "features": [
         {
@@ -77,7 +77,7 @@
           "name": "Full stack smoke test",
           "status": "done",
           "tests": false,
-          "notes": "Docker Compose smoke test verified live. Added 002_seed_words.sql to auto-seed words via initdb.d. Fixed docker-compose.yml postgres volume path from /var/lib/postgresql/data to /var/lib/postgresql (postgres:18+ convention change). Smoke results: nginx/Next.js → 307 (proxy middleware active), FastAPI /health → {status:ok}, PostgreSQL COUNT(words) → 20. Better Auth error-message follow-up deferred — requires Better Auth tables (npx better-auth migrate) and is unrelated to infrastructure wiring. NEXT_PUBLIC_BETTER_AUTH_URL not passed as Docker build arg — baked as localhost:3000 fallback; needs build.args for production."
+          "notes": "Docker Compose smoke test verified live. Added 002_seed_words.sql to auto-seed words via initdb.d. Fixed docker-compose.yml postgres volume path from /var/lib/postgresql/data to /var/lib/postgresql (postgres:18+ convention change). Smoke results: nginx/Next.js → 307 (proxy middleware active), FastAPI /health → {status:ok}, PostgreSQL COUNT(words) → 20. QA verdict: APPROVED. Security verdict: ADVISORY. Follow-ups carried into core-engine: Better Auth tables still require npx better-auth migrate before auth E2E coverage; NEXT_PUBLIC_BETTER_AUTH_URL must be passed as a Docker build arg before non-local deployment; docker-entrypoint-initdb.d seeds only on first named-volume initialization; add explicit secret-handling guidance for AI provider keys before real AI calls; Better Auth raw error forwarding still needs safe Portuguese message mapping."
         }
       ]
     },
@@ -91,7 +91,7 @@
           "name": "Backend infrastructure",
           "status": "pending",
           "tests": false,
-          "notes": "Core engine plan Task 1."
+          "notes": "Core engine plan Task 1. Entry constraints from foundation closeout: run npx better-auth migrate before auth E2E work; add NEXT_PUBLIC_BETTER_AUTH_URL as Docker build arg before non-local deploy paths are considered valid; document docker-entrypoint-initdb.d first-init-only behavior for clean DB resets; add .env.example placeholders/guidance for ANTHROPIC_API_KEY, OPENAI_API_KEY, and GOOGLE_API_KEY before real AI calls; replace raw Better Auth error forwarding with safe Portuguese user-facing messages before enabling user-facing auth flows."
         },
         {
           "id": "core-002",

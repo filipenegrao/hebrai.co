@@ -18,6 +18,7 @@ Updated: 2026-05-18
 
 ## Done
 
+- [x] Foundation section closed (`foundation-001` to `foundation-010`)
 - [x] `foundation-010` — Full stack smoke test
 - [x] `foundation-009` — Route protection and dashboard shell
 - [x] `foundation-008` — Auth pages

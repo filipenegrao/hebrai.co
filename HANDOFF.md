@@ -6,8 +6,8 @@
 ## Last update
 
 - **Date:** 2026-05-18
-- **Session:** `foundation-010` — Full stack smoke test with Docker Compose.
-- **Branch / HEAD:** `main`; changes uncommitted.
+- **Session:** Foundation section closeout after `foundation-010` QA + Security review.
+- **Branch / HEAD:** `main` at `1840e83`; foundation work committed.
 
 ## Goals completed this session
 
@@ -35,6 +35,11 @@
 
 - **Docker binary note:** On this machine, `/usr/local/bin/docker` is a broken symlink (AppTranslocation). Docker must be invoked with the full path `/Applications/Docker.app/Contents/Resources/bin/docker` and `PATH` set to include that directory so `docker-credential-desktop` resolves.
 
+- **Review closeout:**
+  - QA verdict for `foundation-010`: `APPROVED`
+  - Security verdict for `foundation-010`: `ADVISORY`
+  - Foundation section (`foundation-001` through `foundation-010`) is now closed and committed.
+
 ## WIP (in-progress at handoff)
 
 - None.
@@ -42,7 +47,8 @@
 ## Suggested next steps
 
 - `core-001` — Backend infrastructure (FastAPI + PostgreSQL foundation for FSRS and AI services).
-- Before `core-001`, consider committing outstanding uncommitted changes (all files from foundation-001 through foundation-010).
 - Before any auth E2E testing: run `npx better-auth migrate` to create auth tables in a running postgres instance.
-- Long-term: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg for production builds.
-- Long-term: map Better Auth raw errors to safe Portuguese UI messages (deferred from foundation-008/009 security advisory).
+- Before any non-local deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg instead of relying on the localhost fallback.
+- Before real AI calls in `core-001`: ensure `.env.example` and secret-handling guidance cover `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`.
+- During `core-001`: document that `docker-entrypoint-initdb.d` seeds only on first named-volume initialization; use `docker compose down -v` when a clean DB reset is required.
+- Before enabling user-facing auth flows: map Better Auth raw errors to safe Portuguese UI messages (deferred from foundation-008/009 security advisory).
