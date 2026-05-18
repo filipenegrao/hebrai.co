@@ -10,9 +10,6 @@ Updated: 2026-05-18
 
 ## Backlog
 
-### Foundation
-- [ ] `foundation-010` — Full stack smoke test
-
 ### Core engine
 - [ ] `core-001` to `core-009` — Study session engine plan
 
@@ -21,6 +18,7 @@ Updated: 2026-05-18
 
 ## Done
 
+- [x] `foundation-010` — Full stack smoke test
 - [x] `foundation-009` — Route protection and dashboard shell
 - [x] `foundation-008` — Auth pages
 - [x] `foundation-007` — Better Auth configuration

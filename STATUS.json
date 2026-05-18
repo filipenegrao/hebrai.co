@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-18",
+  "last_updated": "2026-05-18T23:30Z",
   "version": "0.1.0",
   "release_phase": "foundation",
   "domains": [
@@ -75,9 +75,9 @@
         {
           "id": "foundation-010",
           "name": "Full stack smoke test",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 10."
+          "notes": "Docker Compose smoke test verified live. Added 002_seed_words.sql to auto-seed words via initdb.d. Fixed docker-compose.yml postgres volume path from /var/lib/postgresql/data to /var/lib/postgresql (postgres:18+ convention change). Smoke results: nginx/Next.js → 307 (proxy middleware active), FastAPI /health → {status:ok}, PostgreSQL COUNT(words) → 20. Better Auth error-message follow-up deferred — requires Better Auth tables (npx better-auth migrate) and is unrelated to infrastructure wiring. NEXT_PUBLIC_BETTER_AUTH_URL not passed as Docker build arg — baked as localhost:3000 fallback; needs build.args for production."
         }
       ]
     },

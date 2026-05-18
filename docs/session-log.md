@@ -583,3 +583,46 @@ Verified: `npm run build` (compiled successfully, route shows `/api/auth/[...all
 
 - Proceed to `foundation-010` — Full stack smoke test.
 - Map Better Auth raw errors to safe Portuguese UI messages before end-to-end validation.
+
+## 2026-05-18 — foundation-010: Full stack smoke test
+
+### What was done
+
+**Blockers resolved before smoke test:**
+
+1. **Seed SQL migration** — `database/migrations/002_seed_words.sql` created with all 20 Hebrew words as `INSERT ... ON CONFLICT (hebrew) DO NOTHING`. The postgres service is on the `internal` Docker network with no exposed ports; the Python seed script cannot connect from the host. Auto-seeding via postgres `initdb.d` (SQL files in `./database/migrations`) is the only viable path.
+
+2. **PostgreSQL 18 volume path** — `docker-compose.yml` volume was mounted at `/var/lib/postgresql/data`. postgres:18-alpine changed to major-version-specific data dirs; the image expects the volume at `/var/lib/postgresql`. The container entered a restart loop until this was corrected.
+
+**Build results:**
+- `docker compose build` — `hebraico-fastapi` and `hebraico-next` both built without errors.
+- Build-time Better Auth warnings (`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` unset) are expected: env vars are runtime-only; the `.env` file is not read at image build time.
+- Build output confirmed `ƒ Proxy (Middleware)` — proxy.ts is wired as middleware in Next.js 16.2.
+
+**Health check results (live):**
+| Check | Command | Result |
+|---|---|---|
+| nginx/Next.js | `curl -s -o /dev/null -w "%{http_code}" http://localhost:80` | `307` (proxy redirect to /login — middleware active) |
+| FastAPI | `docker compose exec fastapi python -c "urllib.request..."` | `{"status":"ok"}` |
+| PostgreSQL | `docker compose exec postgres psql ... -c "SELECT COUNT(*) FROM words;"` | `count = 20` |
+
+Stack torn down cleanly with `docker compose down`.
+
+**Sensors:**
+- `npm run lint` — clean.
+- `npm run build` — compiled successfully.
+
+### Decisions
+
+- Seed via SQL migration (`002_seed_words.sql`) rather than Python script, since postgres is internal-only in Docker Compose.
+- Better Auth error-message follow-up **deferred** — the smoke test does not exercise auth flows. Implementing it requires Better Auth tables (`npx better-auth migrate`) and is properly scoped to the first core-engine task that exercises auth.
+- `NEXT_PUBLIC_BETTER_AUTH_URL` is not passed as a Docker `build.args` entry in `docker-compose.yml` — the `http://localhost:3000` fallback is baked in at image build time. This is non-blocking for local smoke testing but must be addressed before production deployment.
+- Docker binary on this machine: `/usr/local/bin/docker` is a broken AppTranslocation symlink. Invoke Docker as `/Applications/Docker.app/Contents/Resources/bin/docker` with `PATH` set to include that directory for credential helper resolution.
+
+### Follow-ups
+
+- Commit all uncommitted changes spanning foundation-001 through foundation-010 when instructed.
+- Before any auth E2E testing: run `npx better-auth migrate` against a running postgres instance.
+- Add `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker `build.args` entry before production deployment.
+- Map Better Auth raw errors to safe Portuguese UI messages (carried from foundation-008 security advisory).
+- Begin `core-001` — Backend infrastructure.
