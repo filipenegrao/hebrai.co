@@ -6,7 +6,7 @@
 
 **Architecture:** Monorepo with `frontend/` (Next.js) and `backend/` (FastAPI) directories. Three Docker containers share a network; Nginx routes external traffic. Better Auth runs inside Next.js and writes sessions to PostgreSQL. FastAPI is internal-only (not exposed via Nginx in this plan).
 
-**Tech Stack:** Docker Compose, Nginx stable-alpine, PostgreSQL 18, Next.js 16.2 (App Router), Tailwind CSS 4.3, shadcn/ui, Better Auth 1.6.9, Python 3.14, FastAPI 0.136.1 (scaffold only in this plan)
+**Tech Stack:** Docker Compose, Nginx stable-alpine, PostgreSQL 18, Next.js 16.2 (App Router), Tailwind CSS 4.3, shadcn/ui, Better Auth 1.6.9, Node.js 24 LTS, Python 3.14, FastAPI 0.136.1 (scaffold only in this plan)
 
 **Version policy:** Start new work on current stable releases as of 2026-05-17; prefer explicit version pins in dependency manifests and stable container tags over floating defaults. Keep the Task 5 stub minimal; add provider SDKs, database drivers, FSRS, and dotenv only in the tasks that first use them.
 
@@ -574,18 +574,18 @@ cd ..
 - [ ] **Step 4: Create `frontend/Dockerfile`**
 
 ```dockerfile
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/.next/standalone ./

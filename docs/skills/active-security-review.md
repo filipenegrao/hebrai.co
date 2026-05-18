@@ -5,33 +5,35 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-006
-- Feature name: Next.js scaffold
+- Feature ID: foundation-007
+- Feature name: Better Auth configuration
 - Domain: foundation
 
 ## Review objective
 
-Validate that the frontend scaffold introduces no obvious secret-handling or exposure regression within the narrow scaffold scope.
+Validate that the initial auth configuration and the precondition cleanups introduce no avoidable secret-handling or dependency risk.
 
 ## Expected scope
 
-1. Next.js project files.
-2. Tailwind/shadcn/ui config.
-3. Production Dockerfile.
+1. Better Auth config files.
+2. Removal/justification of `@better-auth/client`.
+3. `shadcn` dependency-scope cleanup.
+4. Frontend operational-contract linkage repair.
 
 ## Must not be included in this delivery
 
-1. Auth/session behavior review.
-2. Runtime review of future routes.
-3. Broad frontend security hardening outside the scaffold diff.
+1. Full auth UX review.
+2. Route-protection middleware review.
+3. Broad deployment hardening outside this diff.
 
 ## Mandatory checklist
 
-1. No credentials or secrets are introduced.
-2. No unsafe public environment values are added beyond the planned scaffold.
-3. Docker/build configuration does not introduce an obvious exposure regression.
-4. Security-relevant residual risks are documented.
-5. Applicable verification commands were executed and reported.
+1. No credentials or secrets are hardcoded.
+2. Auth config reads secrets from environment.
+3. No unnecessary pre-alpha auth package remains unless explicitly justified.
+4. Runtime dependency footprint is reduced appropriately.
+5. Security-relevant residual risks are documented.
+6. Applicable verification commands were executed and reported.
 
 ## Required report format
 

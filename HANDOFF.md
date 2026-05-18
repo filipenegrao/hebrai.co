@@ -5,25 +5,30 @@
 
 ## Last update
 
-- **Date:** 2026-05-17
-- **Session:** Closed `foundation-005` through Builder -> QA -> Security and rotated the harness to `foundation-006`.
-- **Branch / HEAD:** `main` at `c32d757`; current docs + foundation-005 changes are uncommitted.
+- **Date:** 2026-05-18
+- **Session:** Closed `foundation-006` through Builder -> QA -> Security and rotated the harness to `foundation-007`.
+- **Branch / HEAD:** `main` at `fc6c7b7`; current foundation-006 changes are uncommitted.
 
 ## Goals completed this session
 
-- Switched the planned AI strategy from LiteLLM to direct provider SDKs behind an internal adapter and documented it in ADR-001.
-- Completed `foundation-005` — FastAPI stub.
-- QA verdict: `APPROVED`.
-- Security verdict: `CLEAN`.
-- Confirmed the backend stub remains intentionally minimal: FastAPI + Uvicorn only, `/health` route only.
-- Rotated active workflow files to `foundation-006` — Next.js scaffold.
+- Refreshed the planned frontend runtime from Node.js 20 to Node.js 24 LTS before scaffolding.
+- Completed `foundation-006` — Next.js scaffold.
+- QA verdict: `APPROVED WITH RESERVATIONS`.
+- Security verdict: `ADVISORY`.
+- Captured mandatory pre-Task 7 follow-ups:
+  - audit/remove the separate `@better-auth/client` pre-alpha package unless explicitly needed
+  - move `shadcn` from production dependencies to devDependencies
+  - repair `frontend/CLAUDE.md` so frontend-scoped agents also load the root contract
+- Captured deployment hardening follow-up:
+  - add a non-root runner user before the first real deployment
+- Rotated active workflow files to `foundation-007` — Better Auth configuration.
 
 ## WIP (in-progress at handoff)
 
 - No feature implementation is currently in progress.
-- Current docs + `foundation-005` changes are not yet committed.
+- `foundation-006` changes are not yet committed.
 
 ## Suggested next steps
 
-- Start `foundation-006` — Next.js scaffold.
-- Before executing core-engine Task 3, rewrite its implementation details around the internal adapter modules introduced by ADR-001.
+- Start `foundation-007` — Better Auth configuration.
+- Resolve the mandatory preconditions above before considering auth setup complete.

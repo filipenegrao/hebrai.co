@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-17",
+  "last_updated": "2026-05-18",
   "version": "0.1.0",
   "release_phase": "foundation",
   "domains": [
@@ -47,16 +47,16 @@
         {
           "id": "foundation-006",
           "name": "Next.js scaffold",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 6."
+          "notes": "Next.js 16.2.6 with TypeScript, Tailwind CSS 4, shadcn/ui (button/card/input/label). Better Auth deps installed. Dockerfile uses node:24-alpine. output: standalone. Build and lint green. QA verdict: APPROVED WITH RESERVATIONS. Security verdict: ADVISORY. Pre-Task 7 follow-ups: remove or justify @better-auth/client pre-alpha dependency, move shadcn to devDependencies, update frontend/CLAUDE.md to reference root contract, and consider non-root runner user before deployment."
         },
         {
           "id": "foundation-007",
           "name": "Better Auth configuration",
           "status": "pending",
           "tests": false,
-          "notes": "Foundation plan Task 7."
+          "notes": "Foundation plan Task 7. Entry preconditions from foundation-006 review: audit/remove @better-auth/client if unnecessary, move shadcn to devDependencies, and repair frontend/CLAUDE.md root-contract linkage before auth implementation."
         },
         {
           "id": "foundation-008",
@@ -227,6 +227,7 @@
     "Confirm the initial Hebrew seed list size and source before production import.",
     "Confirm the production AI provider priority order behind the internal provider adapter.",
     "Confirm final VPS hostname and certificate issuance details before deploy work.",
-    "Decide how to enforce review_log.user_id consistency with cards.user_id before production data paths rely on it."
+    "Decide how to enforce review_log.user_id consistency with cards.user_id before production data paths rely on it.",
+    "Before foundation-007, confirm whether @better-auth/client is needed at all; if not, remove the pre-alpha package and use the stable better-auth/client sub-path from the main package."
   ]
 }

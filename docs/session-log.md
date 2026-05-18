@@ -359,3 +359,64 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 ### Follow-ups
 
 - Begin `foundation-006` — Next.js scaffold.
+
+
+## 2026-05-18 — Refresh frontend runtime baseline
+
+### What was done
+
+- Updated the planned frontend container baseline from Node.js 20 to Node.js 24 LTS before starting `foundation-006`.
+- Kept Next.js 16.2 unchanged; Node.js 24 satisfies the current Next.js 16 minimum and avoids starting on an EOL runtime.
+
+### Decisions
+
+- New frontend work should target Node.js 24 LTS rather than Node.js 20, which is already end-of-life.
+
+### Follow-ups
+
+- Use `node:24-alpine` in the `foundation-006` frontend Dockerfile.
+
+## 2026-05-18 — foundation-006: Next.js scaffold
+
+### What was done
+
+- Scaffolded Next.js 16.2.6 with `create-next-app` (TypeScript, Tailwind CSS 4, ESLint, App Router, src dir, turbopack).
+- Installed Better Auth 1.6.11, `@better-auth/client`, `pg` 8.20.0, `@types/pg` 8.20.0.
+- Initialized shadcn/ui 4.7.0 with Tailwind v4 compat; added `button`, `card`, `input`, `label` components.
+- Created `frontend/Dockerfile` (multi-stage) with `node:24-alpine` in all three stages (deps, builder, runner).
+- Set `output: "standalone"` in `next.config.ts`.
+- Verified `npm run build` (Next.js 16.2.6 + Turbopack — compiled successfully) and `npm run lint` (ESLint — no output, clean).
+- Updated `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md`.
+
+### Decisions
+
+- Used Node.js 24 LTS (`node:24-alpine`) instead of the plan's Node.js 20 — Node 20 is EOL as of March 2026 and 24 is the current LTS.
+- `create-next-app` used `--turbopack` flag; the scaffold includes turbopack for dev.
+- Tailwind v4 uses `@import "tailwindcss"` and `@theme inline` — the plan's `tailwind.config.ts` reference is not applicable for v4 (config is CSS-based).
+- No auth or route protection code pulled forward — pure scaffold.
+
+### Follow-ups
+
+- Proceed to `foundation-007` — Better Auth configuration.
+- Consider cleaning the generated AGENTS.md and CLAUDE.md from the frontend subdir if they conflict with root project docs.
+
+## 2026-05-18 — foundation-006 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED WITH RESERVATIONS` for `foundation-006`.
+- Processed Security verdict `ADVISORY` for `foundation-006`.
+- Preserved the scaffold review follow-ups as explicit preconditions for `foundation-007` instead of leaving them as loose notes.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-007`.
+
+### Decisions
+
+- `foundation-006` is acceptable to close, but these items must be resolved before Task 7 completion:
+  - remove or explicitly justify `@better-auth/client`
+  - move `shadcn` to `devDependencies`
+  - repair `frontend/CLAUDE.md` root-contract linkage
+- Add a non-root frontend runtime user before the first deployment-facing milestone.
+
+### Follow-ups
+
+- Begin `foundation-007` — Better Auth configuration.

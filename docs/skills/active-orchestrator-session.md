@@ -20,8 +20,8 @@ the delivery with validated state docs and repository handoff.
 
 ## Active feature for this session
 
-- Feature ID: foundation-006
-- Feature name: Next.js scaffold
+- Feature ID: foundation-007
+- Feature name: Better Auth configuration
 - Domain: foundation
 
 ## Orchestration steps
