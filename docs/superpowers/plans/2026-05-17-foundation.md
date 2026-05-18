@@ -49,7 +49,7 @@ hebrai.co/
     │   ├── lib/
     │   │   ├── auth.ts                ← Better Auth server config
     │   │   └── auth-client.ts         ← Better Auth browser client
-    │   └── middleware.ts              ← route protection
+    │   └── proxy.ts                   ← route protection
     └── components/
         └── ui/                        ← shadcn/ui components
 ```
@@ -841,21 +841,21 @@ git commit -m "feat: login/register page with better auth email+password"
 
 ---
 
-## Task 9: Route protection middleware and dashboard shell
+## Task 9: Route protection proxy and dashboard shell
 
 **Files:**
-- Create: `frontend/src/middleware.ts`
+- Create: `frontend/src/proxy.ts`
 - Modify: `frontend/src/app/layout.tsx`
 - Modify: `frontend/src/app/page.tsx`
 
-- [ ] **Step 1: Create `frontend/src/middleware.ts`**
+- [ ] **Step 1: Create `frontend/src/proxy.ts`**
 
 ```typescript
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/api/auth"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
@@ -938,8 +938,8 @@ Kill dev server: `kill %1`
 - [ ] **Step 5: Commit**
 
 ```bash
-git add frontend/src/middleware.ts frontend/src/app/layout.tsx frontend/src/app/page.tsx
-git commit -m "feat: route protection middleware and authenticated dashboard shell"
+git add frontend/src/proxy.ts frontend/src/app/layout.tsx frontend/src/app/page.tsx
+git commit -m "feat: route protection proxy and authenticated dashboard shell"
 ```
 
 ---

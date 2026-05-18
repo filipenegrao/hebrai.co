@@ -8,11 +8,11 @@ Updated by Orchestrator at the end of each completed feature.
 - Feature ID: foundation-009
 - Feature name: Route protection and dashboard shell
 - Domain: foundation
-- Goal: Add the planned route-protection middleware and protected dashboard shell exactly as described in foundation plan Task 9.
+- Goal: Add the planned route-protection proxy and protected dashboard shell exactly as described in foundation plan Task 9.
 
 ## Mandatory scope
 
-1. Create the planned middleware for route protection.
+1. Create the planned proxy for route protection.
 2. Replace the default root page with the planned protected dashboard shell.
 3. Preserve auth-page work from Task 8 without expanding into later dashboard metrics.
 4. Update docs and state:
@@ -30,7 +30,7 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Acceptance criteria
 
-1. Middleware and dashboard shell match foundation plan Task 9 intent.
+1. Proxy and dashboard shell match foundation plan Task 9 intent.
 2. Public/protected route behavior is represented as planned.
 3. No later dashboard features are pulled forward.
 4. State docs reflect the real result of this task.

@@ -530,3 +530,56 @@ Verified: `npm run build` (compiled successfully, route shows `/api/auth/[...all
 
 - Begin `foundation-009` — Route protection and dashboard shell.
 - Before `foundation-010`, map Better Auth errors to safe Portuguese UI messages.
+
+## 2026-05-18 — foundation-009: Route protection and dashboard shell
+
+### What was done
+
+- Created `frontend/src/middleware.ts` — route-protection middleware:
+  - `PUBLIC_PATHS = ["/login", "/api/auth"]` — these routes skip session checks.
+  - Checks for `better-auth.session_token` or `__Secure-better-auth.session_token` cookies.
+  - Redirects unauthenticated requests to `/login` while preserving redirect behavior.
+  - Matcher excludes `_next/static`, `_next/image`, `favicon.ico`.
+- Updated `frontend/src/app/layout.tsx` — metadata (`"hebrai.co — Hebraico Bíblico"`), `lang="pt-BR"`, simplified body to `antialiased` class.
+- Replaced `frontend/src/app/page.tsx` — dashboard shell:
+  - Server component with `async` session check via `auth.api.getSession`.
+  - Missing session → `redirect("/login")`.
+  - Authenticated → shows `שָׁלוֹם, {name}` heading + `"Dashboard — em construção"` paragraph.
+- Verified: `npm run build` (compiled successfully, route tree shows `/` dynamic, `/login` static, `ƒ Proxy (Middleware)`) and `npm run lint` (clean).
+- Updated `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md`.
+
+### Decisions
+
+- Next.js 16.2 emits a deprecation warning: `"middleware" file convention is deprecated. Please use "proxy" instead.` This is informational — `middleware.ts` still compiles and functions correctly. Migration to `proxy.ts` is a later concern.
+- Middleware uses cookie-based session detection (no DB call) — lightweight and correct for route gating. The server-side `page.tsx` performs the real session validation via `auth.api.getSession`.
+- Live route-protection testing was not possible — Better Auth tables require a running PostgreSQL instance. Deferred to `foundation-010`.
+
+### Follow-ups
+
+- Proceed to `foundation-010` — Full stack smoke test.
+- Consider migrating `middleware.ts` to `proxy.ts` when the Next.js 16 migration path stabilizes.
+- Map Better Auth raw errors to safe Portuguese UI messages before end-to-end validation.
+
+## 2026-05-18 — foundation-009 correction: proxy migration
+
+### What was done
+
+- Replaced `frontend/src/middleware.ts` with `frontend/src/proxy.ts` using the same route-protection behavior:
+  - `PUBLIC_PATHS = ["/login", "/api/auth"]`
+  - checks `better-auth.session_token` and `__Secure-better-auth.session_token`
+  - redirects unauthenticated requests to `/login`
+  - matcher excludes `_next/static`, `_next/image`, `favicon.ico`
+- Updated active docs/plans so Task 9 no longer teaches the deprecated `middleware.ts` convention.
+- Updated `HANDOFF.md` and `STATUS.json` to reflect the corrected proxy-based result.
+
+### Verification
+
+- `npm run lint` — pass.
+- `npm run build` — pass.
+- Build output no longer reports `middleware` file-convention deprecation.
+- Build still reports existing Better Auth environment warnings in local no-env mode (`BETTER_AUTH_URL` unset, default secret in use).
+
+### Follow-ups
+
+- Proceed to `foundation-010` — Full stack smoke test.
+- Map Better Auth raw errors to safe Portuguese UI messages before end-to-end validation.
