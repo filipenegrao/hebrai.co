@@ -6,7 +6,7 @@
 
 **Architecture:** FastAPI gains a `/stats/daily` endpoint. The Next.js dashboard replaces the shell with real metrics from `DashboardStats`. The settings page reads and writes `user_settings` via a new `/settings` FastAPI endpoint. Hebrew typography uses Noto Serif Hebrew from Google Fonts. Deployment uses Docker Compose on Ubuntu 24.04 with Nginx + Let's Encrypt (Certbot).
 
-**Tech Stack:** FastAPI 0.128.5, PostgreSQL 18, Next.js 16.2 App Router, Tailwind CSS 4.3, shadcn/ui, Noto Serif Hebrew (Google Fonts), Docker Compose, Nginx stable-alpine, Certbot, Ubuntu 24.04 VPS
+**Tech Stack:** FastAPI 0.136.1, PostgreSQL 18, Next.js 16.2 App Router, Tailwind CSS 4.3, shadcn/ui, Noto Serif Hebrew (Google Fonts), Docker Compose, Nginx stable-alpine, Certbot, Ubuntu 24.04 VPS
 
 **Version policy:** Inherit the refreshed foundation baseline and keep deployment images on explicit stable tags.
 

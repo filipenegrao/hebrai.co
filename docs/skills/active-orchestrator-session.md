@@ -20,8 +20,8 @@ the delivery with validated state docs and repository handoff.
 
 ## Active feature for this session
 
-- Feature ID: foundation-005
-- Feature name: FastAPI stub
+- Feature ID: foundation-006
+- Feature name: Next.js scaffold
 - Domain: foundation
 
 ## Orchestration steps

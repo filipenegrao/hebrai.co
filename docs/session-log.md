@@ -302,3 +302,60 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 ### Follow-ups
 
 - Begin `foundation-005` — FastAPI stub.
+
+## 2026-05-17 — Switch AI strategy to direct provider SDKs
+
+### What was done
+
+- Replaced the planned LiteLLM abstraction with direct provider SDKs behind an internal adapter boundary.
+- Added `docs/decisions/ADR-001-ai-provider-boundary.md` documenting the decision.
+- Kept the backend baseline on Python 3.14 because the official OpenAI, Anthropic, and Google Gen AI SDKs currently support it.
+- Tightened foundation Task 5 to remain a true health-check stub with only the dependencies it uses.
+
+### Decisions
+
+- Initial AI architecture will use our own adapter boundary rather than LiteLLM.
+- Provider SDKs will be introduced only in the core-engine slice that first needs them.
+- A richer abstraction can be revisited later if the AI layer grows materially more complex.
+
+### Follow-ups
+
+- Refresh the core-engine Task 3 implementation details around the internal adapter before executing that task.
+
+## 2026-05-17 — foundation-005: FastAPI stub
+
+### What was done
+
+- Created `backend/requirements.txt` with `fastapi==0.136.1` and `uvicorn[standard]==0.46.0` only.
+- Created `backend/main.py` with the `/health` endpoint returning `{"status": "ok"}`.
+- Created `backend/Dockerfile` using `python:3.14-slim`, exposing port 8000.
+- Updated `HANDOFF.md`, `STATUS.json`, `docs/progress.md`, and `docs/session-log.md`.
+
+### Decisions
+
+- Requirements are intentionally minimal — only the 2 dependencies needed for the health-check stub. psycopg2, LiteLLM, py-fsrs, and python-dotenv are deferred until their respective features.
+- LiteLLM is permanently excluded from the default architecture per ADR-001 (direct provider SDKs behind internal adapter).
+- Docker build and runtime were not validated — Docker CLI unavailable locally. Files match the plan template.
+
+### Follow-ups
+
+- Proceed to `foundation-006` — Next.js scaffold.
+- Validate the FastAPI container build when Docker tooling becomes available.
+
+## 2026-05-17 — foundation-005 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED` for `foundation-005`.
+- Processed Security verdict `CLEAN` for `foundation-005`.
+- Confirmed the backend stub stayed intentionally minimal after ADR-001: FastAPI + Uvicorn only, with a single `/health` route.
+- Rotated active Builder, QA, Security, and Orchestrator files to `foundation-006`.
+
+### Decisions
+
+- Keep the health-check stub lean; provider SDKs, DB drivers, and FSRS should arrive only when later features first need them.
+- Container runtime validation remains deferred until Docker tooling is available.
+
+### Follow-ups
+
+- Begin `foundation-006` — Next.js scaffold.

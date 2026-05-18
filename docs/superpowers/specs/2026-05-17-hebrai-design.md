@@ -23,12 +23,12 @@ App de vocabulário de hebraico bíblico com exercícios adaptativos baseados em
 | Auth | Better Auth |
 | Backend / Motor de IA | Python FastAPI + uvicorn |
 | SRS | `py-fsrs` (FSRS v5) |
-| Orquestração de IA | LiteLLM (multi-provider) |
+| Orquestração de IA | SDKs oficiais por provider atrás de adapter interno |
 | Banco de dados | PostgreSQL (self-hosted) |
 | Deploy | Docker Compose — VPS Ubuntu 24.04 |
 | Reverse proxy | Nginx |
 
-### Providers de IA suportados (via LiteLLM)
+### Providers de IA suportados (via adapter interno)
 - Claude (Anthropic) — padrão
 - GPT-4o (OpenAI)
 - Gemini (Google)
@@ -130,7 +130,7 @@ user_settings (
 
 3. FastAPI verifica ai_content_cache (word_id + formato + provider)
    ├── HIT  → retorna conteúdo cacheado
-   └── MISS → chama LiteLLM → salva cache → retorna conteúdo
+   └── MISS → chama adapter interno → salva cache → retorna conteúdo
 
 4. Next.js renderiza exercício (RTL, niqqud, fonte hebraica)
 
@@ -179,7 +179,7 @@ Processo separado do fluxo de sessão. Roda ao fim de cada sessão (ou periodica
 ## 8. Abstração de IA (FastAPI)
 
 ```python
-# Interface unificada via LiteLLM
+# Interface unificada via adapter interno
 class AIProvider:
     def complete(self, prompt: str, model: str | None = None) -> str: ...
 
@@ -190,7 +190,7 @@ class ContentGenerator:
     def curate_next_words(self, user_id: str, review_log: list[Review]) -> list[int]: ...
 ```
 
-Provider configurável por usuário em `user_settings.preferred_provider`. Troca de provider não requer mudança de código — apenas a string do modelo no LiteLLM.
+Provider configurável por usuário em `user_settings.preferred_provider`. Troca de provider não deve exigir mudança fora do adapter interno; o restante da aplicação depende da interface comum, não dos SDKs diretamente.
 
 ---
 

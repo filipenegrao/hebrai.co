@@ -5,17 +5,18 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Task
 
-- Feature ID: foundation-005
-- Feature name: FastAPI stub
+- Feature ID: foundation-006
+- Feature name: Next.js scaffold
 - Domain: foundation
-- Goal: Add the initial internal FastAPI service scaffold exactly as described in foundation plan Task 5.
+- Goal: Add the initial Next.js frontend scaffold with Tailwind and shadcn/ui exactly as described in foundation plan Task 6.
 
 ## Mandatory scope
 
-1. Create `backend/requirements.txt` following the foundation plan Task 5.
-2. Create `backend/main.py` with the planned health-check endpoint.
-3. Create `backend/Dockerfile` using the refreshed Python baseline from the plan.
-4. Update docs and state:
+1. Create the planned Next.js app under `frontend/`.
+2. Configure Tailwind CSS and shadcn/ui according to the foundation plan.
+3. Create the planned production `frontend/Dockerfile`.
+4. Preserve the refreshed frontend baseline from the plan.
+5. Update docs and state:
    - `HANDOFF.md`
    - `STATUS.json`
    - `docs/progress.md`
@@ -23,18 +24,19 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## Out of scope
 
-1. Session endpoints or business logic.
-2. Database access implementation.
-3. Frontend or auth implementation.
-4. Exposing FastAPI publicly through Nginx.
+1. Better Auth configuration.
+2. Login/register pages.
+3. Route protection or dashboard behavior.
+4. Backend/session implementation.
 
 ## Acceptance criteria
 
-1. The backend files match foundation plan Task 5 intent.
-2. FastAPI exposes only the planned health-check behavior.
-3. The Dockerfile uses the refreshed Python baseline.
-4. State docs reflect the real result of this task.
-5. Applicable verification commands are executed and reported.
+1. The frontend scaffold matches foundation plan Task 6 intent.
+2. Tailwind and shadcn/ui setup are present as planned.
+3. The Dockerfile matches the planned production build strategy.
+4. No auth or later-feature work is pulled forward.
+5. State docs reflect the real result of this task.
+6. Applicable verification commands are executed and reported.
 
 ## Constraints
 

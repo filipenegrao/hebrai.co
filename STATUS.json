@@ -40,9 +40,9 @@
         {
           "id": "foundation-005",
           "name": "FastAPI stub",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 5."
+          "notes": "Minimal FastAPI stub at backend/. Health check only. Dependencies: fastapi==0.136.1, uvicorn[standard]==0.46.0. Dockerfile uses python:3.14-slim. LiteLLM excluded per ADR-001. QA verdict: APPROVED. Security verdict: CLEAN. Container runtime validation deferred because Docker Compose is unavailable locally."
         },
         {
           "id": "foundation-006",
@@ -225,7 +225,7 @@
   "architectural_drift": [],
   "open_decisions": [
     "Confirm the initial Hebrew seed list size and source before production import.",
-    "Confirm the production AI provider priority order behind LiteLLM.",
+    "Confirm the production AI provider priority order behind the internal provider adapter.",
     "Confirm final VPS hostname and certificate issuance details before deploy work.",
     "Decide how to enforce review_log.user_id consistency with cards.user_id before production data paths rely on it."
   ]

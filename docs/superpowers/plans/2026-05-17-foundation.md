@@ -6,9 +6,9 @@
 
 **Architecture:** Monorepo with `frontend/` (Next.js) and `backend/` (FastAPI) directories. Three Docker containers share a network; Nginx routes external traffic. Better Auth runs inside Next.js and writes sessions to PostgreSQL. FastAPI is internal-only (not exposed via Nginx in this plan).
 
-**Tech Stack:** Docker Compose, Nginx stable-alpine, PostgreSQL 18, Next.js 16.2 (App Router), Tailwind CSS 4.3, shadcn/ui, Better Auth 1.6.9, Python 3.14, FastAPI 0.128.5 (scaffold only in this plan)
+**Tech Stack:** Docker Compose, Nginx stable-alpine, PostgreSQL 18, Next.js 16.2 (App Router), Tailwind CSS 4.3, shadcn/ui, Better Auth 1.6.9, Python 3.14, FastAPI 0.136.1 (scaffold only in this plan)
 
-**Version policy:** Start new work on current stable releases as of 2026-05-17; prefer explicit version pins in dependency manifests and stable container tags over floating defaults.
+**Version policy:** Start new work on current stable releases as of 2026-05-17; prefer explicit version pins in dependency manifests and stable container tags over floating defaults. Keep the Task 5 stub minimal; add provider SDKs, database drivers, FSRS, and dotenv only in the tasks that first use them.
 
 ---
 
@@ -464,12 +464,8 @@ git commit -m "feat: hebrew word seed data and import script (top-20 for dev)"
 - [ ] **Step 1: Create `backend/requirements.txt`**
 
 ```
-fastapi==0.115.5
-uvicorn[standard]==0.32.1
-psycopg2-binary==2.9.10
-litellm==1.55.0
-py-fsrs==0.6.0
-python-dotenv==1.0.1
+fastapi==0.136.1
+uvicorn[standard]==0.46.0
 ```
 
 - [ ] **Step 2: Create `backend/main.py`**

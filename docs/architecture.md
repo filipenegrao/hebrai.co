@@ -64,7 +64,7 @@ lib -> components -> app routes/pages
 - Keep FastAPI internal-only unless an explicit architecture decision changes that.
 - Preserve authentication boundaries when proxying user-specific requests.
 - Prefer dry-run behavior when introducing automation or deployment scripts.
-- Keep AI generation behind service boundaries and cache generated content where planned.
+- Keep AI generation behind an internal provider adapter boundary and cache generated content where planned.
 - Treat SQL and user identifiers as trust-boundary surfaces; use parameterized access patterns.
 
 ## Testing strategy

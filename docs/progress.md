@@ -11,7 +11,6 @@ Updated: 2026-05-17
 ## Backlog
 
 ### Foundation
-- [ ] `foundation-005` — FastAPI stub
 - [ ] `foundation-006` — Next.js scaffold
 - [ ] `foundation-007` — Better Auth configuration
 - [ ] `foundation-008` — Auth pages
@@ -26,6 +25,7 @@ Updated: 2026-05-17
 
 ## Done
 
+- [x] `foundation-005` — FastAPI stub
 - [x] `foundation-004` — Hebrew seed data and import script
 - [x] `foundation-003` — PostgreSQL schema migration
 - [x] `foundation-002` — Nginx config

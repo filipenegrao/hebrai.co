@@ -11,10 +11,10 @@ learners can build vocabulary through short daily review sessions.
 ## Stack
 
 - **Frontend**: Next.js 16.2 App Router, React, Tailwind CSS 4.3, shadcn/ui
-- **Backend**: Python 3.14, FastAPI 0.128.5
+- **Backend**: Python 3.14, FastAPI 0.136.1
 - **Storage**: PostgreSQL 18
 - **Scheduling**: py-fsrs
-- **AI providers**: LiteLLM with provider keys supplied by environment
+- **AI providers**: direct provider SDKs behind an internal adapter, with keys supplied by environment
 - **Auth**: Better Auth 1.6.9 in the Next.js app
 - **Infra**: Docker Compose, Nginx stable-alpine, later Certbot on VPS
 

@@ -5,34 +5,33 @@ Updated by Orchestrator at the end of each completed feature.
 
 ## PR under review
 
-- Feature ID: foundation-005
-- Feature name: FastAPI stub
+- Feature ID: foundation-006
+- Feature name: Next.js scaffold
 - Domain: foundation
 
 ## Review objective
 
-Validate that the initial backend scaffold introduces no obvious exposure, secret-handling, or unsafe default issue.
+Validate that the frontend scaffold introduces no obvious secret-handling or exposure regression within the narrow scaffold scope.
 
 ## Expected scope
 
-1. Backend dependency declaration.
-2. Health-check endpoint only.
-3. Container runtime definition.
+1. Next.js project files.
+2. Tailwind/shadcn/ui config.
+3. Production Dockerfile.
 
 ## Must not be included in this delivery
 
-1. Runtime review of future endpoints.
-2. Broad Docker hardening beyond the narrow slice.
-3. Public-route changes outside Task 5.
+1. Auth/session behavior review.
+2. Runtime review of future routes.
+3. Broad frontend security hardening outside the scaffold diff.
 
 ## Mandatory checklist
 
 1. No credentials or secrets are introduced.
-2. Only the intended minimal health endpoint exists.
-3. Container config does not create an obvious exposure regression in reviewed scope.
-4. FastAPI remains internal-only in the planned topology.
-5. Security-relevant residual risks are documented.
-6. Applicable verification commands were executed and reported.
+2. No unsafe public environment values are added beyond the planned scaffold.
+3. Docker/build configuration does not introduce an obvious exposure regression.
+4. Security-relevant residual risks are documented.
+5. Applicable verification commands were executed and reported.
 
 ## Required report format
 

@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement the full study session loop: FastAPI endpoints for cards and reviews, FSRS scheduling, AI content generation via LiteLLM, and the Next.js session page with Hebrew exercise components.
+**Goal:** Implement the full study session loop: FastAPI endpoints for cards and reviews, FSRS scheduling, AI content generation via direct provider SDKs behind an internal adapter, and the Next.js session page with Hebrew exercise components.
 
-**Architecture:** FastAPI handles scheduling (py-fsrs), AI content generation (LiteLLM), and caching. Next.js proxies session calls via API routes, adding the authenticated user_id from Better Auth. The session page is a client component managing card state locally. New cards (words not yet started) are introduced up to `daily_new_limit`; due cards are those with a past FSRS due date.
+**Architecture:** FastAPI handles scheduling (py-fsrs), AI content generation through our internal provider adapter, and caching. Next.js proxies session calls via API routes, adding the authenticated user_id from Better Auth. The session page is a client component managing card state locally. New cards (words not yet started) are introduced up to `daily_new_limit`; due cards are those with a past FSRS due date.
 
-**Tech Stack:** FastAPI 0.128.5, py-fsrs 0.6.0, LiteLLM 1.55.0, psycopg2, pytest, httpx, Next.js 16.2 App Router, Tailwind CSS 4.3, shadcn/ui
+**Tech Stack:** FastAPI 0.136.1, direct provider SDKs (Anthropic / OpenAI / Google Gen AI), py-fsrs, psycopg2, pytest, httpx, Next.js 16.2 App Router, Tailwind CSS 4.3, shadcn/ui
 
 **Version policy:** Inherit the foundation stack baseline and pin new dependencies explicitly when they are introduced.
 
@@ -19,7 +19,8 @@ backend/
 ├── db.py                              ← psycopg2 ThreadedConnectionPool + FastAPI dependency
 ├── models.py                          ← Pydantic: Word, CardState, CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse
 ├── fsrs_service.py                    ← py-fsrs wrapper: fsrs_state_to_card(), schedule_review(), determine_format()
-├── ai_service.py                      ← LiteLLM wrapper: hash_prompt(), generate_content()
+├── ai_providers.py                    ← provider adapter interface + Anthropic/OpenAI/Google implementations
+├── ai_service.py                      ← prompt hashing, caching, and adapter orchestration
 ├── session_router.py                  ← APIRouter: GET /session/next-cards, POST /session/review
 ├── main.py                            ← (modify) include session_router
 ├── requirements.txt                   ← (modify) add pytest==8.3.4, httpx==0.28.1, pytest-mock==3.14.0
@@ -344,7 +345,7 @@ git commit -m "feat: fsrs scheduling service with py-fsrs wrapper"
 
 ---
 
-## Task 3: AI content generation service
+## Task 3: AI provider adapter and content generation service
 
 **Files:**
 - Create: `backend/ai_service.py`
@@ -395,7 +396,7 @@ def test_generate_content_multiple_choice(sample_word):
     mock = MagicMock()
     mock.choices[0].message.content = json.dumps(mock_response)
 
-    with patch("ai_service.litellm.completion", return_value=mock):
+    with patch("ai_service.provider.generate", return_value=mock):
         result = generate_content(sample_word, "multiple_choice")
 
     assert result["correct_index"] == 0
@@ -411,7 +412,7 @@ def test_generate_content_flashcard(sample_word):
     mock = MagicMock()
     mock.choices[0].message.content = json.dumps(mock_response)
 
-    with patch("ai_service.litellm.completion", return_value=mock):
+    with patch("ai_service.provider.generate", return_value=mock):
         result = generate_content(sample_word, "flashcard")
 
     assert "example_sentence" in result
@@ -427,7 +428,7 @@ def test_generate_content_typing(sample_word):
     mock = MagicMock()
     mock.choices[0].message.content = json.dumps(mock_response)
 
-    with patch("ai_service.litellm.completion", return_value=mock):
+    with patch("ai_service.provider.generate", return_value=mock):
         result = generate_content(sample_word, "typing")
 
     assert result["answer"] == "אֶרֶץ"
@@ -447,7 +448,6 @@ Expected: `ImportError`
 import hashlib
 import json
 import os
-import litellm
 from models import Word
 
 _DEFAULT_MODEL = "claude-haiku-4-5-20251001"
@@ -506,7 +506,7 @@ Retorne apenas o objeto JSON, sem markdown."""
 
 def generate_content(word: Word, exercise_format: str, model: str | None = None) -> dict:
     prompt = _build_prompt(word, exercise_format)
-    response = litellm.completion(
+    response = provider.generate(
         model=model or os.environ.get("DEFAULT_AI_MODEL", _DEFAULT_MODEL),
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
@@ -527,7 +527,7 @@ Expected: all 5 tests PASS
 
 ```bash
 git add backend/ai_service.py backend/tests/test_ai_service.py
-git commit -m "feat: ai content generation service with litellm and prompt caching"
+git commit -m "feat: ai provider adapter and content generation service"
 ```
 
 ---
@@ -1568,7 +1568,7 @@ git commit -m "chore: end-to-end smoke test — core engine verified"
 - [x] Spec §5 (format selection: reps=0→MC, 1-3→flashcard, >3→flashcard/typing) → fsrs_service.determine_format() (Task 2)
 - [x] Spec §5 (AI cache check before generate) → _get_or_generate_content() (Task 4)
 - [x] Spec §7 (HebrewWord, ExerciseCard, RatingBar, SessionProgress) → Tasks 6, 7
-- [x] Spec §8 (LiteLLM multi-provider) → ai_service.py with DEFAULT_AI_MODEL env var (Task 3)
+- [x] Spec §8 (multi-provider AI) → ai_providers.py + ai_service.py with internal adapter boundary (Task 3)
 - [x] Spec §9 (RTL, niqqud toggle) → HebrewWord component with stripNiqqud() and dir="rtl" (Task 6)
 - [x] Spec §6 /session route → session page (Task 8)
 - [x] Tests for all backend services (Tasks 2, 3, 4)
