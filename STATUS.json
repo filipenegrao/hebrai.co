@@ -68,9 +68,9 @@
         {
           "id": "foundation-009",
           "name": "Route protection and dashboard shell",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Foundation plan Task 9."
+          "notes": "Route protection now uses frontend/src/proxy.ts, which protects all routes except /login and /api/auth. It checks better-auth session cookies and redirects to /login if missing. Dashboard uses server-side auth.api.getSession. Build and lint pass without the deprecated middleware warning."
         },
         {
           "id": "foundation-010",
