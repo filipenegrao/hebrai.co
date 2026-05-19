@@ -12,13 +12,15 @@ def fsrs_state_to_card(state: dict) -> FSRSCard:
         card.reps = 0
         return card
 
-    state_val = state.get("state")
-    if state_val is not None:
-        card.state = State(state_val)
+    if "state" in state:
+        card.state = State(state["state"])
 
-    card.step = state.get("step")
-    card.stability = state.get("stability")
-    card.difficulty = state.get("difficulty")
+    if "step" in state:
+        card.step = state["step"]
+    if "stability" in state:
+        card.stability = state["stability"]
+    if "difficulty" in state:
+        card.difficulty = state["difficulty"]
 
     due = state.get("due")
     if due:

@@ -1,0 +1,79 @@
+import json
+import pytest
+from unittest.mock import MagicMock, patch
+
+from models import Word
+from ai_service import hash_prompt, generate_content
+
+
+@pytest.fixture
+def sample_word():
+    return Word(
+        id=14,
+        hebrew="אֶרֶץ",
+        transliteration="erets",
+        gloss_pt="terra / país",
+        morphology={"class": "noun", "gender": "f"},
+        frequency_rank=14,
+        source_reference="Gn 1:1",
+    )
+
+
+def test_hash_prompt_is_deterministic(sample_word):
+    h1 = hash_prompt(sample_word.id, "flashcard", "claude")
+    h2 = hash_prompt(sample_word.id, "flashcard", "claude")
+    assert h1 == h2
+
+
+def test_hash_prompt_differs_by_format(sample_word):
+    h1 = hash_prompt(sample_word.id, "flashcard", "claude")
+    h2 = hash_prompt(sample_word.id, "multiple_choice", "claude")
+    assert h1 != h2
+
+
+def test_generate_content_multiple_choice(sample_word):
+    mock_response = {
+        "question": "O que significa אֶרֶץ?",
+        "options": ["terra", "céu", "água", "fogo"],
+        "correct_index": 0,
+        "explanation": "אֶרֶץ (erets) significa terra ou país",
+    }
+    mock = MagicMock()
+    mock.choices[0].message.content = json.dumps(mock_response)
+
+    with patch("ai_service.provider.generate", return_value=mock):
+        result = generate_content(sample_word, "multiple_choice")
+
+    assert result["correct_index"] == 0
+    assert len(result["options"]) == 4
+
+
+def test_generate_content_flashcard(sample_word):
+    mock_response = {
+        "example_sentence": "בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ",
+        "translation": "No princípio Deus criou os céus e a terra",
+        "note": "Substantivo feminino, raiz א-ר-ץ",
+    }
+    mock = MagicMock()
+    mock.choices[0].message.content = json.dumps(mock_response)
+
+    with patch("ai_service.provider.generate", return_value=mock):
+        result = generate_content(sample_word, "flashcard")
+
+    assert "example_sentence" in result
+    assert "translation" in result
+
+
+def test_generate_content_typing(sample_word):
+    mock_response = {
+        "prompt": "Como se escreve 'terra' em hebraico?",
+        "answer": "אֶרֶץ",
+        "hint": "Começa com aleph (א)",
+    }
+    mock = MagicMock()
+    mock.choices[0].message.content = json.dumps(mock_response)
+
+    with patch("ai_service.provider.generate", return_value=mock):
+        result = generate_content(sample_word, "typing")
+
+    assert result["answer"] == "אֶרֶץ"

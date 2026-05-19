@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-19T04:00Z",
+  "last_updated": "2026-05-19T06:00Z",
   "version": "0.1.0",
   "release_phase": "core-engine",
   "domains": [
@@ -103,9 +103,9 @@
         {
           "id": "core-003",
           "name": "AI content generation service",
-          "status": "pending",
-          "tests": false,
-          "notes": "Core engine plan Task 3."
+          "status": "done",
+          "tests": true,
+          "notes": "Core engine plan Task 3. Created backend/ai_service.py: hash_prompt (SHA-256, 16-char hex, keyed by word_id+format+provider_name), _build_prompt (format-specific Portuguese prompts), generate_content (calls provider.generate, parses JSON response). Provider boundary is a _Provider placeholder with a .generate() interface — real SDK wrappers deferred until first needed. Created backend/tests/test_ai_service.py: 5 tests with mocked provider (patch ai_service.provider.generate). Carry-forward constraints closed in this slice: models.py CardWithContent.format now Literal['multiple_choice','flashcard','typing']; ReviewRequest.rating now Literal[1,2,3,4]; fsrs_service.py fsrs_state_to_card() now uses explicit key-presence guards to prevent partial dicts from overwriting FSRS defaults with None. No new dependencies added. Full suite 13/13 PASS, 0 regressions. QA verdict: APPROVED WITH RESERVATIONS. Security verdict: ADVISORY. Carry forward before core-004: constrain ReviewRequest.format_used, make _build_prompt() raise for unknown formats, wrap provider JSON parsing in structured error handling, make _get_pool() thread-safe, and validate fsrs_state shape before datetime parsing. Before or alongside real SDK wiring: document trusted Word-field prompt assumptions and validate DEFAULT_AI_MODEL against an explicit contract or allowlist."
         },
         {
           "id": "core-004",

@@ -6,10 +6,29 @@
 ## Last update
 
 - **Date:** 2026-05-19
-- **Session:** `core-002` closeout — FSRS scheduling service.
-- **Branch / HEAD:** `main` at `95a75d9`; `core-002` changes uncommitted (commit on explicit request).
+- **Session:** `core-003` closeout — AI content generation service.
+- **Branch / HEAD:** `main` at `8697f9e`; `core-003` changes uncommitted (commit on explicit request).
 
 ## Goals completed this session
+
+- Completed `core-003` — AI content generation service.
+  - Created `backend/ai_service.py`: `hash_prompt`, `_build_prompt`, `generate_content`. Provider boundary kept internal via a `_Provider` placeholder with a `.generate()` interface (real SDK wrappers deferred to when they're first needed).
+  - Created `backend/tests/test_ai_service.py`: 5 tests covering deterministic hash, format-discriminated hash, and all three exercise formats with mocked provider responses.
+  - Applied carry-forward constraints from `core-001`/`core-002` reviews:
+    - `backend/models.py`: `CardWithContent.format` → `Literal["multiple_choice", "flashcard", "typing"]`; `ReviewRequest.rating` → `Literal[1, 2, 3, 4]`.
+    - `backend/fsrs_service.py`: `fsrs_state_to_card()` now uses explicit `"key" in state` guards instead of unconditional `.get()` assignment, preventing partial state dicts from overwriting FSRS defaults with `None`.
+  - No dependencies added (no real provider SDK in this slice).
+  - Sensors: red→green TDD cycle in Docker. Full suite 13/13 PASS, 0 regressions.
+
+- **Review closeout for `core-003`:**
+  - QA verdict: `APPROVED WITH RESERVATIONS`
+  - Security verdict: `ADVISORY`
+  - Carry-forward constraints:
+    - Before `core-004`: constrain `ReviewRequest.format_used` to `Literal["multiple_choice", "flashcard", "typing"]`.
+    - Before `core-004`: make `_build_prompt()` raise `ValueError` for unknown `exercise_format` instead of falling through to typing.
+    - Before `core-004`: wrap provider-response JSON parsing in structured error handling.
+    - Before `core-004`: make `_get_pool()` thread-safe and validate `fsrs_state` shape before datetime parsing.
+    - Before or alongside real SDK wiring: document the trusted-source assumption for `Word` prompt fields and validate `DEFAULT_AI_MODEL` against an explicit provider contract or allowlist.
 
 - Completed `core-002` — FSRS scheduling service.
   - Created `backend/fsrs_service.py`: `fsrs_state_to_card`, `card_to_fsrs_state`, `schedule_review`, `determine_format`.
@@ -90,9 +109,14 @@
 
 ## Suggested next steps
 
-- `core-003` — AI content generation service.
-- Before `core-003`: constrain `CardWithContent.format` (Literal) and `ReviewRequest.rating` (1–4) at the Pydantic layer, and guard `fsrs_state_to_card()` against overwriting FSRS defaults with `None`.
-- Before `core-004`: make `_get_pool()` thread-safe, validate `rating` before `_RATING_MAP` lookup, and validate `fsrs_state` shape before datetime parsing.
+- Pre-`core-004` hardening slice:
+  - constrain `ReviewRequest.format_used`
+  - make `_build_prompt()` reject unknown formats
+  - wrap provider JSON parsing in structured error handling
+  - make `_get_pool()` thread-safe
+- `core-004` — Session router (`backend/session_router.py` + `backend/tests/test_session_router.py`).
+- Before `core-004`: validate `fsrs_state` shape before `datetime.fromisoformat()` sees untrusted values from the DB.
+- Before wiring real AI calls: add real provider SDK wrappers behind the `_Provider` interface in `ai_service.py`; add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` to `.env.example`.
 - Before any auth E2E testing: run `npx better-auth migrate` to create auth tables in a running postgres instance.
 - Before any non-local deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg instead of relying on the localhost fallback.
 - Before real AI calls in `core-003`: ensure `.env.example` and secret-handling guidance cover `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`.

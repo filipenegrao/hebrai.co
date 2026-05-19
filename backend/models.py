@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Literal
 from pydantic import BaseModel
 
 
@@ -16,7 +16,7 @@ class Word(BaseModel):
 class CardWithContent(BaseModel):
     card_id: int
     word: Word
-    format: str  # "multiple_choice" | "flashcard" | "typing"
+    format: Literal["multiple_choice", "flashcard", "typing"]
     content: dict[str, Any]
 
 
@@ -27,7 +27,7 @@ class NextCardsResponse(BaseModel):
 
 class ReviewRequest(BaseModel):
     card_id: int
-    rating: int  # 1=again 2=hard 3=good 4=easy
+    rating: Literal[1, 2, 3, 4]
     format_used: str
     response_time_ms: int | None = None
 

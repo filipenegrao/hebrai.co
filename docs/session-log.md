@@ -627,6 +627,58 @@ Stack torn down cleanly with `docker compose down`.
 - Map Better Auth raw errors to safe Portuguese UI messages (carried from foundation-008 security advisory).
 - Begin `core-001` — Backend infrastructure.
 
+## 2026-05-19 — core-003: AI content generation service
+
+### What was done
+
+- Created `backend/ai_service.py`: `hash_prompt`, `_build_prompt`, `generate_content`, and `_Provider` placeholder.
+- Created `backend/tests/test_ai_service.py`: 5 tests with mocked provider responses for all three exercise formats.
+- Applied carry-forward constraints:
+  - `backend/models.py`: `CardWithContent.format` → `Literal["multiple_choice", "flashcard", "typing"]`; `ReviewRequest.rating` → `Literal[1, 2, 3, 4]`.
+  - `backend/fsrs_service.py`: `fsrs_state_to_card()` uses explicit `"key" in state` guards; partial dicts no longer overwrite FSRS defaults with `None`.
+
+### Decisions
+
+- Provider interface is a `_Provider` placeholder class with a `.generate()` method that raises `NotImplementedError`. Tests patch `ai_service.provider.generate`. Real SDK wrappers will replace or extend this when the first real provider is wired.
+- `hash_prompt` uses `provider_name: str` as the parameter name (not `provider`) to avoid shadowing the module-level `provider` object.
+- No provider SDK dependencies added in this slice per the scope constraint.
+
+### Sensors
+
+| Sensor | Result |
+|---|---|
+| Red phase: `pytest tests/test_ai_service.py` before `ai_service.py` | `ModuleNotFoundError` — confirmed |
+| Green phase: `pytest tests/` after implementation | **13 passed** |
+| Full suite regressions | 0 |
+
+### Residual risks / carry-forward to `core-004`
+
+- `_get_pool()` lazy init is still not thread-safe — add `threading.Lock` before `core-004`.
+- `fsrs_state` values from the DB are trusted at the service layer; add shape validation before `datetime.fromisoformat()` once the router is wired.
+- Real AI provider SDK wrappers not yet implemented; `generate_content` will raise `NotImplementedError` in production until they're added.
+
+## 2026-05-19 — core-003 closeout
+
+### What was done
+
+- Completed Builder -> QA -> Security closeout for `core-003` — AI content generation service.
+- Accepted `backend/ai_service.py`, `backend/tests/test_ai_service.py`, the `backend/models.py` Literal constraints, and the `backend/fsrs_service.py` partial-state hardening.
+- Confirmed the slice remains service-only: no router wiring, no DB caching layer, and no real provider SDK integration yet.
+
+### Decisions
+
+- `core-003` is accepted with QA verdict `APPROVED WITH RESERVATIONS` and Security verdict `ADVISORY`.
+- Real provider SDK integration remains intentionally deferred; the placeholder provider boundary is acceptable for this slice.
+- The next step should be a small pre-`core-004` hardening pass rather than starting router work immediately.
+
+### Follow-ups
+
+- Before `core-004`, constrain `ReviewRequest.format_used` to the same exercise-format Literal set.
+- Before `core-004`, make `_build_prompt()` raise for unknown `exercise_format` instead of falling through to typing.
+- Before `core-004`, wrap provider-response `json.loads()` in structured error handling.
+- Before `core-004`, make `_get_pool()` thread-safe and validate `fsrs_state` shape before datetime parsing.
+- Before or alongside real SDK wiring, document the trusted-source assumption for `Word` prompt fields and validate `DEFAULT_AI_MODEL` against an allowlist or explicit provider contract.
+
 ## 2026-05-19 — core-002: FSRS scheduling service
 
 ### What was done
