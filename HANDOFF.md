@@ -5,13 +5,57 @@
 
 ## Last update
 
-- **Date:** 2026-05-18
-- **Session:** Foundation section closeout after `foundation-010` QA + Security review.
-- **Branch / HEAD:** `main` at `1840e83`; foundation work committed.
+- **Date:** 2026-05-19
+- **Session:** `core-002` closeout — FSRS scheduling service.
+- **Branch / HEAD:** `main` at `95a75d9`; `core-002` changes uncommitted (commit on explicit request).
 
 ## Goals completed this session
 
-- Completed `foundation-010` — Full stack smoke test.
+- Completed `core-002` — FSRS scheduling service.
+  - Created `backend/fsrs_service.py`: `fsrs_state_to_card`, `card_to_fsrs_state`, `schedule_review`, `determine_format`.
+  - Created `backend/tests/test_fsrs_service.py`: 8 tests covering all acceptance criteria.
+  - Added `fsrs==6.3.1` to `backend/requirements.txt` (package name is `fsrs`, not `py-fsrs`).
+  - **API note:** `fsrs` v6 has no `reps` field. We carry `reps` as a synthetic counter in our state dict (incremented by `schedule_review`) and set it as a dynamic attribute on the `Card` dataclass (no `__slots__`).
+  - Sensors: red→green TDD cycle confirmed in Docker. All 8 tests PASS. Full suite 8/8, 0 regressions.
+
+- **Review closeout for `core-002`:**
+  - QA verdict: `APPROVED WITH RESERVATIONS`
+  - Security verdict: `ADVISORY`
+  - Carry-forward constraints:
+    - Before `core-003`: constrain `CardWithContent.format` and `ReviewRequest.rating` in `backend/models.py`.
+    - Before `core-003` leaves QA: guard `fsrs_state_to_card()` so missing keys do not overwrite FSRS defaults with `None`.
+    - Before `core-004`: make `_get_pool()` thread-safe, ensure invalid `rating` cannot reach `_RATING_MAP[rating]` as an unhandled `KeyError`, and validate `fsrs_state` shape before `datetime.fromisoformat()` sees untrusted values.
+
+- Security hardening follow-up after `core-001`: created `backend/.dockerignore`.
+  - Excludes `.env`, `.env.*`, `__pycache__/`, `*.pyc`, `*.pyo`, `*.pyd`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `*.egg-info/`, `dist/`, `build/`, `.DS_Store`, `*.swp`, `*.swo`.
+  - Docker build re-verified: PASS.
+
+- Completed `core-001` — Backend infrastructure.
+  - Created `backend/db.py`: psycopg2 `ThreadedConnectionPool`, FastAPI `db_connection` dependency (commit/rollback/putconn lifecycle).
+  - Created `backend/models.py`: `Word`, `CardWithContent`, `NextCardsResponse`, `ReviewRequest`, `ReviewResponse` — pure Pydantic contracts.
+  - Updated `backend/requirements.txt`: added `psycopg2-binary==2.9.10`, `pytest==8.3.4`, `httpx==0.28.1`, `pytest-mock==3.14.0`.
+  - Created `backend/tests/__init__.py` (empty) and `backend/tests/conftest.py` (`mock_db` + `client` fixtures with `app.dependency_overrides`).
+  - Updated `backend/Dockerfile`: added `build-essential` + `libpq-dev` so psycopg2-binary compiles from source on Python 3.14-slim (no pre-built wheel exists for this runtime).
+
+- **Sensors run:**
+  - Docker image build: PASS.
+  - Import smoke test inside container (`db_connection`, all Pydantic models): PASS.
+  - `pytest tests/`: exit 5 — 0 tests collected (conftest-only; no test files added in this slice — expected).
+
+- **Review closeout for `core-001`:**
+  - QA verdict: `APPROVED WITH RESERVATIONS`
+  - Security verdict: `ADVISORY`
+  - Follow-up constraints carried forward:
+    - Before `core-003`: constrain `CardWithContent.format` and `ReviewRequest.rating`.
+    - Before `core-004`: add a lock guard around lazy `_get_pool()` initialization.
+    - Pre-production hardening: multi-stage backend Dockerfile, non-root user, explicit `DATABASE_URL` validation, direct `pydantic` pin.
+
+- **Review closeout for `.dockerignore` hardening:**
+  - QA verdict: `APPROVED`
+  - Security verdict: `CLEAN`
+  - The build-context secret-exposure advisory from `core-001` is closed.
+
+- Completed `foundation-010` — Full stack smoke test (carried from previous session).
   - Created `database/migrations/002_seed_words.sql` — 20 Biblical Hebrew words as SQL INSERT, auto-seeded via postgres `initdb.d` on first boot. The seed Python script cannot connect to postgres (internal-only network); SQL migration is the only viable path for automatic seeding in Docker Compose.
   - Fixed `docker-compose.yml`: postgres:18 changed the expected volume mount path from `/var/lib/postgresql/data` to `/var/lib/postgresql` (major-version-specific data dirs; see https://github.com/docker-library/postgres/pull/1259). Container crashed with `restart` loop without this fix.
   - Ran `docker compose build` — both `hebraico-fastapi` and `hebraico-next` built cleanly.
@@ -46,9 +90,11 @@
 
 ## Suggested next steps
 
-- `core-001` — Backend infrastructure (FastAPI + PostgreSQL foundation for FSRS and AI services).
+- `core-003` — AI content generation service.
+- Before `core-003`: constrain `CardWithContent.format` (Literal) and `ReviewRequest.rating` (1–4) at the Pydantic layer, and guard `fsrs_state_to_card()` against overwriting FSRS defaults with `None`.
+- Before `core-004`: make `_get_pool()` thread-safe, validate `rating` before `_RATING_MAP` lookup, and validate `fsrs_state` shape before datetime parsing.
 - Before any auth E2E testing: run `npx better-auth migrate` to create auth tables in a running postgres instance.
 - Before any non-local deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg instead of relying on the localhost fallback.
-- Before real AI calls in `core-001`: ensure `.env.example` and secret-handling guidance cover `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`.
-- During `core-001`: document that `docker-entrypoint-initdb.d` seeds only on first named-volume initialization; use `docker compose down -v` when a clean DB reset is required.
+- Before real AI calls in `core-003`: ensure `.env.example` and secret-handling guidance cover `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`.
+- During backend Docker hardening: add `.venv/`, `venv/`, and `htmlcov/` to `backend/.dockerignore`, and later remove test files from the final runtime stage once a multi-stage image exists.
 - Before enabling user-facing auth flows: map Better Auth raw errors to safe Portuguese UI messages (deferred from foundation-008/009 security advisory).

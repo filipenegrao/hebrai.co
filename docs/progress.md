@@ -2,7 +2,7 @@
 
 > Human-readable roadmap. Canonical task state is `STATUS.json`.
 
-Updated: 2026-05-18
+Updated: 2026-05-19
 
 ## In progress
 
@@ -11,7 +11,9 @@ Updated: 2026-05-18
 ## Backlog
 
 ### Core engine
-- [ ] `core-001` to `core-009` — Study session engine plan
+- [x] `core-001` — Backend infrastructure (db.py, models.py, tests/conftest.py)
+- [x] `core-002` — FSRS scheduling service (fsrs_service.py, test_fsrs_service.py)
+- [ ] `core-003` to `core-009` — Study session engine plan
 
 ### Dashboard and deploy
 - [ ] `dash-001` to `dash-009` — Dashboard, settings, typography, and deployment plan

@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-18T23:55Z",
+  "last_updated": "2026-05-19T04:00Z",
   "version": "0.1.0",
   "release_phase": "core-engine",
   "domains": [
@@ -89,16 +89,16 @@
         {
           "id": "core-001",
           "name": "Backend infrastructure",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Core engine plan Task 1. Entry constraints from foundation closeout: run npx better-auth migrate before auth E2E work; add NEXT_PUBLIC_BETTER_AUTH_URL as Docker build arg before non-local deploy paths are considered valid; document docker-entrypoint-initdb.d first-init-only behavior for clean DB resets; add .env.example placeholders/guidance for ANTHROPIC_API_KEY, OPENAI_API_KEY, and GOOGLE_API_KEY before real AI calls; replace raw Better Auth error forwarding with safe Portuguese user-facing messages before enabling user-facing auth flows."
+          "notes": "Core engine plan Task 1. Created backend/db.py (psycopg2 ThreadedConnectionPool, FastAPI dependency, commit/rollback/putconn lifecycle). Created backend/models.py (Word, CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse — pure Pydantic contracts). Created backend/tests/__init__.py and backend/tests/conftest.py (mock_db and client fixtures with dependency_overrides). Added to requirements.txt: psycopg2-binary==2.9.10, pytest==8.3.4, httpx==0.28.1, pytest-mock==3.14.0. Updated Dockerfile to add build-essential + libpq-dev (psycopg2-binary has no pre-built wheel for Python 3.14 and must be compiled from source). Docker build: PASS. Import smoke test (db_connection, all models): PASS. pytest: 0 collected (conftest only — scaffolding only, no real test modules yet). QA verdict: APPROVED WITH RESERVATIONS. Security verdict: ADVISORY. Hardening follow-up completed: backend/.dockerignore now excludes .env, .env.*, __pycache__/, *.pyc, .pytest_cache/ and related Python/OS junk; follow-up QA verdict: APPROVED; Security verdict: CLEAN. Carry forward: constrain format/rating before core-003; add lock guard around _get_pool() before core-004; defer multi-stage image, non-root user, explicit DATABASE_URL validation, and pydantic pin to pre-production hardening."
         },
         {
           "id": "core-002",
           "name": "FSRS scheduling service",
-          "status": "pending",
-          "tests": false,
-          "notes": "Core engine plan Task 2."
+          "status": "done",
+          "tests": true,
+          "notes": "Core engine plan Task 2. Created backend/fsrs_service.py: fsrs_state_to_card, card_to_fsrs_state, schedule_review, determine_format. Created backend/tests/test_fsrs_service.py: 8 tests, all passing. Added fsrs==6.3.1 to requirements.txt (PyPI package name is 'fsrs', not 'py-fsrs'; v6 has no 'reps' field — 'reps' is carried as a synthetic counter in our state dict and set as a dynamic attribute on Card, which is a dataclass without __slots__). TDD cycle confirmed in Docker: red on ImportError, green on all 8. Full suite 8/8, 0 regressions. QA verdict: APPROVED WITH RESERVATIONS. Security verdict: ADVISORY. Carry forward: before core-003, constrain CardWithContent.format and ReviewRequest.rating, and guard fsrs_state_to_card() so missing keys do not overwrite FSRS defaults with None; before core-004, make _get_pool() thread-safe, prevent invalid rating from surfacing as an unhandled KeyError, and validate fsrs_state shape before datetime parsing."
         },
         {
           "id": "core-003",
