@@ -7,7 +7,7 @@
 
 - **Date:** 2026-05-20
 - **Session:** `core-006` — HebrewWord component.
-- **Branch / HEAD:** `main` at `3a0692e`; `core-006` complete.
+- **Branch / HEAD:** `main` at `e7a78d2`; `core-006` accepted by QA/Security and committed.
 
 ## Goals completed this session
 
@@ -18,6 +18,7 @@
   - Internal `stripNiqqud()` removes niqqud and cantillation Unicode ranges when `showNiqqud` is false.
   - Uses `cn()` from `@/lib/utils` — no new dependencies.
   - Sensors: `lint` clean; `build` compiled successfully; `tsc --noEmit` errors are pre-existing stale `.next/types/` artifacts, not introduced by this slice.
+  - Review closeout: QA verdict `APPROVED`; Security verdict `CLEAN`.
   - `core-007` is unblocked.
 
 - Completed `core-005` — Session proxy routes.
@@ -145,6 +146,7 @@
 
 - `core-007` — `ExerciseCard`, `RatingBar`, `SessionProgress` components.
 - `core-008` — Session page (`/session`).
+- Clean stale `.next/types` artifacts before the next `tsc --noEmit` run so real type regressions are visible during `core-007`.
 - Before `core-009`:
   - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
   - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON

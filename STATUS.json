@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-20T03:00Z",
+  "last_updated": "2026-05-20T06:00Z",
   "version": "0.1.0",
   "release_phase": "core-engine",
   "domains": [
@@ -126,7 +126,7 @@
           "name": "HebrewWord component",
           "status": "done",
           "tests": false,
-          "notes": "Core engine plan Task 6. Created frontend/src/components/HebrewWord.tsx. Props: text, showNiqqud (default true), size (sm/md/lg/xl, default md), className. Renders <span dir='rtl' lang='he'> with Tailwind size classes. Internal stripNiqqud() strips niqqud and cantillation Unicode ranges when showNiqqud is false. Uses cn() from @/lib/utils — no new dependencies. Sensors: lint clean; build compiled successfully; tsc --noEmit errors are pre-existing stale .next/types artifacts unrelated to this slice. core-007 unblocked."
+          "notes": "Core engine plan Task 6. Created frontend/src/components/HebrewWord.tsx. Props: text, showNiqqud (default true), size (sm/md/lg/xl, default md), className. Renders <span dir='rtl' lang='he'> with Tailwind size classes. Internal stripNiqqud() strips niqqud and cantillation Unicode ranges when showNiqqud is false. Uses cn() from @/lib/utils — no new dependencies. Sensors: lint clean; build compiled successfully; tsc --noEmit errors are pre-existing stale .next/types artifacts unrelated to this slice. QA verdict: APPROVED. Security verdict: CLEAN. Non-blocking follow-up: clean stale .next/types artifacts before core-007 so TypeScript signal is useful again. core-007 unblocked."
         },
         {
           "id": "core-007",

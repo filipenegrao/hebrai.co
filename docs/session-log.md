@@ -962,6 +962,25 @@ Stack torn down cleanly with `docker compose down`.
   - stop transparently forwarding raw FastAPI error payloads to the browser
   - add an explicit body-size guard on the review POST
 
+## 2026-05-20 — core-006 closeout
+
+### What was done
+
+- Completed Builder -> QA -> Security closeout for `core-006` — `HebrewWord` component.
+- Accepted `frontend/src/components/HebrewWord.tsx`.
+- Confirmed the slice stayed narrowly scoped to reusable Hebrew text rendering and did not drift into session-page or exercise-card work.
+
+### Decisions
+
+- `core-006` is accepted with QA verdict `APPROVED` and Security verdict `CLEAN`.
+- `core-007` is unblocked.
+- `tsc --noEmit` remains noisy due to stale generated `.next/types` artifacts, but lint and build are green and the TypeScript noise is not introduced by this slice.
+
+### Follow-ups
+
+- Before or during `core-007`, clean stale `.next/types` artifacts so `tsc --noEmit` becomes a useful signal again.
+- Hebrew typography remains a visual concern for later UI integration, not a blocker for this component slice.
+
 ## 2026-05-18 — foundation section closeout
 
 ### What was done
