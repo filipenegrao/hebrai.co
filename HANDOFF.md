@@ -7,7 +7,7 @@
 
 - **Date:** 2026-05-20
 - **Session:** `core-008` — Session page.
-- **Branch / HEAD:** `main` at `8248407`; `core-008` implemented, sensors green, awaiting commit.
+- **Branch / HEAD:** `main` at `f2b440a`; `core-008` accepted by QA/Security and committed.
 
 ## Goals completed this session
 
@@ -20,6 +20,7 @@
   - Updated `frontend/src/app/page.tsx`: added "Iniciar sessão" link to `/session`.
   - `Button asChild` not supported by base-ui `Button` — used directly-styled `<Link>` elements throughout.
   - Sensors: `tsc --noEmit` — clean; `lint` — no issues; `build` — compiled successfully; `/session` appears as `○` (static shell) in route tree.
+  - Review closeout: QA verdict `APPROVED WITH RESERVATIONS`; Security verdict `ADVISORY`.
   - `core-009` is unblocked.
 
 - Completed `core-007` — Exercise UI components.
@@ -167,13 +168,17 @@
 
 ## Suggested next steps
 
-- Commit `core-008` files when explicitly requested.
 - `core-009` — End-to-end smoke test (full Docker Compose stack with real session flow).
 - Before `core-009`: apply the proxy-route hardening carry-forwards from `core-005`:
   - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
   - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON
   - wrap upstream `fetch()` / `upstream.json()` in both proxy routes and return structured `502/503`
   - wire `FASTAPI_URL=http://fastapi:8000` for the Next.js container runtime
+- Before or during `core-009`, also address:
+  - disable rating buttons while `submitReview()` is in flight
+  - use actual reviewed count for the completion message if `session_size !== cards.length`
+  - add visible fallback for unknown `card.format`
+  - harmonize remaining `ExerciseCard` strings to Portuguese
 - `TypingExercise` answer comparison is plain `===` after `.trim()` — a niqqud-tolerant matcher would improve UX; raise at QA.
 - `Button asChild` is not supported by base-ui — document this as a project constraint; use styled `<Link>` instead.
 - Carry forward from `core-004` into the next suitable hardening point:

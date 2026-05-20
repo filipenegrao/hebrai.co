@@ -1072,6 +1072,37 @@ Stack torn down cleanly with `docker compose down`.
   - adding a visible fallback for unknown `card.format`
 - A niqqud-tolerant matcher for `TypingExercise` remains a UX improvement for later integration, not a blocker for this slice.
 
+## 2026-05-20 — core-008 closeout
+
+### What was done
+
+- Completed Builder -> QA -> Security closeout for `core-008` — session page.
+- Accepted:
+  - `frontend/src/app/session/page.tsx`
+  - `frontend/src/app/page.tsx` session link
+- Confirmed the page uses the existing proxy/API layer and component layer without redesigning backend or proxy behavior.
+
+### Decisions
+
+- `core-008` is accepted with QA verdict `APPROVED WITH RESERVATIONS` and Security verdict `ADVISORY`.
+- `core-009` is unblocked.
+- `/session` appearing as a static shell in the route tree is acceptable because the page fetches session data client-side after hydration and auth enforcement remains in middleware/proxy layers.
+
+### Follow-ups
+
+- Before `core-009`:
+  - add `cache: "no-store"` to the next-cards proxy fetch
+  - wrap malformed JSON as `400`
+  - wrap upstream fetch/json failures as `502/503`
+  - wire `FASTAPI_URL=http://fastapi:8000`
+  - disable rating buttons while `submitReview()` is in flight
+  - bound `response_time_ms` server-side before analytics use
+- Non-blocking UI follow-ups:
+  - completion message should use actual reviewed count if `session_size !== cards.length`
+  - add visible fallback for unknown `card.format`
+  - harmonize remaining `ExerciseCard` strings to Portuguese
+  - consider niqqud-tolerant typing comparison
+
 ## 2026-05-18 — foundation section closeout
 
 ### What was done

@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-20T08:00Z",
+  "last_updated": "2026-05-20T10:00Z",
   "version": "0.1.0",
   "release_phase": "core-engine",
   "domains": [
@@ -140,7 +140,7 @@
           "name": "Session page",
           "status": "done",
           "tests": false,
-          "notes": "Core engine plan Task 8. Created frontend/src/app/session/page.tsx: client component implementing loading/active/empty/complete/error state machine. Loads cards via getNextCards(), renders current card with ExerciseCard and progress with SessionProgress, submits ratings via submitReview() with response_time_ms, advances through queue, moves to complete when exhausted. Submit failures are non-fatal (logged, session continues). Updated frontend/src/app/page.tsx to add Iniciar sessão link to /session. Button.asChild not supported by base-ui Button — used styled Link elements instead. useRef initialized with 0 (not Date.now()) to satisfy react-hooks/purity rule. Sensors: tsc --noEmit clean, lint clean, build compiled successfully — /session appears as static shell in route tree. core-009 unblocked."
+          "notes": "Core engine plan Task 8. Created frontend/src/app/session/page.tsx: client component implementing loading/active/empty/complete/error state machine. Loads cards via getNextCards(), renders current card with ExerciseCard and progress with SessionProgress, submits ratings via submitReview() with response_time_ms, advances through queue, moves to complete when exhausted. Submit failures are non-fatal (logged, session continues). Updated frontend/src/app/page.tsx to add Iniciar sessão link to /session. Button.asChild not supported by base-ui Button — used styled Link elements instead. useRef initialized with 0 (not Date.now()) to satisfy react-hooks/purity rule. Sensors: tsc --noEmit clean, lint clean, build compiled successfully — /session appears as static shell in route tree. QA verdict: APPROVED WITH RESERVATIONS. Security verdict: ADVISORY. Before core-009: apply proxy hardening from core-005, disable duplicate rating taps while submitReview() is in flight, bound response_time_ms server-side before analytics use, and fix session completion/progress assumptions if session_size can differ from cards.length. core-009 unblocked."
         },
         {
           "id": "core-009",
