@@ -2,6 +2,22 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-20 — core-006: HebrewWord component
+
+### What was done
+
+- Created `frontend/src/components/HebrewWord.tsx`.
+- Props: `text: string`, `showNiqqud?: boolean` (default `true`), `size?: "sm" | "md" | "lg" | "xl"` (default `"md"`), `className?: string`.
+- Renders a `<span dir="rtl" lang="he">` with Tailwind size classes (`text-xl` / `text-3xl` / `text-5xl` / `text-7xl`).
+- Internal `stripNiqqud()` helper removes niqqud and cantillation marks via a Unicode range regex when `showNiqqud` is false.
+- Uses `cn()` from `@/lib/utils` (clsx + tailwind-merge) for class merging — no new dependencies added.
+
+### Sensors
+
+- `npx tsc --noEmit`: 6 errors in `.next/types/` stale generated artifacts (pre-existing, unrelated to this slice). Source code typechecks clean.
+- `npm run lint`: clean.
+- `npm run build`: compiled successfully. `BETTER_AUTH_SECRET` warning is pre-existing.
+
 ## 2026-04-29 — Goals 7 & 8: npm CLI + dashboard usage telemetry
 
 ### What was done

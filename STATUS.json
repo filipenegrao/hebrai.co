@@ -124,9 +124,9 @@
         {
           "id": "core-006",
           "name": "HebrewWord component",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Core engine plan Task 6."
+          "notes": "Core engine plan Task 6. Created frontend/src/components/HebrewWord.tsx. Props: text, showNiqqud (default true), size (sm/md/lg/xl, default md), className. Renders <span dir='rtl' lang='he'> with Tailwind size classes. Internal stripNiqqud() strips niqqud and cantillation Unicode ranges when showNiqqud is false. Uses cn() from @/lib/utils — no new dependencies. Sensors: lint clean; build compiled successfully; tsc --noEmit errors are pre-existing stale .next/types artifacts unrelated to this slice. core-007 unblocked."
         },
         {
           "id": "core-007",

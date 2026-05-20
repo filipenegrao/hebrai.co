@@ -6,10 +6,19 @@
 ## Last update
 
 - **Date:** 2026-05-20
-- **Session:** `core-005` — Session proxy routes.
-- **Branch / HEAD:** `main` at `a389ba4`; `core-005` accepted by QA/Security and committed.
+- **Session:** `core-006` — HebrewWord component.
+- **Branch / HEAD:** `main` at `3a0692e`; `core-006` complete.
 
 ## Goals completed this session
+
+- Completed `core-006` — HebrewWord component.
+  - Created `frontend/src/components/HebrewWord.tsx`: reusable Hebrew text renderer.
+  - Props: `text`, `showNiqqud` (default `true`), `size` (`sm`/`md`/`lg`/`xl`, default `"md"`), `className`.
+  - Renders `<span dir="rtl" lang="he">` with Tailwind size classes (`text-xl` / `text-3xl` / `text-5xl` / `text-7xl`).
+  - Internal `stripNiqqud()` removes niqqud and cantillation Unicode ranges when `showNiqqud` is false.
+  - Uses `cn()` from `@/lib/utils` — no new dependencies.
+  - Sensors: `lint` clean; `build` compiled successfully; `tsc --noEmit` errors are pre-existing stale `.next/types/` artifacts, not introduced by this slice.
+  - `core-007` is unblocked.
 
 - Completed `core-005` — Session proxy routes.
   - Created `frontend/src/app/api/session/next-cards/route.ts`: `GET` — validates Better Auth session, forwards to FastAPI with `X-User-ID` from session, returns upstream JSON.
@@ -134,7 +143,6 @@
 
 ## Suggested next steps
 
-- `core-006` — `HebrewWord` component.
 - `core-007` — `ExerciseCard`, `RatingBar`, `SessionProgress` components.
 - `core-008` — Session page (`/session`).
 - Before `core-009`:
