@@ -6,10 +6,21 @@
 ## Last update
 
 - **Date:** 2026-05-20
-- **Session:** `core-007` — Exercise UI components.
-- **Branch / HEAD:** `main` at `8248407`; `core-007` accepted by QA/Security and committed.
+- **Session:** `core-008` — Session page.
+- **Branch / HEAD:** `main` at `8248407`; `core-008` implemented, sensors green, awaiting commit.
 
 ## Goals completed this session
+
+- Completed `core-008` — Session page.
+  - Created `frontend/src/app/session/page.tsx`: client component with `loading` / `active` / `empty` / `complete` / `error` state machine.
+  - Loads cards via `getNextCards()` on mount; handles `cards.length === 0` → `empty`.
+  - Tracks per-card response time via `useRef<number>(0)` (reset to `Date.now()` inside effect/handler to satisfy `react-hooks/purity`).
+  - Submits ratings via `submitReview()` with `card_id`, `rating`, `format_used`, `response_time_ms`; failures are non-fatal (session continues, card will reappear next session).
+  - Renders `SessionProgress` (done / total) + `ExerciseCard` (current card) in `active` state.
+  - Updated `frontend/src/app/page.tsx`: added "Iniciar sessão" link to `/session`.
+  - `Button asChild` not supported by base-ui `Button` — used directly-styled `<Link>` elements throughout.
+  - Sensors: `tsc --noEmit` — clean; `lint` — no issues; `build` — compiled successfully; `/session` appears as `○` (static shell) in route tree.
+  - `core-009` is unblocked.
 
 - Completed `core-007` — Exercise UI components.
   - Created `frontend/src/components/RatingBar.tsx`: four FSRS rating buttons (1/Again, 2/Hard, 3/Good, 4/Easy). Props: `onRate: (rating: 1 | 2 | 3 | 4) => void`, `disabled?: boolean`. Color-coded (red/amber/blue/green) via Tailwind classes. No new dependencies.
@@ -156,16 +167,15 @@
 
 ## Suggested next steps
 
-- `core-008` — Session page (`/session`) — can now import `ExerciseCard`, `RatingBar`, `SessionProgress` directly.
-- Before or during `core-008`, consider:
-  - adding `type="button"` to non-submit buttons in `RatingBar` and `MultipleChoiceExercise`
-  - adding a visible fallback for unknown `card.format`
-- Consider a `TypingExercise` niqqud-tolerant answer matcher (plain `===` is used now) — defer to `core-008` QA.
-- Before `core-009`:
+- Commit `core-008` files when explicitly requested.
+- `core-009` — End-to-end smoke test (full Docker Compose stack with real session flow).
+- Before `core-009`: apply the proxy-route hardening carry-forwards from `core-005`:
   - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
   - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON
   - wrap upstream `fetch()` / `upstream.json()` in both proxy routes and return structured `502/503`
   - wire `FASTAPI_URL=http://fastapi:8000` for the Next.js container runtime
+- `TypingExercise` answer comparison is plain `===` after `.trim()` — a niqqud-tolerant matcher would improve UX; raise at QA.
+- `Button asChild` is not supported by base-ui — document this as a project constraint; use styled `<Link>` instead.
 - Carry forward from `core-004` into the next suitable hardening point:
   - guard `daily_new_limit` / preferred provider null-coalescing in `backend/session_router.py`
   - catch invalid DB `format_override` and return a structured error instead of a bare 500

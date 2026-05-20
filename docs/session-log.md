@@ -2,6 +2,39 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-20 — core-008: Session page
+
+### What was done
+
+- Created `frontend/src/app/session/page.tsx`: client component implementing the study session flow.
+  - State machine: `loading` → `active` (or `empty`) → `complete` (or `error`).
+  - On mount: calls `getNextCards()`; if `cards.length === 0` enters `empty`; otherwise stores cards and enters `active`.
+  - Tracks per-card response time with `useRef<number>(0)` — initialized to `0` (not `Date.now()`) to satisfy `react-hooks/purity`; reset to `Date.now()` inside the `useEffect` callback and after each card advance.
+  - `handleRate(rating)`: builds `ReviewRequest` (card_id, rating, format_used, response_time_ms), calls `submitReview()`, catches errors non-fatally (logs and continues), advances `currentIndex`; when queue is exhausted enters `complete`.
+  - UI states: loading (spinner text), error (message + back link), empty (no cards message + back link), complete (summary + back link), active (`SessionProgress` + `ExerciseCard`).
+  - `Button asChild` not supported by base-ui `Button` — used styled `<Link>` elements for navigation buttons.
+- Updated `frontend/src/app/page.tsx`: added "Iniciar sessão" `<Link href="/session">` styled as a primary button to make `/session` discoverable.
+
+### Sensor results
+
+| Sensor | Command | Result |
+|---|---|---|
+| TypeScript | `rm -rf .next && npx tsc --noEmit` | **Clean** |
+| ESLint | `npm run lint` | **No issues found** |
+| Build | `npm run build` | **Compiled successfully** — `/session` appears as `○` (static shell) in route tree |
+
+### Decisions
+
+- Submit failures are non-fatal: the session continues and the card will reappear in a future session. This is the simplest coherent behavior for an offline/degraded backend.
+- `useRef<number>(0)` rather than `useRef<number>(Date.now())` — the purity rule flags `Date.now()` in the ref initializer (render-time call); timestamp is set inside the `useEffect` callback instead.
+- `Button asChild` is not available in base-ui — this is a project-wide constraint; styled `<Link>` elements are the right pattern for navigation-as-button throughout this codebase.
+
+### Follow-ups for core-009
+
+- `/session` page exercises the full browser → proxy → FastAPI path; a real end-to-end smoke test requires a running Docker Compose stack with AI provider mocked or wired.
+- Before `core-009`, apply proxy-route hardening from `core-005` carry-forward (cache:no-store, 400/502/503, FASTAPI_URL).
+- `TypingExercise` answer comparison is plain `===` — niqqud-tolerant matching would reduce false negatives.
+
 ## 2026-05-20 — core-007: Exercise UI components
 
 ### What was done
