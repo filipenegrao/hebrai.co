@@ -7,7 +7,7 @@
 
 - **Date:** 2026-05-19
 - **Session:** `core-004` — Session router.
-- **Branch / HEAD:** `main` at `25c091c`; `core-004` accepted by QA/Security, local changes ready to commit.
+- **Branch / HEAD:** `main` at `34b3c4a`; `core-004` accepted by QA/Security and committed.
 
 ## Goals completed this session
 
