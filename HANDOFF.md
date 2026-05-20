@@ -5,11 +5,20 @@
 
 ## Last update
 
-- **Date:** 2026-05-19
-- **Session:** `core-004` — Session router.
-- **Branch / HEAD:** `main` at `34b3c4a`; `core-004` accepted by QA/Security and committed.
+- **Date:** 2026-05-20
+- **Session:** `core-005` — Session proxy routes.
+- **Branch / HEAD:** `main` at `b2eb240`; `core-005` accepted by QA/Security, local changes ready to commit.
 
 ## Goals completed this session
+
+- Completed `core-005` — Session proxy routes.
+  - Created `frontend/src/app/api/session/next-cards/route.ts`: `GET` — validates Better Auth session, forwards to FastAPI with `X-User-ID` from session, returns upstream JSON.
+  - Created `frontend/src/app/api/session/review/route.ts`: `POST` — same auth pattern, forwards body + `X-User-ID` + `Content-Type` to FastAPI.
+  - Created `frontend/src/lib/api.ts`: typed interfaces (`Word`, `CardWithContent`, `NextCardsResponse`, `ReviewRequest`, `ReviewResponse`) and helpers (`getNextCards()`, `submitReview()`).
+  - Both routes appear in the Next.js build route tree as dynamic (`ƒ`) routes.
+  - Sensors: `npm run lint` — clean. `npm run build` — compiled successfully. `BETTER_AUTH_SECRET` warning is pre-existing, not introduced by this slice.
+  - Review closeout: QA verdict `APPROVED WITH RESERVATIONS`; Security verdict `ADVISORY`.
+  - `core-006` is unblocked.
 
 - Completed `core-004` — Session router.
   - Created `backend/session_router.py`: `GET /session/next-cards` and `POST /session/review`.
@@ -125,7 +134,14 @@
 
 ## Suggested next steps
 
-- `core-005` — Session proxy routes (Next.js API routes + `frontend/src/lib/api.ts`).
+- `core-006` — `HebrewWord` component.
+- `core-007` — `ExerciseCard`, `RatingBar`, `SessionProgress` components.
+- `core-008` — Session page (`/session`).
+- Before `core-009`:
+  - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
+  - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON
+  - wrap upstream `fetch()` / `upstream.json()` in both proxy routes and return structured `502/503`
+  - wire `FASTAPI_URL=http://fastapi:8000` for the Next.js container runtime
 - Carry forward from `core-004` into the next suitable hardening point:
   - guard `daily_new_limit` / preferred provider null-coalescing in `backend/session_router.py`
   - catch invalid DB `format_override` and return a structured error instead of a bare 500
@@ -133,6 +149,8 @@
 - Before any external exposure of backend routes:
   - replace trusted `X-User-ID` header identity with validated session/user forwarding
   - stop echoing internal Python type names in fsrs_state validation errors
+  - stop transparently forwarding raw FastAPI error payloads to the browser
+  - add an explicit body-size guard on the review POST
 - Before real AI calls land: add at least one real provider SDK wrapper behind `_Provider`; add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` to `.env.example`.
 - Before any auth E2E testing: run `npx better-auth migrate` to create auth tables in a running postgres instance.
 - Before any non-local deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg instead of relying on the localhost fallback.

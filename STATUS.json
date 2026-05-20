@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-19T09:00Z",
+  "last_updated": "2026-05-20T03:00Z",
   "version": "0.1.0",
   "release_phase": "core-engine",
   "domains": [
@@ -117,9 +117,9 @@
         {
           "id": "core-005",
           "name": "Session proxy routes",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Core engine plan Task 5."
+          "notes": "Core engine plan Task 5. Created frontend/src/app/api/session/next-cards/route.ts (GET — Better Auth session check, 401 if unauthenticated, forwards to FastAPI with X-User-ID from session.user.id) and frontend/src/app/api/session/review/route.ts (POST — same auth pattern, forwards JSON body). Created frontend/src/lib/api.ts: typed interfaces (Word, CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse) and helpers (getNextCards, submitReview) that call the proxy routes. Sensors: npm run lint — clean; npm run build — compiled successfully, both routes appear as dynamic (ƒ) in route tree. BETTER_AUTH_SECRET warning is pre-existing, not introduced here. QA verdict: APPROVED WITH RESERVATIONS. Security verdict: ADVISORY. Browser-to-backend trust boundary is now mediated by the server-side Better Auth session; the browser no longer controls X-User-ID. Before core-009, add cache:no-store to the next-cards upstream fetch, wrap malformed request.json() as 400, wrap upstream fetch/json failures as structured 502/503, and wire FASTAPI_URL=http://fastapi:8000 for the Next.js container runtime. Before external exposure, stop transparently forwarding raw FastAPI error payloads and add an explicit review POST body-size guard. No frontend test framework present; no tests added per project convention."
         },
         {
           "id": "core-006",

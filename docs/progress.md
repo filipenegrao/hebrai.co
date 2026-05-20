@@ -2,7 +2,7 @@
 
 > Human-readable roadmap. Canonical task state is `STATUS.json`.
 
-Updated: 2026-05-19
+Updated: 2026-05-20
 
 ## In progress
 
@@ -15,7 +15,8 @@ Updated: 2026-05-19
 - [x] `core-002` — FSRS scheduling service (fsrs_service.py, test_fsrs_service.py)
 - [x] `core-003` — AI content generation service (ai_service.py, test_ai_service.py)
 - [x] `core-004` — Session router (session_router.py, test_session_router.py, main.py wired)
-- [ ] `core-005` to `core-009` — Study session engine plan
+- [x] `core-005` — Session proxy routes (Next.js API routes + api.ts helpers)
+- [ ] `core-006` to `core-009` — Study session engine plan
 
 ### Dashboard and deploy
 - [ ] `dash-001` to `dash-009` — Dashboard, settings, typography, and deployment plan

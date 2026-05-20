@@ -627,6 +627,32 @@ Stack torn down cleanly with `docker compose down`.
 - Map Better Auth raw errors to safe Portuguese UI messages (carried from foundation-008 security advisory).
 - Begin `core-001` — Backend infrastructure.
 
+## 2026-05-20 — core-005: Session proxy routes
+
+### What was done
+
+- Created `frontend/src/app/api/session/next-cards/route.ts`: `GET` — reads Better Auth session via `auth.api.getSession`, returns 401 if no session, forwards to `${FASTAPI_URL}/session/next-cards` with `X-User-ID: session.user.id`.
+- Created `frontend/src/app/api/session/review/route.ts`: `POST` — same session pattern, forwards request body with `Content-Type: application/json` and `X-User-ID`.
+- Created `frontend/src/lib/api.ts`: `Word`, `CardWithContent`, `NextCardsResponse`, `ReviewRequest`, `ReviewResponse` types; `getNextCards()` and `submitReview()` helpers that call the proxy routes (not FastAPI directly).
+
+### Decisions
+
+- `X-User-ID` is always sourced from `session.user.id` — never forwarded from the caller.
+- `FASTAPI_URL` falls back to `http://localhost:8000` (matching `.env.example` pattern of `http://fastapi:8000` for Docker Compose).
+- No frontend test framework exists; no tests added per project convention.
+
+### Sensors
+
+| Sensor | Result |
+|---|---|
+| `npm run lint` | Clean |
+| `npm run build` | **Compiled successfully** — `/api/session/next-cards` and `/api/session/review` appear as dynamic (ƒ) routes |
+
+### Residual risks
+
+- The proxy routes pass upstream errors through transparently — if FastAPI is down, the client receives a network error, not a structured 502. Add an explicit upstream-failure handler before production.
+- `FASTAPI_URL` is a server-side env var; it is not exposed to the browser. Correct, but it must be set in Docker Compose or the app will fall back to localhost and fail in production.
+
 ## 2026-05-19 — core-004: Session router
 
 ### What was done
@@ -888,6 +914,37 @@ Stack torn down cleanly with `docker compose down`.
 - Before `core-003`, constrain `CardWithContent.format` and `ReviewRequest.rating` in `backend/models.py`.
 - Before `core-003` leaves QA, guard `fsrs_state_to_card()` so missing keys do not overwrite FSRS defaults with `None`.
 - Before `core-004`, add `_get_pool()` locking, validate `rating` before `_RATING_MAP` lookup, and validate `fsrs_state` shape before datetime parsing.
+
+## 2026-05-20 — core-005 closeout
+
+### What was done
+
+- Completed Builder -> QA -> Security closeout for `core-005` — Session proxy routes.
+- Accepted:
+  - `frontend/src/app/api/session/next-cards/route.ts`
+  - `frontend/src/app/api/session/review/route.ts`
+  - `frontend/src/lib/api.ts`
+- Confirmed the browser-to-backend trust boundary is now mediated by the server-side Better Auth session:
+  - unauthenticated calls return `401`
+  - `X-User-ID` is derived from `session.user.id`
+  - browser code calls `/api/session/*`, not FastAPI directly
+
+### Decisions
+
+- `core-005` is accepted with QA verdict `APPROVED WITH RESERVATIONS` and Security verdict `ADVISORY`.
+- `core-006` is unblocked.
+- Lint and build are accepted as the correct sensors for this slice because the repo has no frontend route-test harness yet.
+
+### Follow-ups
+
+- Before `core-009`:
+  - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
+  - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON
+  - wrap upstream `fetch()` / `upstream.json()` in both routes and return structured `502/503`
+  - wire `FASTAPI_URL=http://fastapi:8000` for the Next.js container runtime
+- Before external user exposure:
+  - stop transparently forwarding raw FastAPI error payloads to the browser
+  - add an explicit body-size guard on the review POST
 
 ## 2026-05-18 — foundation section closeout
 
