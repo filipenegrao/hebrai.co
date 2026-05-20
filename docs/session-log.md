@@ -2,6 +2,40 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-20 — core-007: Exercise UI components
+
+### What was done
+
+- Cleaned stale `.next/types` artifacts with `rm -rf .next` before running tsc so the TypeScript signal is useful again.
+- Created `frontend/src/components/RatingBar.tsx`: four FSRS rating buttons (1/Again, 2/Hard, 3/Good, 4/Easy). Props: `onRate: (rating: 1 | 2 | 3 | 4) => void`, `disabled?: boolean`. Color-coded via Tailwind semantic classes (red/amber/blue/green). Uses native `<button>` rather than shadcn Button to avoid the default variant overriding the color semantics.
+- Created `frontend/src/components/SessionProgress.tsx`: text (`done / total cards` + `%`) and a thin progress bar driven by inline `width` style. Handles `total === 0` via a guard before dividing.
+- Created `frontend/src/components/ExerciseCard.tsx`: client component with three sub-renderers:
+  - `MultipleChoiceExercise`: shows Hebrew word + transliteration, shuffles options once on mount via `useState` initializer, reveals correct/incorrect state after selection, shows explanation + `RatingBar` after reveal.
+  - `FlashcardExercise`: shows Hebrew word + transliteration, reveals gloss + example sentence + note on button click, shows `RatingBar` after reveal.
+  - `TypingExercise`: shows prompt + hint, collects RTL Hebrew input (`dir="rtl" lang="he"`), checks answer on submit or Enter key, shows correct/incorrect feedback + `RatingBar` after submit.
+  - Sub-components receive `key={card.card_id}` so React remounts them (resetting state) when a new card arrives.
+  - Content helpers (`asMultipleChoice`, `asFlashcard`, `asTyping`) safely extract typed shapes from `Record<string, unknown>`.
+
+### Sensor results
+
+| Sensor | Command | Result |
+|---|---|---|
+| TypeScript | `rm -rf .next && npx tsc --noEmit` | **Clean (no output)** — stale artifacts removed, all source types valid |
+| ESLint | `npm run lint` | **No issues found** |
+| Build | `npm run build` | **Compiled successfully** — route tree unchanged; Better Auth warnings are pre-existing |
+
+### Decisions
+
+- `Math.random()` inside `useMemo` triggers `react-hooks/purity`. Replaced with `useState` initializer (run-once, not pure-render context) to produce a stable shuffle.
+- `key={card.card_id}` on sub-components (not the wrapper `<div>`) is the correct state-reset mechanism; `key` on DOM elements has no unmount effect.
+- No new dependencies added. All UI built from existing shadcn/ui primitives (`Card`, `Button`, `Input`) and `HebrewWord`.
+
+### Follow-ups for core-008
+
+- `/session` page can now import `ExerciseCard`, `RatingBar`, `SessionProgress` directly.
+- Answer comparison in `TypingExercise` is plain string equality (`===` after `.trim()`). A tolerance matcher (ignore niqqud, case-insensitive) may improve UX — defer to QA on core-008.
+- `RatingBar` does not include keyboard shortcuts (1–4 keys) — low-priority UX improvement for later.
+
 ## 2026-05-20 — core-006: HebrewWord component
 
 ### What was done

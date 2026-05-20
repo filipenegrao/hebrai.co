@@ -6,10 +6,21 @@
 ## Last update
 
 - **Date:** 2026-05-20
-- **Session:** `core-006` — HebrewWord component.
-- **Branch / HEAD:** `main` at `e7a78d2`; `core-006` accepted by QA/Security and committed.
+- **Session:** `core-007` — Exercise UI components.
+- **Branch / HEAD:** `main` at `298bbee` (core-007 implementation not yet committed — awaiting QA/Security closeout).
 
 ## Goals completed this session
+
+- Completed `core-007` — Exercise UI components.
+  - Created `frontend/src/components/RatingBar.tsx`: four FSRS rating buttons (1/Again, 2/Hard, 3/Good, 4/Easy). Props: `onRate: (rating: 1 | 2 | 3 | 4) => void`, `disabled?: boolean`. Color-coded (red/amber/blue/green) via Tailwind classes. No new dependencies.
+  - Created `frontend/src/components/SessionProgress.tsx`: text and progress bar. Handles `total === 0` safely.
+  - Created `frontend/src/components/ExerciseCard.tsx`: client component with three sub-renderers keyed by `card.card_id`:
+    - `MultipleChoiceExercise`: Hebrew word + transliteration, shuffled options (once on mount via `useState` initializer), correctness reveal, explanation + `RatingBar`.
+    - `FlashcardExercise`: Hebrew word + transliteration, reveal-on-click, gloss + example sentence + note + `RatingBar`.
+    - `TypingExercise`: prompt + hint, RTL Hebrew input, Enter/button submit, correctness reveal + `RatingBar`.
+  - Cleaned stale `.next/types` artifacts before sensor run — `tsc --noEmit` is now clean.
+  - Sensors: `tsc --noEmit` — clean; `npm run lint` — no issues; `npm run build` — compiled successfully.
+  - `core-008` is unblocked.
 
 - Completed `core-006` — HebrewWord component.
   - Created `frontend/src/components/HebrewWord.tsx`: reusable Hebrew text renderer.
@@ -144,9 +155,9 @@
 
 ## Suggested next steps
 
-- `core-007` — `ExerciseCard`, `RatingBar`, `SessionProgress` components.
-- `core-008` — Session page (`/session`).
-- Clean stale `.next/types` artifacts before the next `tsc --noEmit` run so real type regressions are visible during `core-007`.
+- `core-008` — Session page (`/session`) — can now import `ExerciseCard`, `RatingBar`, `SessionProgress` directly.
+- Commit `core-007` files when explicitly requested.
+- Consider a `TypingExercise` niqqud-tolerant answer matcher (plain `===` is used now) — defer to `core-008` QA.
 - Before `core-009`:
   - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
   - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON
