@@ -7,7 +7,7 @@
 
 - **Date:** 2026-05-20
 - **Session:** `core-005` — Session proxy routes.
-- **Branch / HEAD:** `main` at `b2eb240`; `core-005` accepted by QA/Security, local changes ready to commit.
+- **Branch / HEAD:** `main` at `a389ba4`; `core-005` accepted by QA/Security and committed.
 
 ## Goals completed this session
 
