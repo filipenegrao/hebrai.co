@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-20T06:00Z",
+  "last_updated": "2026-05-20T08:00Z",
   "version": "0.1.0",
   "release_phase": "core-engine",
   "domains": [
@@ -133,7 +133,7 @@
           "name": "Exercise UI components",
           "status": "done",
           "tests": false,
-          "notes": "Core engine plan Task 7. Created frontend/src/components/RatingBar.tsx (4-button FSRS rating bar, color-coded), SessionProgress.tsx (progress text + bar, total===0 safe), and ExerciseCard.tsx (client component with MultipleChoiceExercise, FlashcardExercise, TypingExercise sub-renderers). Options are shuffled once on mount via useState initializer to avoid react-hooks/purity violation. Sub-components keyed by card_id for automatic state reset on new card. Uses HebrewWord, shadcn Card/Button/Input, no new dependencies. Sensors: tsc --noEmit clean (stale .next artifacts removed first), lint clean, build compiled successfully. core-008 unblocked."
+          "notes": "Core engine plan Task 7. Created frontend/src/components/RatingBar.tsx (4-button FSRS rating bar, color-coded), SessionProgress.tsx (progress text + bar, total===0 safe), and ExerciseCard.tsx (client component with MultipleChoiceExercise, FlashcardExercise, TypingExercise sub-renderers). Options are shuffled once on mount via useState initializer to avoid react-hooks/purity violation. Sub-components keyed by card_id for automatic state reset on new card. Uses HebrewWord, shadcn Card/Button/Input, no new dependencies. Sensors: tsc --noEmit clean (stale .next artifacts removed first), lint clean, build compiled successfully. QA verdict: APPROVED. Security verdict: CLEAN. Non-blocking follow-ups: add type=\"button\" to non-submit buttons and a visible fallback for unknown card.format during or before core-008 integration. core-008 unblocked."
         },
         {
           "id": "core-008",

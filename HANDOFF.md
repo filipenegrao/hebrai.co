@@ -7,7 +7,7 @@
 
 - **Date:** 2026-05-20
 - **Session:** `core-007` — Exercise UI components.
-- **Branch / HEAD:** `main` at `298bbee` (core-007 implementation not yet committed — awaiting QA/Security closeout).
+- **Branch / HEAD:** `main` at `8248407`; `core-007` accepted by QA/Security and committed.
 
 ## Goals completed this session
 
@@ -20,6 +20,7 @@
     - `TypingExercise`: prompt + hint, RTL Hebrew input, Enter/button submit, correctness reveal + `RatingBar`.
   - Cleaned stale `.next/types` artifacts before sensor run — `tsc --noEmit` is now clean.
   - Sensors: `tsc --noEmit` — clean; `npm run lint` — no issues; `npm run build` — compiled successfully.
+  - Review closeout: QA verdict `APPROVED`; Security verdict `CLEAN`.
   - `core-008` is unblocked.
 
 - Completed `core-006` — HebrewWord component.
@@ -156,7 +157,9 @@
 ## Suggested next steps
 
 - `core-008` — Session page (`/session`) — can now import `ExerciseCard`, `RatingBar`, `SessionProgress` directly.
-- Commit `core-007` files when explicitly requested.
+- Before or during `core-008`, consider:
+  - adding `type="button"` to non-submit buttons in `RatingBar` and `MultipleChoiceExercise`
+  - adding a visible fallback for unknown `card.format`
 - Consider a `TypingExercise` niqqud-tolerant answer matcher (plain `===` is used now) — defer to `core-008` QA.
 - Before `core-009`:
   - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`

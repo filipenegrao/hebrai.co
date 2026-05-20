@@ -1015,6 +1015,30 @@ Stack torn down cleanly with `docker compose down`.
 - Before or during `core-007`, clean stale `.next/types` artifacts so `tsc --noEmit` becomes a useful signal again.
 - Hebrew typography remains a visual concern for later UI integration, not a blocker for this component slice.
 
+## 2026-05-20 — core-007 closeout
+
+### What was done
+
+- Completed Builder -> QA -> Security closeout for `core-007` — exercise UI components.
+- Accepted:
+  - `frontend/src/components/RatingBar.tsx`
+  - `frontend/src/components/SessionProgress.tsx`
+  - `frontend/src/components/ExerciseCard.tsx`
+- Confirmed the slice stayed within the `components` layer and did not drift into `/session` page orchestration.
+
+### Decisions
+
+- `core-007` is accepted with QA verdict `APPROVED` and Security verdict `CLEAN`.
+- `core-008` is unblocked.
+- Cleaning `.next` before `tsc --noEmit` was the correct corrective action; TypeScript, lint, and build are accepted as sufficient sensors for this pure UI-component slice.
+
+### Follow-ups
+
+- Before or during `core-008`, consider:
+  - adding `type=\"button\"` to non-submit buttons in `RatingBar` and `MultipleChoiceExercise`
+  - adding a visible fallback for unknown `card.format`
+- A niqqud-tolerant matcher for `TypingExercise` remains a UX improvement for later integration, not a blocker for this slice.
+
 ## 2026-05-18 — foundation section closeout
 
 ### What was done
