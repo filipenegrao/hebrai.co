@@ -1,14 +1,18 @@
 import os
+import threading
 import psycopg2
 from psycopg2.pool import ThreadedConnectionPool
 
 _pool: ThreadedConnectionPool | None = None
+_pool_lock = threading.Lock()
 
 
 def _get_pool() -> ThreadedConnectionPool:
     global _pool
     if _pool is None:
-        _pool = ThreadedConnectionPool(1, 10, dsn=os.environ["DATABASE_URL"])
+        with _pool_lock:
+            if _pool is None:
+                _pool = ThreadedConnectionPool(1, 10, dsn=os.environ["DATABASE_URL"])
     return _pool
 
 

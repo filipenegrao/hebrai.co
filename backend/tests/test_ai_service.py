@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from models import Word
-from ai_service import hash_prompt, generate_content
+from ai_service import hash_prompt, generate_content, _build_prompt
 
 
 @pytest.fixture
@@ -77,3 +77,17 @@ def test_generate_content_typing(sample_word):
         result = generate_content(sample_word, "typing")
 
     assert result["answer"] == "אֶרֶץ"
+
+
+def test_build_prompt_raises_for_unknown_format(sample_word):
+    with pytest.raises(ValueError, match="Unsupported exercise_format"):
+        _build_prompt(sample_word, "unknown_format")
+
+
+def test_generate_content_raises_on_malformed_json(sample_word):
+    mock = MagicMock()
+    mock.choices[0].message.content = "not valid json {"
+
+    with patch("ai_service.provider.generate", return_value=mock):
+        with pytest.raises(ValueError, match="non-JSON"):
+            generate_content(sample_word, "flashcard")

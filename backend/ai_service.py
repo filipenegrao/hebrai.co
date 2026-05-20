@@ -7,7 +7,8 @@ _DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 
 
 class _Provider:
-    """Placeholder provider interface. Real SDK wrappers are added in the AI provider task."""
+    """Placeholder provider interface. Real SDK wrappers are added in the AI provider task.
+    Expected response shape: response.choices[0].message.content -> JSON string."""
 
     def generate(self, model: str, messages: list[dict], temperature: float = 0.3):
         raise NotImplementedError("No AI provider configured")
@@ -22,6 +23,7 @@ def hash_prompt(word_id: int, exercise_format: str, provider_name: str) -> str:
 
 
 def _build_prompt(word: Word, exercise_format: str) -> str:
+    # Word fields are DB-sourced and treated as trusted content at this layer.
     word_json = json.dumps(
         {
             "hebrew": word.hebrew,
@@ -55,8 +57,8 @@ Retorne um objeto JSON com estes campos exatos:
 
 Retorne apenas o objeto JSON, sem markdown."""
 
-    # typing
-    return f"""Gere um exercício de digitação para esta palavra do hebraico bíblico:
+    if exercise_format == "typing":
+        return f"""Gere um exercício de digitação para esta palavra do hebraico bíblico:
 {word_json}
 
 Retorne um objeto JSON com estes campos exatos:
@@ -65,6 +67,8 @@ Retorne um objeto JSON com estes campos exatos:
 - hint: string (nome da primeira letra, ex: "Começa com aleph (א)")
 
 Retorne apenas o objeto JSON, sem markdown."""
+
+    raise ValueError(f"Unsupported exercise_format: {exercise_format!r}")
 
 
 def generate_content(word: Word, exercise_format: str, model: str | None = None) -> dict:
@@ -75,4 +79,7 @@ def generate_content(word: Word, exercise_format: str, model: str | None = None)
         temperature=0.3,
     )
     text = response.choices[0].message.content.strip()
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Provider returned non-JSON content for format {exercise_format!r}: {exc}") from exc

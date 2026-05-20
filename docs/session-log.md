@@ -627,6 +627,91 @@ Stack torn down cleanly with `docker compose down`.
 - Map Better Auth raw errors to safe Portuguese UI messages (carried from foundation-008 security advisory).
 - Begin `core-001` — Backend infrastructure.
 
+## 2026-05-19 — core-004: Session router
+
+### What was done
+
+- Created `backend/session_router.py`:
+  - `GET /session/next-cards`: reads user settings, fetches due cards (joined with words), introduces new words up to `daily_new_limit`, generates/caches AI content per card, returns `NextCardsResponse`.
+  - `POST /session/review`: validates card ownership, validates and parses `fsrs_state`, calls `schedule_review`, updates DB, inserts `review_log` row, returns `ReviewResponse`.
+  - `_validate_fsrs_state()`: router-layer guard — checks type is dict; checks `due`/`last_review` fields are valid ISO datetime strings; raises HTTP 422 with a coherent message on failure.
+- Modified `backend/main.py`: registered `session_router` via `app.include_router`.
+- Created `backend/tests/test_session_router.py`: 7 tests.
+
+### Routes added
+
+| Method | Path | Auth |
+|---|---|---|
+| GET | `/session/next-cards` | `X-User-ID` header (required) |
+| POST | `/session/review` | `X-User-ID` header (required) |
+
+### Sensors
+
+| Sensor | Result |
+|---|---|
+| Red phase: `pytest tests/test_session_router.py` | 6 failed (routes 404), 1 passed — confirmed |
+| Docker build | PASS |
+| Green phase: `pytest tests/test_session_router.py` | **7 passed** |
+| Full suite: `pytest tests/` | **22 passed, 0 regressions** |
+
+### Residual risks for `core-005`
+
+- `provider.generate()` still raises `NotImplementedError` — real SDK wrappers needed before live AI calls.
+- The `IN (SELECT word_id FROM cards WHERE user_id = %s)` subquery in new-word fetch is a correlated subquery; acceptable at current scale but should be replaced with a LEFT JOIN anti-join for larger word lists.
+- AI content cache insert uses `ON CONFLICT DO NOTHING`; a concurrent race could leave a card without content if the INSERT loses — acceptable for now.
+
+## 2026-05-19 — core-004 closeout
+
+### What was done
+
+- Completed Builder -> QA -> Security closeout for `core-004` — Session router.
+- Accepted `backend/session_router.py`, `backend/tests/test_session_router.py`, and `backend/main.py` router registration.
+- Confirmed the deferred router-layer `fsrs_state` validation requirement from earlier reviews is now closed.
+
+### Decisions
+
+- `core-004` is accepted with QA verdict `APPROVED WITH RESERVATIONS` and Security verdict `ADVISORY`.
+- `core-005` is unblocked.
+- The router-layer `fsrs_state` trust-boundary fix is complete:
+  - non-dict state returns `422`
+  - invalid ISO datetime strings in `due` / `last_review` return `422`
+  - invalid state no longer reaches `datetime.fromisoformat()` inside the FSRS service
+
+### Follow-ups
+
+- Before `core-009`, harden `backend/session_router.py` for:
+  - `daily_new_limit` / preferred provider null-coalescing
+  - invalid DB `format_override` returning a structured client error instead of a bare 500
+  - `ReviewRequest.response_time_ms` range constraints
+- Before any external exposure of backend routes:
+  - replace trusted `X-User-ID` header identity with validated session/user forwarding
+  - stop echoing internal Python type names in `fsrs_state` validation errors
+
+## 2026-05-19 — pre-core-004 hardening: model constraints, error handling, thread safety
+
+### What was done
+
+- `backend/models.py`: `ReviewRequest.format_used` → `Literal["multiple_choice", "flashcard", "typing"]`.
+- `backend/ai_service.py`:
+  - `_build_prompt()` raises `ValueError("Unsupported exercise_format: ...")` for unknown formats.
+  - `generate_content()` wraps `json.loads` — `JSONDecodeError` is re-raised as `ValueError("Provider returned non-JSON content...")`.
+  - Added docstring on `_Provider.generate()` expected response shape.
+  - Added comment in `_build_prompt()` noting `Word` fields are DB-sourced/trusted at this layer.
+- `backend/db.py`: `_get_pool()` uses double-checked locking with `threading.Lock` to prevent duplicate pool creation under concurrent requests.
+- `backend/tests/test_ai_service.py`: added `test_build_prompt_raises_for_unknown_format` and `test_generate_content_raises_on_malformed_json`.
+
+### Sensors
+
+| Sensor | Result |
+|---|---|
+| Docker build | PASS |
+| `pytest tests/ -v` | **15 passed, 0 regressions** |
+
+### Residual risks for `core-004`
+
+- `fsrs_state` datetime values are still trusted at the service layer (they come from the DB through the router). Shape validation before `datetime.fromisoformat()` belongs in the router or a dedicated validator in `core-004`.
+- Real provider SDK wrappers not yet implemented — `provider.generate()` still raises `NotImplementedError`.
+
 ## 2026-05-19 — core-003: AI content generation service
 
 ### What was done

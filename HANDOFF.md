@@ -6,10 +6,26 @@
 ## Last update
 
 - **Date:** 2026-05-19
-- **Session:** `core-003` closeout — AI content generation service.
-- **Branch / HEAD:** `main` at `8697f9e`; `core-003` changes uncommitted (commit on explicit request).
+- **Session:** `core-004` — Session router.
+- **Branch / HEAD:** `main` at `25c091c`; `core-004` accepted by QA/Security, local changes ready to commit.
 
 ## Goals completed this session
+
+- Completed `core-004` — Session router.
+  - Created `backend/session_router.py`: `GET /session/next-cards` and `POST /session/review`.
+  - Modified `backend/main.py`: registered `session_router` via `app.include_router`.
+  - Created `backend/tests/test_session_router.py`: 7 tests (happy paths, missing header, forbidden, not-found, invalid fsrs_state type, invalid fsrs_state datetime).
+  - Carry-forward constraint closed: `_validate_fsrs_state()` in the router validates type and ISO datetime fields before `fsrs_state_to_card()` is called; returns 422 with a coherent message on failure.
+  - Full suite: **22/22 PASS, 0 regressions**.
+  - Review closeout: QA verdict `APPROVED WITH RESERVATIONS`; Security verdict `ADVISORY`.
+  - `core-005` is unblocked.
+
+- Pre-`core-004` hardening (all carry-forward constraints from `core-003` review closed):
+  - `backend/models.py`: `ReviewRequest.format_used` → `Literal["multiple_choice", "flashcard", "typing"]`.
+  - `backend/ai_service.py`: `_build_prompt()` now raises `ValueError` for unknown formats instead of silently falling through to typing template. `generate_content()` wraps `json.loads` and converts `JSONDecodeError` to a structured `ValueError`. Added docstring on provider response shape; added comment on `Word` field trust assumption.
+  - `backend/db.py`: `_get_pool()` now uses a double-checked lock (`threading.Lock`) to prevent concurrent threads from creating multiple connection pool instances.
+  - `backend/tests/test_ai_service.py`: added `test_build_prompt_raises_for_unknown_format` and `test_generate_content_raises_on_malformed_json`.
+  - Full suite: **15/15 PASS, 0 regressions**.
 
 - Completed `core-003` — AI content generation service.
   - Created `backend/ai_service.py`: `hash_prompt`, `_build_prompt`, `generate_content`. Provider boundary kept internal via a `_Provider` placeholder with a `.generate()` interface (real SDK wrappers deferred to when they're first needed).
@@ -109,16 +125,16 @@
 
 ## Suggested next steps
 
-- Pre-`core-004` hardening slice:
-  - constrain `ReviewRequest.format_used`
-  - make `_build_prompt()` reject unknown formats
-  - wrap provider JSON parsing in structured error handling
-  - make `_get_pool()` thread-safe
-- `core-004` — Session router (`backend/session_router.py` + `backend/tests/test_session_router.py`).
-- Before `core-004`: validate `fsrs_state` shape before `datetime.fromisoformat()` sees untrusted values from the DB.
-- Before wiring real AI calls: add real provider SDK wrappers behind the `_Provider` interface in `ai_service.py`; add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` to `.env.example`.
+- `core-005` — Session proxy routes (Next.js API routes + `frontend/src/lib/api.ts`).
+- Carry forward from `core-004` into the next suitable hardening point:
+  - guard `daily_new_limit` / preferred provider null-coalescing in `backend/session_router.py`
+  - catch invalid DB `format_override` and return a structured error instead of a bare 500
+  - constrain `ReviewRequest.response_time_ms`
+- Before any external exposure of backend routes:
+  - replace trusted `X-User-ID` header identity with validated session/user forwarding
+  - stop echoing internal Python type names in fsrs_state validation errors
+- Before real AI calls land: add at least one real provider SDK wrapper behind `_Provider`; add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` to `.env.example`.
 - Before any auth E2E testing: run `npx better-auth migrate` to create auth tables in a running postgres instance.
 - Before any non-local deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg instead of relying on the localhost fallback.
-- Before real AI calls in `core-003`: ensure `.env.example` and secret-handling guidance cover `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`.
 - During backend Docker hardening: add `.venv/`, `venv/`, and `htmlcov/` to `backend/.dockerignore`, and later remove test files from the final runtime stage once a multi-stage image exists.
 - Before enabling user-facing auth flows: map Better Auth raw errors to safe Portuguese UI messages (deferred from foundation-008/009 security advisory).

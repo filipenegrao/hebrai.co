@@ -28,7 +28,7 @@ class NextCardsResponse(BaseModel):
 class ReviewRequest(BaseModel):
     card_id: int
     rating: Literal[1, 2, 3, 4]
-    format_used: str
+    format_used: Literal["multiple_choice", "flashcard", "typing"]
     response_time_ms: int | None = None
 
 

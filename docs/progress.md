@@ -14,7 +14,8 @@ Updated: 2026-05-19
 - [x] `core-001` — Backend infrastructure (db.py, models.py, tests/conftest.py)
 - [x] `core-002` — FSRS scheduling service (fsrs_service.py, test_fsrs_service.py)
 - [x] `core-003` — AI content generation service (ai_service.py, test_ai_service.py)
-- [ ] `core-004` to `core-009` — Study session engine plan
+- [x] `core-004` — Session router (session_router.py, test_session_router.py, main.py wired)
+- [ ] `core-005` to `core-009` — Study session engine plan
 
 ### Dashboard and deploy
 - [ ] `dash-001` to `dash-009` — Dashboard, settings, typography, and deployment plan
