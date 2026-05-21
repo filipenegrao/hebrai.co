@@ -18,7 +18,8 @@ Updated: 2026-05-20
 - [x] `core-005` — Session proxy routes (Next.js API routes + api.ts helpers)
 - [x] `core-006` — HebrewWord component
 - [x] `core-007` — Exercise UI components
-- [ ] `core-008` to `core-009` — Study session engine plan
+- [x] `core-008` — Session page
+- [x] `core-009` — End-to-end smoke test hardening and verification
 
 ### Dashboard and deploy
 - [ ] `dash-001` to `dash-009` — Dashboard, settings, typography, and deployment plan
@@ -26,6 +27,7 @@ Updated: 2026-05-20
 ## Done
 
 - [x] Foundation section closed (`foundation-001` to `foundation-010`)
+- [x] Core engine section closed (`core-001` to `core-009`)
 - [x] `foundation-010` — Full stack smoke test
 - [x] `foundation-009` — Route protection and dashboard shell
 - [x] `foundation-008` — Auth pages

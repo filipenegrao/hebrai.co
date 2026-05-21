@@ -7,7 +7,7 @@
 
 - **Date:** 2026-05-20
 - **Session:** `core-009` — End-to-end smoke test hardening.
-- **Branch / HEAD:** `main` at `f2b440a`; `core-009` implemented and sensors green, awaiting commit.
+- **Branch / HEAD:** `main`; `core-009` accepted by QA/Security and committed locally.
 
 ## Goals completed this session
 
@@ -188,7 +188,6 @@
 
 ## Suggested next steps
 
-- Commit `core-009` files when explicitly requested.
 - `core-engine` section is complete. Next delivery track is `dashboard-deploy` (dash-001 onward).
 - Before real AI calls: wire a real provider SDK behind `_Provider` in `backend/ai_service.py`; add provider keys to `.env`.
 - Before any user-facing auth: run `npx better-auth migrate` against a running postgres instance.

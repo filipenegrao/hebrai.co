@@ -75,6 +75,31 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 - Wire a real AI provider SDK before any production session flow.
 - Run `npx better-auth migrate` before browser-level auth smoke testing.
 
+## 2026-05-20 — core-009 closeout
+
+### What was done
+
+- Processed QA verdict `APPROVED WITH RESERVATIONS` for `core-009`.
+- Processed Security verdict `ADVISORY` for `core-009`.
+- Confirmed the `core-engine` section is complete for local development and the next delivery track is `dashboard-deploy`.
+
+### Decisions
+
+- `core-009` is accepted without Builder rework.
+- Synthetic smoke is sufficient to close the local engine milestone, but not a substitute for a browser-auth smoke after Better Auth migration.
+
+### Follow-ups
+
+- Before any external exposure or deploy work:
+  - stop forwarding raw FastAPI JSON payloads directly to the browser
+  - add an explicit body-size guard on the review POST
+  - run Better Auth migration and perform browser-auth E2E smoke
+- Non-blocking cleanup:
+  - let unknown-format fallback advance/skip instead of stalling the session
+  - use actual queue length for progress totals if it can differ from `session_size`
+  - make `_placeholder_content()` raise on unknown formats for consistency
+  - wire `NEXT_PUBLIC_BETTER_AUTH_URL` before non-local deployment
+
 ## 2026-05-20 — core-008: Session page
 
 ### What was done
