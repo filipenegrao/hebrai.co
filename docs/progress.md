@@ -2,7 +2,7 @@
 
 > Human-readable roadmap. Canonical task state is `STATUS.json`.
 
-Updated: 2026-05-20
+Updated: 2026-05-21
 
 ## In progress
 

@@ -16,6 +16,10 @@
   - Updated `backend/main.py`: `stats_router` registered.
   - Created `backend/tests/test_stats_router.py`: 3 tests — happy path, missing header 422, new user zeros.
   - Sensors: backend 28/28 PASS, 0 regressions; frontend lint clean; frontend build compiled.
+  - Review closeout: QA verdict `APPROVED WITH RESERVATIONS`; Security verdict `ADVISORY`.
+  - Carry-forward: docs must describe streak semantics precisely. The current SQL returns the length of the terminal consecutive run ending at the most recent review date; it does not reset to 0 merely because today has no reviews.
+  - Carry-forward: add an explicit edge-case test for non-zero streak when the most recent review was yesterday before or alongside `dash-002`.
+  - Carry-forward: bound `X-User-ID` length at the FastAPI layer before external exposure; confirm streak and timezone behavior against live Postgres 18 data during `dash-009`.
   - `dash-002` (settings endpoint) is unblocked.
 
 - Completed `core-009` — End-to-end smoke test hardening.
@@ -196,6 +200,7 @@
 ## Suggested next steps
 
 - `dash-001` complete. Next task is `dash-002` (settings endpoint: `GET /settings`, `PUT /settings` against `user_settings` table).
+- Before or alongside `dash-002`, add the missing streak edge-case test and keep the docs aligned with the implemented terminal-run semantics.
 - Before real AI calls: wire a real provider SDK behind `_Provider` in `backend/ai_service.py`; add provider keys to `.env`.
 - Before any user-facing auth: run `npx better-auth migrate` against a running postgres instance.
 - `TypingExercise` answer comparison is plain `===` — a niqqud-tolerant matcher would improve UX.

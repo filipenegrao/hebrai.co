@@ -10,10 +10,14 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 - Updated `backend/main.py`: registered `stats_router` via `app.include_router`.
 - Created `backend/tests/test_stats_router.py`: 3 tests (happy path all fields, missing header 422, new user all zeros).
 - Sensors: backend 28/28 PASS (0 regressions), frontend lint clean, frontend build compiled successfully.
+- Review closeout: QA verdict `APPROVED WITH RESERVATIONS`; Security verdict `ADVISORY`.
 
 ### Residual risks
 
+- Streak semantics: the current query returns the size of the terminal consecutive run ending at the most recent review date. It does not reset to `0` just because today has no reviews. Keep this behavior explicit in future docs and frontend assumptions.
 - Streak CTE uses a subquery with ORDER BY + LIMIT to identify the most-recent group — tested against mocks; verify against live Postgres 18 data during dash-009 smoke test.
+- `CURRENT_DATE` and `NOW()` use the server timezone; confirm the desired timezone policy before the dashboard is exposed to real users.
+- `X-User-ID` is still accepted as an unbounded string at the FastAPI layer. SQL is parameterized, but a length bound should be added before any external backend exposure.
 
 ---
 
