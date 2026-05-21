@@ -71,13 +71,40 @@ Retorne apenas o objeto JSON, sem markdown."""
     raise ValueError(f"Unsupported exercise_format: {exercise_format!r}")
 
 
+def _placeholder_content(exercise_format: str, word: Word) -> dict:
+    """Deterministic fallback used when no AI provider is configured (NotImplementedError).
+    Returns semantically valid but clearly marked stub content so the smoke path works
+    without a real API key. Replaced automatically once a real provider is wired."""
+    if exercise_format == "multiple_choice":
+        return {
+            "question": f"O que significa '{word.hebrew}'?",
+            "options": [word.gloss_pt, "(opção B)", "(opção C)", "(opção D)"],
+            "correct_index": 0,
+            "explanation": "[Provedor de IA não configurado — adicione uma chave de API]",
+        }
+    if exercise_format == "flashcard":
+        return {
+            "example_sentence": word.hebrew,
+            "translation": word.gloss_pt,
+            "note": "[Provedor de IA não configurado — adicione uma chave de API]",
+        }
+    return {
+        "prompt": f"Como se escreve '{word.gloss_pt}' em hebraico?",
+        "answer": word.hebrew,
+        "hint": "[Provedor de IA não configurado — adicione uma chave de API]",
+    }
+
+
 def generate_content(word: Word, exercise_format: str, model: str | None = None) -> dict:
     prompt = _build_prompt(word, exercise_format)
-    response = provider.generate(
-        model=model or os.environ.get("DEFAULT_AI_MODEL", _DEFAULT_MODEL),
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-    )
+    try:
+        response = provider.generate(
+            model=model or os.environ.get("DEFAULT_AI_MODEL", _DEFAULT_MODEL),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+        )
+    except NotImplementedError:
+        return _placeholder_content(exercise_format, word)
     text = response.choices[0].message.content.strip()
     try:
         return json.loads(text)

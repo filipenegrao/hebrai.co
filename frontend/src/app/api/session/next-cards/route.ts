@@ -9,10 +9,23 @@ export async function GET() {
   }
 
   const fastapiUrl = process.env.FASTAPI_URL ?? "http://localhost:8000";
-  const upstream = await fetch(`${fastapiUrl}/session/next-cards`, {
-    headers: { "X-User-ID": session.user.id },
-  });
 
-  const data = await upstream.json();
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${fastapiUrl}/session/next-cards`, {
+      cache: "no-store",
+      headers: { "X-User-ID": session.user.id },
+    });
+  } catch {
+    return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
+  }
+
+  let data: unknown;
+  try {
+    data = await upstream.json();
+  } catch {
+    return NextResponse.json({ error: "Resposta inválida do servidor" }, { status: 502 });
+  }
+
   return NextResponse.json(data, { status: upstream.status });
 }

@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Any, Literal
-from pydantic import BaseModel
+from typing import Annotated, Any, Literal
+from pydantic import BaseModel, Field
 
 
 class Word(BaseModel):
@@ -29,7 +29,8 @@ class ReviewRequest(BaseModel):
     card_id: int
     rating: Literal[1, 2, 3, 4]
     format_used: Literal["multiple_choice", "flashcard", "typing"]
-    response_time_ms: int | None = None
+    # Capped at 5 minutes (300 000 ms) — values beyond this are likely clock errors.
+    response_time_ms: Annotated[int, Field(ge=0, le=300_000)] | None = None
 
 
 class ReviewResponse(BaseModel):

@@ -40,6 +40,7 @@ export function RatingBar({ onRate, disabled = false }: RatingBarProps) {
       {RATINGS.map(({ value, label, className }) => (
         <button
           key={value}
+          type="button"
           onClick={() => onRate(value)}
           disabled={disabled}
           className={cn(

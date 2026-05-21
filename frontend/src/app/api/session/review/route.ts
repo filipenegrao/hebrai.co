@@ -8,18 +8,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Corpo da requisição inválido" }, { status: 400 });
+  }
+
   const fastapiUrl = process.env.FASTAPI_URL ?? "http://localhost:8000";
 
-  const upstream = await fetch(`${fastapiUrl}/session/review`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-User-ID": session.user.id,
-    },
-    body: JSON.stringify(body),
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${fastapiUrl}/session/review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-User-ID": session.user.id,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
+  }
 
-  const data = await upstream.json();
+  let data: unknown;
+  try {
+    data = await upstream.json();
+  } catch {
+    return NextResponse.json({ error: "Resposta inválida do servidor" }, { status: 502 });
+  }
+
   return NextResponse.json(data, { status: upstream.status });
 }

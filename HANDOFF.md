@@ -6,10 +6,30 @@
 ## Last update
 
 - **Date:** 2026-05-20
-- **Session:** `core-008` — Session page.
-- **Branch / HEAD:** `main` at `f2b440a`; `core-008` accepted by QA/Security and committed.
+- **Session:** `core-009` — End-to-end smoke test hardening.
+- **Branch / HEAD:** `main` at `f2b440a`; `core-009` implemented and sensors green, awaiting commit.
 
 ## Goals completed this session
+
+- Completed `core-009` — End-to-end smoke test hardening.
+  - **Proxy routes hardened:** `cache: "no-store"` on next-cards GET; `request.json()` wrapped → 400; upstream `fetch()` wrapped → 503; upstream `.json()` wrapped → 502. No raw internal details forwarded to browser.
+  - **FASTAPI_URL default:** `docker-compose.yml` now uses `${FASTAPI_URL:-http://fastapi:8000}` — container always gets the right address even without a `.env` entry.
+  - **Duplicate submission guard:** `submitting` boolean state in session page; `ratingDisabled` prop threaded through `ExerciseCard` → sub-components → `RatingBar`; buttons disabled during in-flight request.
+  - **`response_time_ms` bounded:** `ge=0, le=300_000` (5 min cap) via Pydantic `Annotated[int, Field(...)]` in `backend/models.py`.
+  - **AI placeholder fallback:** `generate_content()` catches `NotImplementedError` and returns deterministic stub content from the word's own data. Smoke path works without a real API key.
+  - **ExerciseCard corrections:** `ratingDisabled` prop; `type="button"` on all non-submit buttons; all user-visible strings in Portuguese; unknown-format fallback card rendered.
+  - **Session page:** `reviewedCount` state tracks actual reviewed cards for the completion message (vs `session_size`). `response_time_ms` client-side capped at 300 000 before submission.
+  - **Backend tests:** 3 new tests for placeholder paths → 25/25 pass, 0 regressions.
+  - **Stack smoke results:**
+    - All 4 containers started and stayed up.
+    - nginx/Next.js → 307 (proxy middleware active).
+    - FastAPI `/health` → `{"status": "ok"}`.
+    - PostgreSQL `COUNT(words)` → 20.
+    - `FASTAPI_URL` in next container → `http://fastapi:8000` ✓
+    - `GET /session/next-cards` (X-User-ID smoke-test-user-001) → 5 cards, format `multiple_choice`, placeholder AI content.
+    - `POST /session/review` (card_id=1, rating=3, response_time_ms=4500) → `next_due`, `new_stability`, `new_difficulty`, `new_reps` ✓
+  - **Limitation:** Better Auth tables not yet migrated — browser-level auth flow not covered in this smoke (requires `npx better-auth migrate` against a running postgres instance).
+  - `core-engine` section is now `done`.
 
 - Completed `core-008` — Session page.
   - Created `frontend/src/app/session/page.tsx`: client component with `loading` / `active` / `empty` / `complete` / `error` state machine.
@@ -168,30 +188,14 @@
 
 ## Suggested next steps
 
-- `core-009` — End-to-end smoke test (full Docker Compose stack with real session flow).
-- Before `core-009`: apply the proxy-route hardening carry-forwards from `core-005`:
-  - add `cache: "no-store"` to the upstream fetch in `GET /api/session/next-cards`
-  - wrap `request.json()` in `POST /api/session/review` and return `400` on malformed JSON
-  - wrap upstream `fetch()` / `upstream.json()` in both proxy routes and return structured `502/503`
-  - wire `FASTAPI_URL=http://fastapi:8000` for the Next.js container runtime
-- Before or during `core-009`, also address:
-  - disable rating buttons while `submitReview()` is in flight
-  - use actual reviewed count for the completion message if `session_size !== cards.length`
-  - add visible fallback for unknown `card.format`
-  - harmonize remaining `ExerciseCard` strings to Portuguese
-- `TypingExercise` answer comparison is plain `===` after `.trim()` — a niqqud-tolerant matcher would improve UX; raise at QA.
-- `Button asChild` is not supported by base-ui — document this as a project constraint; use styled `<Link>` instead.
-- Carry forward from `core-004` into the next suitable hardening point:
-  - guard `daily_new_limit` / preferred provider null-coalescing in `backend/session_router.py`
-  - catch invalid DB `format_override` and return a structured error instead of a bare 500
-  - constrain `ReviewRequest.response_time_ms`
+- Commit `core-009` files when explicitly requested.
+- `core-engine` section is complete. Next delivery track is `dashboard-deploy` (dash-001 onward).
+- Before real AI calls: wire a real provider SDK behind `_Provider` in `backend/ai_service.py`; add provider keys to `.env`.
+- Before any user-facing auth: run `npx better-auth migrate` against a running postgres instance.
+- `TypingExercise` answer comparison is plain `===` — a niqqud-tolerant matcher would improve UX.
 - Before any external exposure of backend routes:
   - replace trusted `X-User-ID` header identity with validated session/user forwarding
   - stop echoing internal Python type names in fsrs_state validation errors
-  - stop transparently forwarding raw FastAPI error payloads to the browser
   - add an explicit body-size guard on the review POST
-- Before real AI calls land: add at least one real provider SDK wrapper behind `_Provider`; add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY` to `.env.example`.
-- Before any auth E2E testing: run `npx better-auth migrate` to create auth tables in a running postgres instance.
-- Before any non-local deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg instead of relying on the localhost fallback.
-- During backend Docker hardening: add `.venv/`, `venv/`, and `htmlcov/` to `backend/.dockerignore`, and later remove test files from the final runtime stage once a multi-stage image exists.
-- Before enabling user-facing auth flows: map Better Auth raw errors to safe Portuguese UI messages (deferred from foundation-008/009 security advisory).
+- Before production deployment: pass `NEXT_PUBLIC_BETTER_AUTH_URL` as a Docker build arg; add non-root user to frontend/backend Dockerfiles; multi-stage backend image.
+- Guard `daily_new_limit` / preferred provider null-coalescing in `backend/session_router.py` (carried from core-004).

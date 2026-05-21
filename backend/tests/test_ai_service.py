@@ -91,3 +91,25 @@ def test_generate_content_raises_on_malformed_json(sample_word):
     with patch("ai_service.provider.generate", return_value=mock):
         with pytest.raises(ValueError, match="non-JSON"):
             generate_content(sample_word, "flashcard")
+
+
+def test_generate_content_returns_placeholder_when_no_provider(sample_word):
+    with patch("ai_service.provider.generate", side_effect=NotImplementedError):
+        result = generate_content(sample_word, "flashcard")
+    assert "example_sentence" in result
+    assert "translation" in result
+    assert "note" in result
+
+
+def test_generate_content_placeholder_multiple_choice(sample_word):
+    with patch("ai_service.provider.generate", side_effect=NotImplementedError):
+        result = generate_content(sample_word, "multiple_choice")
+    assert result["correct_index"] == 0
+    assert len(result["options"]) == 4
+    assert result["options"][0] == sample_word.gloss_pt
+
+
+def test_generate_content_placeholder_typing(sample_word):
+    with patch("ai_service.provider.generate", side_effect=NotImplementedError):
+        result = generate_content(sample_word, "typing")
+    assert result["answer"] == sample_word.hebrew

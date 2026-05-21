@@ -2,6 +2,79 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-20 — core-009: End-to-end smoke test hardening
+
+### What was done
+
+**Proxy route hardening** (`frontend/src/app/api/session/next-cards/route.ts`, `review/route.ts`):
+- Added `cache: "no-store"` to the upstream fetch in next-cards GET.
+- Wrapped `request.json()` in review POST → returns 400 `{error: "Corpo da requisição inválido"}`.
+- Wrapped upstream `fetch()` → returns 503 `{error: "Serviço indisponível"}`.
+- Wrapped upstream `.json()` → returns 502 `{error: "Resposta inválida do servidor"}`.
+- No raw internal error details forwarded to the browser.
+
+**FASTAPI_URL default** (`docker-compose.yml`):
+- Changed `FASTAPI_URL: ${FASTAPI_URL}` to `FASTAPI_URL: ${FASTAPI_URL:-http://fastapi:8000}`.
+- Container always resolves the correct service address even without a `.env` entry.
+
+**Duplicate submission guard** (`session/page.tsx`, `ExerciseCard.tsx`, `RatingBar.tsx`):
+- Added `submitting: boolean` state to session page; set `true` before `submitReview()`, reset to `false` on advance (complete state never resets — not needed).
+- Added `ratingDisabled?: boolean` prop to `ExerciseCard` and all three sub-components; passed to `RatingBar disabled`.
+- `RatingBar` buttons already had `disabled` support; added `type="button"` to all rating buttons.
+
+**`response_time_ms` bounded** (`backend/models.py`):
+- `response_time_ms: Annotated[int, Field(ge=0, le=300_000)] | None = None`. Upper bound = 5 minutes — values beyond this are likely clock errors or unattended sessions.
+- Client-side: session page also clamps via `Math.min(elapsed, 300_000)` before submitting.
+
+**AI placeholder fallback** (`backend/ai_service.py`):
+- Added `_placeholder_content(exercise_format, word)`: returns deterministic stub content from the word's own data (gloss_pt, hebrew). Clearly marked as `[Provedor de IA não configurado]`.
+- `generate_content()` catches `NotImplementedError` (thrown by the placeholder `_Provider`) and delegates to `_placeholder_content`. The smoke path works without a real API key.
+- Added 3 backend tests for the placeholder path → 25/25 pass.
+
+**ExerciseCard corrections** (`ExerciseCard.tsx`):
+- `ratingDisabled` prop added and threaded through all sub-components.
+- `type="button"` on all non-submit `<button>` elements.
+- All user-visible strings harmonized to Portuguese (Revelar resposta, Significado, Exemplo, Digite em hebraico…, Verificar, Correto!, Resposta correta:, Qual era seu nível de conhecimento?).
+- Unknown-format fallback: renders a `<Card>` with "Formato de exercício desconhecido." if `card.format` is none of the three expected values.
+
+**Session page corrections** (`session/page.tsx`):
+- `reviewedCount` state tracks actual cards reviewed; used in completion message.
+- Completion message uses `reviewedCount` (actual) rather than `totalCards` (session_size).
+
+### Sensor results
+
+| Sensor | Command | Result |
+|---|---|---|
+| TypeScript | `rm -rf .next && npx tsc --noEmit` | **Clean** |
+| ESLint | `npm run lint` | **No issues** |
+| Build | `npm run build` | **Compiled successfully** |
+| Backend tests | `docker compose run --rm fastapi python -m pytest tests/ -v` (via pip install) | **25/25 PASS** |
+| Docker build | `docker compose build` | **Both images built** |
+| Stack startup | `docker compose up -d` | **All 4 containers healthy** |
+
+### Smoke test results
+
+| Check | Result |
+|---|---|
+| nginx/Next.js | `307` (proxy middleware active) |
+| FastAPI `/health` | `{"status": "ok"}` |
+| PostgreSQL `COUNT(words)` | `20` |
+| `FASTAPI_URL` in next container | `http://fastapi:8000` ✓ |
+| `GET /session/next-cards` (X-User-ID header) | 5 cards, format `multiple_choice`, placeholder AI content ✓ |
+| `POST /session/review` (card_id=1, rating=3, response_time_ms=4500) | `next_due`, `new_stability`, `new_difficulty`, `new_reps` ✓ |
+
+### Decisions
+
+- Placeholder provider fallback (`NotImplementedError` → stub content) is the pragmatic path for local smoke testing without requiring a real API key. It is removed automatically once a real provider is wired.
+- `response_time_ms` cap of 300 000 ms (5 min) chosen as the ceiling for a single card review. Longer durations are almost certainly clock errors or unattended sessions.
+- Browser-level auth E2E not verified: Better Auth tables do not exist until `npx better-auth migrate` is run against a live postgres instance.
+
+### Follow-ups
+
+- `core-engine` is complete. Next track is `dashboard-deploy`.
+- Wire a real AI provider SDK before any production session flow.
+- Run `npx better-auth migrate` before browser-level auth smoke testing.
+
 ## 2026-05-20 — core-008: Session page
 
 ### What was done

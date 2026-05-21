@@ -83,7 +83,7 @@
     },
     {
       "name": "core-engine",
-      "status": "pending",
+      "status": "done",
       "quality_grade": "N/A",
       "features": [
         {
@@ -145,9 +145,9 @@
         {
           "id": "core-009",
           "name": "End-to-end smoke test",
-          "status": "pending",
-          "tests": false,
-          "notes": "Core engine plan Task 9."
+          "status": "done",
+          "tests": true,
+          "notes": "Core engine plan Task 9. Hardened proxy routes (cache:no-store on next-cards GET; 400 on malformed review body; 503 on upstream network failure; 502 on upstream JSON parse failure — no raw error details forwarded). FASTAPI_URL default added to docker-compose.yml (${FASTAPI_URL:-http://fastapi:8000}). Duplicate review submissions guarded via submitting state in session page + ratingDisabled prop threaded into ExerciseCard/RatingBar. response_time_ms bounded ge=0 le=300_000 in backend/models.py. AI placeholder fallback added to ai_service.generate_content (catches NotImplementedError, returns deterministic content from word data so smoke path works without a real API key). ExerciseCard: ratingDisabled prop added, type=button on all non-submit buttons, Portuguese strings harmonized, unknown-format fallback card added. Session page: reviewedCount tracks actual reviewed cards (vs session_size). Backend: 3 new placeholder tests added; 25/25 pass. Stack smoke: all 4 containers healthy; FastAPI GET /session/next-cards returned 5 cards with placeholder AI content; POST /session/review returned next_due, new_stability, new_difficulty, new_reps. Better Auth tables not yet migrated — browser-level auth flow not verified in this smoke."
         }
       ]
     },

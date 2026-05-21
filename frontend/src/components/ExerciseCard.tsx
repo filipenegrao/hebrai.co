@@ -69,9 +69,11 @@ function asTyping(c: Record<string, unknown>): TypingContent {
 function MultipleChoiceExercise({
   card,
   onRate,
+  ratingDisabled,
 }: {
   card: CardWithContent
   onRate: (rating: 1 | 2 | 3 | 4) => void
+  ratingDisabled?: boolean
 }) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const revealed = selectedIdx !== null
@@ -112,6 +114,7 @@ function MultipleChoiceExercise({
             return (
               <button
                 key={i}
+                type="button"
                 onClick={() => !revealed && setSelectedIdx(i)}
                 disabled={revealed}
                 className={cn(
@@ -142,9 +145,9 @@ function MultipleChoiceExercise({
       {revealed && (
         <CardFooter className="flex-col gap-3 pt-4">
           <p className="self-start text-xs font-medium text-muted-foreground">
-            How well did you know this?
+            Qual era seu nível de conhecimento?
           </p>
-          <RatingBar onRate={onRate} />
+          <RatingBar onRate={onRate} disabled={ratingDisabled} />
         </CardFooter>
       )}
     </Card>
@@ -158,9 +161,11 @@ function MultipleChoiceExercise({
 function FlashcardExercise({
   card,
   onRate,
+  ratingDisabled,
 }: {
   card: CardWithContent
   onRate: (rating: 1 | 2 | 3 | 4) => void
+  ratingDisabled?: boolean
 }) {
   const content = asFlashcard(card.content)
   const [revealed, setRevealed] = useState(false)
@@ -179,17 +184,18 @@ function FlashcardExercise({
       <CardContent className="flex flex-col gap-4 pt-4">
         {!revealed ? (
           <Button
+            type="button"
             variant="outline"
             className="w-full"
             onClick={() => setRevealed(true)}
           >
-            Reveal answer
+            Revelar resposta
           </Button>
         ) : (
           <div className="flex flex-col gap-3">
             <div className="rounded-lg border border-border bg-muted/30 p-4">
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Meaning
+                Significado
               </p>
               <p className="font-medium">{card.word.gloss_pt}</p>
             </div>
@@ -197,7 +203,7 @@ function FlashcardExercise({
             {content.example_sentence && (
               <div className="rounded-lg border border-border bg-muted/30 p-4">
                 <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Example
+                  Exemplo
                 </p>
                 <HebrewWord
                   text={content.example_sentence}
@@ -220,9 +226,9 @@ function FlashcardExercise({
       {revealed && (
         <CardFooter className="flex-col gap-3 pt-4">
           <p className="self-start text-xs font-medium text-muted-foreground">
-            How well did you know this?
+            Qual era seu nível de conhecimento?
           </p>
-          <RatingBar onRate={onRate} />
+          <RatingBar onRate={onRate} disabled={ratingDisabled} />
         </CardFooter>
       )}
     </Card>
@@ -236,9 +242,11 @@ function FlashcardExercise({
 function TypingExercise({
   card,
   onRate,
+  ratingDisabled,
 }: {
   card: CardWithContent
   onRate: (rating: 1 | 2 | 3 | 4) => void
+  ratingDisabled?: boolean
 }) {
   const content = asTyping(card.content)
   const [value, setValue] = useState("")
@@ -269,13 +277,13 @@ function TypingExercise({
             value={value}
             onChange={(e) => !submitted && setValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !submitted && handleSubmit()}
-            placeholder="Type in Hebrew…"
+            placeholder="Digite em hebraico…"
             disabled={submitted}
             className="font-serif text-lg"
           />
           {!submitted && (
-            <Button onClick={handleSubmit} disabled={!value.trim()}>
-              Check
+            <Button type="button" onClick={handleSubmit} disabled={!value.trim()}>
+              Verificar
             </Button>
           )}
         </div>
@@ -290,10 +298,10 @@ function TypingExercise({
             )}
           >
             {isCorrect ? (
-              <p>Correct!</p>
+              <p>Correto!</p>
             ) : (
               <p>
-                Correct answer:{" "}
+                Resposta correta:{" "}
                 <span dir="rtl" lang="he" className="font-serif">
                   {content.answer}
                 </span>
@@ -306,9 +314,9 @@ function TypingExercise({
       {submitted && (
         <CardFooter className="flex-col gap-3 pt-4">
           <p className="self-start text-xs font-medium text-muted-foreground">
-            How well did you know this?
+            Qual era seu nível de conhecimento?
           </p>
-          <RatingBar onRate={onRate} />
+          <RatingBar onRate={onRate} disabled={ratingDisabled} />
         </CardFooter>
       )}
     </Card>
@@ -322,23 +330,32 @@ function TypingExercise({
 export interface ExerciseCardProps {
   card: CardWithContent
   onRate: (rating: 1 | 2 | 3 | 4) => void
+  ratingDisabled?: boolean
 }
 
-export function ExerciseCard({ card, onRate }: ExerciseCardProps) {
-  // Reset internal exercise state whenever the card changes.
-  // The sub-components read `card.card_id` via their own key or effects;
-  // wrapping them in a keyed fragment here is the simplest safe reset.
+export function ExerciseCard({ card, onRate, ratingDisabled }: ExerciseCardProps) {
   return (
     <div className="w-full">
       {card.format === "multiple_choice" && (
-        <MultipleChoiceExercise key={card.card_id} card={card} onRate={onRate} />
+        <MultipleChoiceExercise key={card.card_id} card={card} onRate={onRate} ratingDisabled={ratingDisabled} />
       )}
       {card.format === "flashcard" && (
-        <FlashcardExercise key={card.card_id} card={card} onRate={onRate} />
+        <FlashcardExercise key={card.card_id} card={card} onRate={onRate} ratingDisabled={ratingDisabled} />
       )}
       {card.format === "typing" && (
-        <TypingExercise key={card.card_id} card={card} onRate={onRate} />
+        <TypingExercise key={card.card_id} card={card} onRate={onRate} ratingDisabled={ratingDisabled} />
       )}
+      {card.format !== "multiple_choice" &&
+        card.format !== "flashcard" &&
+        card.format !== "typing" && (
+          <Card className="w-full">
+            <CardContent className="pt-4">
+              <p className="text-sm text-muted-foreground">
+                Formato de exercício desconhecido.
+              </p>
+            </CardContent>
+          </Card>
+        )}
     </div>
   )
 }

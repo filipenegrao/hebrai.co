@@ -6,6 +6,7 @@ import { getNextCards, submitReview } from "@/lib/api"
 import type { CardWithContent } from "@/lib/api"
 import { ExerciseCard } from "@/components/ExerciseCard"
 import { SessionProgress } from "@/components/SessionProgress"
+
 type SessionState = "loading" | "active" | "empty" | "complete" | "error"
 
 export default function SessionPage() {
@@ -13,6 +14,8 @@ export default function SessionPage() {
   const [cards, setCards] = useState<CardWithContent[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [totalCards, setTotalCards] = useState(0)
+  const [reviewedCount, setReviewedCount] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const cardStartRef = useRef<number>(0)
 
@@ -39,8 +42,11 @@ export default function SessionPage() {
   }, [])
 
   async function handleRate(rating: 1 | 2 | 3 | 4) {
+    if (submitting) return
+    setSubmitting(true)
+
     const card = cards[currentIndex]
-    const response_time_ms = Date.now() - cardStartRef.current
+    const response_time_ms = Math.min(Date.now() - cardStartRef.current, 300_000)
 
     try {
       await submitReview({
@@ -56,11 +62,15 @@ export default function SessionPage() {
     }
 
     const next = currentIndex + 1
+    const reviewed = reviewedCount + 1
+    setReviewedCount(reviewed)
+
     if (next >= cards.length) {
       setStatus("complete")
     } else {
       cardStartRef.current = Date.now()
       setCurrentIndex(next)
+      setSubmitting(false)
     }
   }
 
@@ -107,12 +117,13 @@ export default function SessionPage() {
   }
 
   if (status === "complete") {
+    const count = reviewedCount > 0 ? reviewedCount : totalCards
     return (
       <main className="flex min-h-screen items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
           <h1 className="text-2xl font-semibold">Sessão concluída!</h1>
           <p className="text-muted-foreground">
-            {totalCards} {totalCards === 1 ? "cartão revisado" : "cartões revisados"}.
+            {count} {count === 1 ? "cartão revisado" : "cartões revisados"}.
           </p>
           <Link
             href="/"
@@ -140,7 +151,11 @@ export default function SessionPage() {
           </Link>
         </div>
         {currentCard && (
-          <ExerciseCard card={currentCard} onRate={handleRate} />
+          <ExerciseCard
+            card={currentCard}
+            onRate={handleRate}
+            ratingDisabled={submitting}
+          />
         )}
       </div>
     </main>
