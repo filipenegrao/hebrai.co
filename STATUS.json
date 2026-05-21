@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-21T00:27Z",
+  "last_updated": "2026-05-21T13:00Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -159,9 +159,9 @@
         {
           "id": "dash-001",
           "name": "Daily stats endpoint",
-          "status": "pending",
-          "tests": false,
-          "notes": "Dashboard/deploy plan Task 1."
+          "status": "done",
+          "tests": true,
+          "notes": "Dashboard/deploy plan Task 1. Created backend/stats_router.py: GET /stats/daily returns reviews_today, new_words_today, retention_rate (30-day window, 0.0 if no reviews), streak_days (consecutive distinct daily-review dates). X-User-ID required via Header; missing produces 422. All SQL parameterized. DailyStats Pydantic response model. Router registered in main.py. Created backend/tests/test_stats_router.py: 3 tests (happy path all fields, missing header 422, new user zeros including retention_rate==0.0). Full suite 28/28 PASS, 0 regressions. Frontend lint and build green. Streak SQL fix: subquery references grp column alias from the streak CTE directly (vs re-computing the expression). Residual risk: streak query uses a CTE with ORDER BY in a subquery — verified correct in test but confirm behavior against real Postgres 18 data before dash-009."
         },
         {
           "id": "dash-002",

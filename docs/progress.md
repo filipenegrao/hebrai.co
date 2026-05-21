@@ -22,7 +22,8 @@ Updated: 2026-05-20
 - [x] `core-009` — End-to-end smoke test hardening and verification
 
 ### Dashboard and deploy
-- [ ] `dash-001` to `dash-009` — Dashboard, settings, typography, and deployment plan
+- [x] `dash-001` — Daily stats endpoint (stats_router.py, test_stats_router.py, main.py wired)
+- [ ] `dash-002` to `dash-009` — Settings, proxy routes, UI, typography, and deployment plan
 
 ## Done
 

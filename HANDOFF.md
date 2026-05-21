@@ -5,11 +5,18 @@
 
 ## Last update
 
-- **Date:** 2026-05-20
-- **Session:** `core-009` — End-to-end smoke test hardening.
-- **Branch / HEAD:** `main`; `core-009` accepted by QA/Security and committed locally.
+- **Date:** 2026-05-21
+- **Session:** `dash-001` — Daily stats endpoint.
+- **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-001` — Daily stats endpoint.
+  - Created `backend/stats_router.py`: `GET /stats/daily`. Required `X-User-ID` header (422 on missing). Four metrics computed via parameterized SQL: `reviews_today`, `new_words_today`, `retention_rate` (30-day window, 0.0 if no reviews), `streak_days` (consecutive days CTE). `DailyStats` Pydantic response model.
+  - Updated `backend/main.py`: `stats_router` registered.
+  - Created `backend/tests/test_stats_router.py`: 3 tests — happy path, missing header 422, new user zeros.
+  - Sensors: backend 28/28 PASS, 0 regressions; frontend lint clean; frontend build compiled.
+  - `dash-002` (settings endpoint) is unblocked.
 
 - Completed `core-009` — End-to-end smoke test hardening.
   - **Proxy routes hardened:** `cache: "no-store"` on next-cards GET; `request.json()` wrapped → 400; upstream `fetch()` wrapped → 503; upstream `.json()` wrapped → 502. No raw internal details forwarded to browser.
@@ -188,7 +195,7 @@
 
 ## Suggested next steps
 
-- `core-engine` section is complete. Next delivery track is `dashboard-deploy` (dash-001 onward).
+- `dash-001` complete. Next task is `dash-002` (settings endpoint: `GET /settings`, `PUT /settings` against `user_settings` table).
 - Before real AI calls: wire a real provider SDK behind `_Provider` in `backend/ai_service.py`; add provider keys to `.env`.
 - Before any user-facing auth: run `npx better-auth migrate` against a running postgres instance.
 - `TypingExercise` answer comparison is plain `===` — a niqqud-tolerant matcher would improve UX.

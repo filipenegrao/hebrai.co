@@ -2,6 +2,21 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-21 — dash-001: Daily stats endpoint
+
+### What was done
+
+- Created `backend/stats_router.py`: `GET /stats/daily` with `DailyStats` Pydantic response model. Four metrics: `reviews_today` (review_log count today), `new_words_today` (cards count today), `retention_rate` (30-day window, rating >= 3, 0.0 if no data), `streak_days` (consecutive distinct daily-review CTE). `X-User-ID` header required; missing → 422. All SQL parameterized.
+- Updated `backend/main.py`: registered `stats_router` via `app.include_router`.
+- Created `backend/tests/test_stats_router.py`: 3 tests (happy path all fields, missing header 422, new user all zeros).
+- Sensors: backend 28/28 PASS (0 regressions), frontend lint clean, frontend build compiled successfully.
+
+### Residual risks
+
+- Streak CTE uses a subquery with ORDER BY + LIMIT to identify the most-recent group — tested against mocks; verify against live Postgres 18 data during dash-009 smoke test.
+
+---
+
 ## 2026-05-20 — core-009: End-to-end smoke test hardening
 
 ### What was done
