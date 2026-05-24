@@ -2,6 +2,68 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-24 — dash-002b: Settings endpoint validation hardening
+
+### What was done
+
+- Added Pydantic bounds on `daily_new_limit`: `Field(default=5, ge=1, le=500)`. Zero and negative values now produce 422.
+- Added `timezone` validation via `zoneinfo.ZoneInfo` (Python stdlib, no new dependency). Unknown timezone names produce 422 with a clear message. Max length 64 chars also enforced.
+- Both validators run on PUT input and GET read-back (defense-in-depth via `response_model`).
+- Removed `Annotated[...]` wrapper from `daily_new_limit` — `from __future__ import annotations` prevents mypy from seeing defaults inside `Annotated`. Plain `int = Field(default=5, ge=1, le=500)` works correctly with mypy.
+- Extended `backend/tests/test_settings_router.py`: 4 new tests (daily_new_limit=0 → 422, -1 → 422, invalid timezone → 422, overly long timezone 65 chars → 422). Total: 11 tests.
+
+### Sensor results
+
+| Sensor | Result |
+|---|---|
+| ruff | 4 pre-existing errors (none in new code) |
+| mypy | 5 pre-existing errors (none in new code) |
+| pytest | **39/39 PASS — 0 regressions** |
+| ESLint | Clean |
+| Build | Compiled successfully |
+
+### Residual risks
+
+- `X-User-ID` still directly trusted at FastAPI layer.
+- Invalid stored provider/timezone can still cause 500 on GET until DB CHECK constraints land.
+- Provider allowlist is local to this router.
+
+## 2026-05-24 — dash-002: Settings endpoint
+
+### What was done
+
+- Created `backend/settings_router.py`: `GET /settings` and `PUT /settings` with `UserSettings` Pydantic response model. `GET` reads `preferred_provider`, `daily_new_limit`, `show_niqqud`, `timezone` from `user_settings`; returns defaults (`claude` / 5 / true / `America/Sao_Paulo`) if no row found. `PUT` upserts via `ON CONFLICT (user_id) DO UPDATE SET`. `X-User-ID` header required; missing → 422. All SQL parameterized.
+- `UserSettings` includes a `@field_validator("preferred_provider")` that rejects values outside the allowed set `{"claude", "gpt-4o", "gemini", "ollama"}`. The validator runs on both PUT body and GET DB read-back — defense-in-depth. Invalid provider on PUT → 422. Invalid provider from DB on GET → 500 (validation error), which is intentional — it catches DB corruption.
+- Updated `backend/main.py`: registered `settings_router` via `app.include_router`.
+- Created `backend/tests/test_settings_router.py`: 7 tests (GET defaults for new user, GET saved values, PUT upsert and return payload, invalid provider → 422, missing X-User-ID → 422 for GET, missing X-User-ID → 422 for PUT, SQL shape regression verifying INSERT/ON CONFLICT/EXCLUDED).
+- Note: plan test used `"openai"` as saved provider but `"openai"` is not in the allowed set per the plan's own `_VALID_PROVIDERS`. Corrected to `"gpt-4o"`.
+- Sensors: backend 35/35 PASS (0 regressions), ruff 4 pre-existing errors (none in new code), mypy 5 pre-existing errors (none in new code), frontend lint clean, frontend build compiled (Better Auth warnings pre-existing).
+
+### Sensor results
+
+| Sensor | Command | Result |
+|---|---|---|
+| ruff | `ruff check .` | **4 pre-existing errors** — none in new code |
+| mypy | `mypy .` | **5 pre-existing errors** — none in new code |
+| pytest | `pytest tests/ -v` | **35/35 PASS — 0 regressions** |
+| ESLint | `npm run lint` | **No issues found** |
+| Build | `npm run build` | **Compiled successfully** |
+
+### Decisions
+
+- `field_validator` applies on both PUT input and GET response (Pydantic `response_model` behavior). This catches invalid DB-stored values but also means a corrupted DB row produces a 500 rather than silently returning bad data. A DB-level CHECK constraint on `user_settings.preferred_provider` should be added before `dash-009` to prevent invalid writes entirely.
+- `frozenset` for `_VALID_PROVIDERS` — immutable, no accidental mutation risk.
+
+### Residual risks
+
+- `X-User-ID` is still accepted as an unbounded string. A length or pattern bound should be added before any external backend exposure.
+- Provider allowlist is hardcoded in the router; should be kept in sync with the frontend settings page and the eventual DB CHECK constraint.
+- `field_validator` on read-back means a DB-injected invalid provider causes a 500. Add DB CHECK constraint before dash-009.
+
+### Follow-ups
+
+- `dash-003` (stats and settings proxy routes) is unblocked.
+
 ## 2026-05-21 — dash-001: Daily stats endpoint
 
 ### What was done

@@ -2,7 +2,7 @@
 
 > Human-readable roadmap. Canonical task state is `STATUS.json`.
 
-Updated: 2026-05-21
+Updated: 2026-05-24
 
 ## In progress
 
@@ -10,20 +10,10 @@ Updated: 2026-05-21
 
 ## Backlog
 
-### Core engine
-- [x] `core-001` — Backend infrastructure (db.py, models.py, tests/conftest.py)
-- [x] `core-002` — FSRS scheduling service (fsrs_service.py, test_fsrs_service.py)
-- [x] `core-003` — AI content generation service (ai_service.py, test_ai_service.py)
-- [x] `core-004` — Session router (session_router.py, test_session_router.py, main.py wired)
-- [x] `core-005` — Session proxy routes (Next.js API routes + api.ts helpers)
-- [x] `core-006` — HebrewWord component
-- [x] `core-007` — Exercise UI components
-- [x] `core-008` — Session page
-- [x] `core-009` — End-to-end smoke test hardening and verification
-
 ### Dashboard and deploy
 - [x] `dash-001` — Daily stats endpoint (stats_router.py, test_stats_router.py, main.py wired)
-- [ ] `dash-002` to `dash-009` — Settings, proxy routes, UI, typography, and deployment plan
+- [x] `dash-002` — Settings endpoint (settings_router.py, test_settings_router.py, main.py wired)
+- [ ] `dash-003` to `dash-009` — Proxy routes, UI, typography, and deployment plan
 
 ## Done
 

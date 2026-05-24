@@ -5,13 +5,37 @@
 
 ## Last update
 
-- **Date:** 2026-05-21
-- **Session:** `dash-001` — Daily stats endpoint.
+- **Date:** 2026-05-24
+- **Session:** `dash-002b` — Settings endpoint validation hardening.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
 
-- Completed `dash-001` — Daily stats endpoint.
+- Completed `dash-002b` — validation hardening for settings endpoint.
+  - `backend/settings_router.py`: `daily_new_limit` now bounded `ge=1, le=500` via `Field()`. `timezone` now validated via `zoneinfo.ZoneInfo` (stdlib, no new dep) + max length 64 chars. Both `@field_validator` methods run on PUT input and GET read-back (defense-in-depth).
+  - `backend/tests/test_settings_router.py`: extended from 7 to 11 tests — added `daily_new_limit=0` → 422, `daily_new_limit=-1` → 422, invalid timezone → 422, overly long timezone (65 chars) → 422.
+  - Mypy fix: dropped `Annotated[...]` wrapper for `Field(default=..., ge=..., le=...)` — `from __future__ import annotations` hides defaults inside `Annotated` from mypy. Plain `int = Field(...)` works correctly.
+  - Sensors: backend 39/39 PASS, 0 regressions; ruff 4 pre-existing (none in new code); mypy 5 pre-existing (none in new code); frontend lint clean; frontend build compiled.
+  - `dash-003` is unblocked.
+
+### Carry-forward residuals (same as dash-002)
+  - `X-User-ID` is still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on GET until DB CHECK constraints land — add before `dash-009`.
+  - Provider allowlist is local to this router — keep in sync with frontend and eventual DB constraint.
+
+## Goals completed this session (previous)
+
+- Completed `dash-002` — Settings endpoint.
+  - Created `backend/settings_router.py`: `GET /settings` and `PUT /settings`. Requires `X-User-ID` header (422 on missing). `GET` reads `preferred_provider`, `daily_new_limit`, `show_niqqud`, `timezone` from `user_settings`; returns defaults if no row. `PUT` upserts via `ON CONFLICT`. `UserSettings` Pydantic model with `field_validator` rejecting non-allowed providers (`claude`, `gpt-4o`, `gemini`, `ollama`).
+  - Updated `backend/main.py`: `settings_router` registered.
+  - Created `backend/tests/test_settings_router.py`: 7 tests — GET defaults, GET saved values, PUT upsert, invalid provider 422, missing header 422 (GET), missing header 422 (PUT), SQL shape regression (INSERT ON CONFLICT).
+  - Note: plan test used `"openai"` provider which is not in the allowed set; corrected to `"gpt-4o"`. The field_validator runs on both input (PUT) and DB read-back (GET response), providing defense-in-depth against DB corruption.
+  - Sensors: backend 35/35 PASS, 0 regressions; ruff 4 pre-existing errors (none in new code); mypy 5 pre-existing errors (none in new code); frontend lint clean; frontend build compiled.
+  - Follow-on `dash-002b`: added `daily_new_limit` bound (`ge=1, le=500`), `timezone` validation (`zoneinfo.ZoneInfo` + max 64 chars), 4 new tests (39/39 PASS).
+
+## Goals completed this session (previous)
+
+  - Completed `dash-001` — Daily stats endpoint.
   - Created `backend/stats_router.py`: `GET /stats/daily`. Required `X-User-ID` header (422 on missing). Four metrics computed via parameterized SQL: `reviews_today`, `new_words_today`, `retention_rate` (30-day window, 0.0 if no reviews), `streak_days` (consecutive days CTE). `DailyStats` Pydantic response model.
   - Updated `backend/main.py`: `stats_router` registered.
   - Created `backend/tests/test_stats_router.py`: 3 tests — happy path, missing header 422, new user zeros.
@@ -199,8 +223,10 @@
 
 ## Suggested next steps
 
-- `dash-001` complete. Next task is `dash-002` (settings endpoint: `GET /settings`, `PUT /settings` against `user_settings` table).
-- Before or alongside `dash-002`, add the missing streak edge-case test and keep the docs aligned with the implemented terminal-run semantics.
+- `dash-002` complete. Next task is `dash-003` (stats and settings proxy routes: `frontend/src/app/api/stats/daily/route.ts`, `frontend/src/app/api/settings/route.ts`, `frontend/src/lib/api.ts`).
+- Before or alongside `dash-003`: carry-forward constraint from `dash-001` — add the missing streak edge-case test (non-zero streak when latest review was yesterday).
+- Before `dash-009`: add DB CHECK constraint on `user_settings.preferred_provider` to prevent invalid stored values from causing a 500 on read-back.
+- Before any external exposure: bound `X-User-ID` length at the FastAPI layer.
 - Before real AI calls: wire a real provider SDK behind `_Provider` in `backend/ai_service.py`; add provider keys to `.env`.
 - Before any user-facing auth: run `npx better-auth migrate` against a running postgres instance.
 - `TypingExercise` answer comparison is plain `===` — a niqqud-tolerant matcher would improve UX.

@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-21T13:00Z",
+  "last_updated": "2026-05-24T18:30Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -166,9 +166,9 @@
         {
           "id": "dash-002",
           "name": "Settings endpoint",
-          "status": "pending",
-          "tests": false,
-          "notes": "Dashboard/deploy plan Task 2."
+          "status": "done",
+          "tests": true,
+          "notes": "Dashboard/deploy plan Task 2. Created backend/settings_router.py: GET /settings (reads user_settings, returns defaults if no row) and PUT /settings (upserts via ON CONFLICT, validates preferred_provider against allowed set). X-User-ID required via Header; missing produces 422. daily_new_limit bounded (ge=1, le=500) via Field; timezone validated via zoneinfo.ZoneInfo + max length 64. Pydantic field_validator rejects non-allowed providers and invalid timezones. Validators also applied on DB read-back as defense-in-depth. Created backend/tests/test_settings_router.py: 11 tests (GET defaults, GET saved values, PUT upsert, invalid provider 422, missing header 422 GET, missing header 422 PUT, SQL shape regression, daily_new_limit=0 422, daily_new_limit=-1 422, invalid timezone 422, overly long timezone 422). Full suite 39/39 PASS, 0 regressions. Frontend lint and build green. Allowed providers: claude, gpt-4o, gemini, ollama. Carry-forward: X-User-ID length bound should be added before external exposure; field_validator catch on DB read-back means a stored invalid provider or timezone would cause a 500 — add DB CHECK constraint on user_settings.preferred_provider and user_settings.timezone before dash-009."
         },
         {
           "id": "dash-003",
