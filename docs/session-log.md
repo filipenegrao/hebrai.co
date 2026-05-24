@@ -54,6 +54,7 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 - `X-User-ID` still directly trusted at FastAPI layer.
 - Invalid stored provider/timezone can still cause 500 on GET until DB CHECK constraints land.
 - Provider allowlist is local to this router.
+- FastAPI `422` validation payloads are currently forwarded through the Next.js proxy unchanged.
 
 ## 2026-05-24 — dash-002: Settings endpoint
 

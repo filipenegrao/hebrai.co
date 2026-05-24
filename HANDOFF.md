@@ -23,6 +23,7 @@
   - `dash-001` streak edge-case test still open.
   - `X-User-ID` is still directly trusted at the FastAPI layer — bound before external exposure.
   - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land.
+  - FastAPI `422` validation payloads are currently forwarded through the Next.js proxy unchanged; revisit before broader UI/public exposure.
 
 ## Goals completed this session (previous)
 
