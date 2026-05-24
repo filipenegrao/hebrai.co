@@ -2,6 +2,33 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-24 — dash-003: Stats and settings proxy routes
+
+### What was done
+
+- Created `frontend/src/app/api/stats/daily/route.ts`: authenticated proxy for `GET /api/stats/daily`. Reads Better Auth session server-side; 401 if no session. Proxies to FastAPI `/stats/daily` with `X-User-ID`. `cache: "no-store"` for user-specific data. Upstream errors wrapped as 503 (network) and 502 (JSON parse).
+- Created `frontend/src/app/api/settings/route.ts`: authenticated proxy for `GET /api/settings` and `PUT /api/settings`. Same auth pattern. GET follows same 503/502 wrapping. PUT additionally wraps malformed `request.json()` as 400 (aligned with session/review hardening style). Both handlers non-cached.
+- Extended `frontend/src/lib/api.ts`: added `DailyStats` and `UserSettings` typed interfaces; added `getDailyStats()`, `getSettings()`, and `updateSettings()` helpers using the same fetch-and-throw pattern as `getNextCards()` / `submitReview()`.
+- Both new routes appear as dynamic (`ƒ`) in the Next.js build route tree.
+
+### Sensor results
+
+| Sensor | Result |
+|---|---|
+| ruff | 4 pre-existing errors (none in new code) |
+| mypy | 5 pre-existing errors (none in new code) |
+| pytest | **39/39 PASS — 0 regressions** |
+| ESLint | Clean |
+| Build | Compiled successfully |
+
+### Residual risks (carry-forward unchanged)
+
+- `dash-001` streak edge-case test still open.
+- `X-User-ID` still directly trusted at FastAPI layer — bound before external exposure.
+- Invalid stored provider/timezone can still cause 500 on GET until DB CHECK constraints land.
+
+---
+
 ## 2026-05-24 — dash-002b: Settings endpoint validation hardening
 
 ### What was done

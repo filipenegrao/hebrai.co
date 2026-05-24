@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-24T18:30Z",
+  "last_updated": "2026-05-24T19:00Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -173,9 +173,9 @@
         {
           "id": "dash-003",
           "name": "Stats and settings proxy routes",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 3."
+          "notes": "Dashboard/deploy plan Task 3. Created frontend/src/app/api/stats/daily/route.ts (GET — Better Auth session check, 401 if unauthenticated, proxies to FastAPI /stats/daily with X-User-ID, cache:no-store, 503/502 error wrapping). Created frontend/src/app/api/settings/route.ts (GET + PUT — same auth pattern; PUT also wraps malformed request.json() as 400). Extended frontend/src/lib/api.ts with DailyStats and UserSettings interfaces and getDailyStats(), getSettings(), updateSettings() helpers. Both routes appear as dynamic (ƒ) in the Next.js build route tree. Sensors: ruff 4 pre-existing (none in new code); mypy 5 pre-existing (none in new code); pytest 39/39 PASS; ESLint clean; build compiled successfully. dash-004 is unblocked."
         },
         {
           "id": "dash-004",

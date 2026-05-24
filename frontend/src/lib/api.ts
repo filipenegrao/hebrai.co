@@ -49,3 +49,39 @@ export async function submitReview(body: ReviewRequest): Promise<ReviewResponse>
   if (!res.ok) throw new Error(`Failed to submit review: ${res.status}`);
   return res.json();
 }
+
+export interface DailyStats {
+  reviews_today: number;
+  new_words_today: number;
+  retention_rate: number;
+  streak_days: number;
+}
+
+export interface UserSettings {
+  preferred_provider: string;
+  daily_new_limit: number;
+  show_niqqud: boolean;
+  timezone: string;
+}
+
+export async function getDailyStats(): Promise<DailyStats> {
+  const res = await fetch("/api/stats/daily");
+  if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`);
+  return res.json();
+}
+
+export async function getSettings(): Promise<UserSettings> {
+  const res = await fetch("/api/settings");
+  if (!res.ok) throw new Error(`Failed to fetch settings: ${res.status}`);
+  return res.json();
+}
+
+export async function updateSettings(body: UserSettings): Promise<UserSettings> {
+  const res = await fetch("/api/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Failed to update settings: ${res.status}`);
+  return res.json();
+}

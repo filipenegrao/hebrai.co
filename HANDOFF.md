@@ -6,10 +6,25 @@
 ## Last update
 
 - **Date:** 2026-05-24
-- **Session:** `dash-002b` — Settings endpoint validation hardening.
+- **Session:** `dash-003` — Stats and settings proxy routes.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-003` — Stats and settings proxy routes.
+  - `frontend/src/app/api/stats/daily/route.ts`: authenticated GET proxy for `/stats/daily`. Better Auth session check → 401; proxies with `X-User-ID`; `cache: "no-store"`; 503/502 error wrapping.
+  - `frontend/src/app/api/settings/route.ts`: authenticated GET + PUT proxy for `/settings`. Same auth pattern; PUT additionally wraps malformed body as 400. Both non-cached.
+  - `frontend/src/lib/api.ts`: extended with `DailyStats` and `UserSettings` interfaces and `getDailyStats()`, `getSettings()`, `updateSettings()` helpers, consistent style with existing session helpers.
+  - Both new routes appear as dynamic (`ƒ`) in the Next.js build route tree.
+  - Sensors: ruff 4 pre-existing (none in new code); mypy 5 pre-existing (none in new code); pytest 39/39 PASS; ESLint clean; build compiled.
+  - `dash-004` is unblocked.
+
+### Carry-forward residuals (unchanged)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` is still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land.
+
+## Goals completed this session (previous)
 
 - Completed `dash-002b` — validation hardening for settings endpoint.
   - `backend/settings_router.py`: `daily_new_limit` now bounded `ge=1, le=500` via `Field()`. `timezone` now validated via `zoneinfo.ZoneInfo` (stdlib, no new dep) + max length 64 chars. Both `@field_validator` methods run on PUT input and GET read-back (defense-in-depth).
@@ -223,7 +238,7 @@
 
 ## Suggested next steps
 
-- `dash-002` complete. Next task is `dash-003` (stats and settings proxy routes: `frontend/src/app/api/stats/daily/route.ts`, `frontend/src/app/api/settings/route.ts`, `frontend/src/lib/api.ts`).
+- `dash-003` complete. Next task is `dash-004` (Dashboard UI: `DashboardStats` component and full dashboard page.tsx).
 - Before or alongside `dash-003`: carry-forward constraint from `dash-001` — add the missing streak edge-case test (non-zero streak when latest review was yesterday).
 - Before `dash-009`: add DB CHECK constraint on `user_settings.preferred_provider` to prevent invalid stored values from causing a 500 on read-back.
 - Before any external exposure: bound `X-User-ID` length at the FastAPI layer.
