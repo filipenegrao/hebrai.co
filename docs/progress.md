@@ -14,7 +14,8 @@ Updated: 2026-05-24
 - [x] `dash-001` — Daily stats endpoint (stats_router.py, test_stats_router.py, main.py wired)
 - [x] `dash-002` — Settings endpoint (settings_router.py, test_settings_router.py, main.py wired)
 - [x] `dash-003` — Stats and settings proxy routes (api/stats/daily/route.ts, api/settings/route.ts, api.ts helpers)
-- [ ] `dash-004` to `dash-009` — Dashboard UI, settings page, typography, and deployment plan
+- [x] `dash-004` — Dashboard UI (DashboardStats.tsx, full page.tsx with session check and non-blocking stats)
+- [ ] `dash-005` to `dash-009` — Settings page, typography, and deployment plan
 
 ## Done
 

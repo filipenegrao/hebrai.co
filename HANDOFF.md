@@ -6,10 +6,24 @@
 ## Last update
 
 - **Date:** 2026-05-24
-- **Session:** `dash-003` — Stats and settings proxy routes.
+- **Session:** `dash-004` — Dashboard UI.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-004` — Dashboard UI.
+  - `frontend/src/components/DashboardStats.tsx`: presentational 4-card stats grid (streak, reviews today, new words today, retention). Uses shadcn Card. Accepts `DailyStats` from `@/lib/api`. Layout: 2-col grid on mobile, 4-col on sm+.
+  - `frontend/src/app/page.tsx`: full dashboard server component. Better Auth session check with redirect to `/login` if unauthenticated. Stats fetched directly from FastAPI via `FASTAPI_URL`+`X-User-ID` (correct server-side pattern — avoids circular HTTP call through the Next.js proxy). Stats are non-blocking (null on error = dashboard renders without stats). Hebrew greeting, settings link, "Iniciar sessão de estudo" button.
+  - Sensors: ruff 4 pre-existing; mypy 5 pre-existing; pytest 39/39 PASS; ESLint clean; build compiled — `/` is dynamic `ƒ`.
+  - `dash-005` is unblocked.
+
+### Carry-forward residuals (unchanged)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land.
+  - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+
+## Goals completed this session (previous)
 
 - Completed `dash-003` — Stats and settings proxy routes.
   - `frontend/src/app/api/stats/daily/route.ts`: authenticated GET proxy for `/stats/daily`. Better Auth session check → 401; proxies with `X-User-ID`; `cache: "no-store"`; 503/502 error wrapping.
@@ -239,7 +253,7 @@
 
 ## Suggested next steps
 
-- `dash-003` complete. Next task is `dash-004` (Dashboard UI: `DashboardStats` component and full dashboard page.tsx).
+- `dash-004` complete. Next task is `dash-005` (Settings page: `frontend/src/app/settings/page.tsx`).
 - Before or alongside `dash-003`: carry-forward constraint from `dash-001` — add the missing streak edge-case test (non-zero streak when latest review was yesterday).
 - Before `dash-009`: add DB CHECK constraint on `user_settings.preferred_provider` to prevent invalid stored values from causing a 500 on read-back.
 - Before any external exposure: bound `X-User-ID` length at the FastAPI layer.

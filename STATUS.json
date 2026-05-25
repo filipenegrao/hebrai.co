@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-24T19:00Z",
+  "last_updated": "2026-05-24T22:15Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -180,9 +180,9 @@
         {
           "id": "dash-004",
           "name": "Dashboard UI",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 4."
+          "notes": "Dashboard/deploy plan Task 4. Created frontend/src/components/DashboardStats.tsx: presentational 4-card stats grid (streak, reviews today, new words today, retention) using shadcn Card components; accepts DailyStats from @/lib/api. Replaced frontend/src/app/page.tsx with full dashboard: server component with Better Auth session check (redirects to /login), direct FastAPI stats fetch using FASTAPI_URL env var + X-User-ID (server-side pattern — avoids circular proxy call), non-blocking stats (null on error renders shell without stats), Hebrew greeting, settings link, session-start button. Sensors: ruff 4 pre-existing, mypy 5 pre-existing, pytest 39/39 PASS, ESLint clean, build compiled — / is dynamic ƒ. dash-005 is unblocked."
         },
         {
           "id": "dash-005",

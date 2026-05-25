@@ -2,6 +2,36 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-24 — dash-004: Dashboard UI
+
+### What was done
+
+- Created `frontend/src/components/DashboardStats.tsx`: presentational component accepting `DailyStats` from `@/lib/api`. Renders 4 stat cards (streak, reviews today, new words today, retention) using the existing shadcn Card components. Layout is a 2-col grid (sm: 4-col).
+- Replaced `frontend/src/app/page.tsx` with the full dashboard. Server component: reads Better Auth session via `auth.api.getSession`; redirects unauthenticated users to `/login`. Stats are fetched directly from FastAPI using `FASTAPI_URL` env var + `X-User-ID` header — this is the correct server-side pattern (relative URLs only work in the browser, not in server components). Stats are non-blocking: a null return on any error means the dashboard shell renders without them. Page includes Hebrew greeting, settings link, and session-start button.
+
+### Key decision
+
+Stats fetch in the server component calls FastAPI directly (not via the Next.js proxy route). The proxy routes exist for browser→FastAPI (where cookies travel with the request). In a server component the session is already available, so calling FastAPI directly with `X-User-ID` avoids a circular HTTP call (Next → itself → FastAPI). The `getDailyStats()` helper in api.ts remains available for future client component usage.
+
+### Sensor results
+
+| Sensor | Result |
+|---|---|
+| ruff | 4 pre-existing errors (none in new code) |
+| mypy | 5 pre-existing errors (none in new code) |
+| pytest | **39/39 PASS — 0 regressions** |
+| ESLint | Clean |
+| Build | Compiled successfully — `/` is dynamic `ƒ` |
+
+### Residual risks (carry-forward unchanged)
+
+- `dash-001` streak edge-case test still open.
+- `X-User-ID` still directly trusted at FastAPI layer — bound before external exposure.
+- Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land.
+- FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+
+---
+
 ## 2026-05-24 — dash-003: Stats and settings proxy routes
 
 ### What was done
