@@ -5,11 +5,26 @@
 
 ## Last update
 
-- **Date:** 2026-05-24
-- **Session:** `dash-004` — Dashboard UI.
+- **Date:** 2026-05-25
+- **Session:** `dash-005` — Settings page.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-005` — Settings page.
+  - `frontend/src/app/settings/page.tsx`: client component. `useEffect` loads settings on mount via `getSettings()`; `useState` manages form state. On submit calls `updateSettings()` and reflects saving/saved/error states on the button (auto-resets after 2–3 s). Fields: `preferred_provider` (native `<select>` with 4 provider options matching backend allowlist), `daily_new_limit` (number input, UI-clamped 1–50), `show_niqqud` (checkbox). Loading and error states handled before the form. Back navigation uses `useRouter().push("/")` (plain button — base-ui `Button` does not support `asChild`). All copy in Portuguese.
+  - Sensors: `npm run lint` — clean; `npm run build` — compiled; `/settings` appears as `○` (static shell) in route tree. No backend changes; backend baseline 39/39 still holds.
+  - `dash-006` is unblocked.
+
+### Carry-forward residuals (unchanged)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land (before `dash-009`).
+  - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+  - Direct server-component FastAPI fetch pattern in `page.tsx` must stay limited to validated session-derived user IDs.
+  - `daily_new_limit` UI cap is 50; backend allows up to 500 — intentional gap, revisit before `dash-009`.
+
+## Goals completed this session (previous)
 
 - Completed `dash-004` — Dashboard UI.
   - `frontend/src/components/DashboardStats.tsx`: presentational 4-card stats grid (streak, reviews today, new words today, retention). Uses shadcn Card. Accepts `DailyStats` from `@/lib/api`. Layout: 2-col grid on mobile, 4-col on sm+.

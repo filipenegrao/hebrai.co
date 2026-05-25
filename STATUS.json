@@ -187,9 +187,9 @@
         {
           "id": "dash-005",
           "name": "Settings page",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 5."
+          "notes": "Dashboard/deploy plan Task 5. Created frontend/src/app/settings/page.tsx: client component with useEffect/useState loading settings on mount via getSettings(), persisting via updateSettings() on submit. Editable fields: preferred_provider (select with 4 provider options), daily_new_limit (number input, UI-clamped 1–50), show_niqqud (checkbox). Save button reflects saving/saved/error states. Back navigation via useRouter. All copy in Portuguese. Sensors: ESLint clean; build compiled — /settings appears as static shell (○). No backend changes. dash-006 is unblocked."
         },
         {
           "id": "dash-006",

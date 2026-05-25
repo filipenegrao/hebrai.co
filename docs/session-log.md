@@ -2,6 +2,33 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-25 — dash-005: Settings page
+
+### What was done
+
+- Created `frontend/src/app/settings/page.tsx`: client component implementing the settings form.
+  - Loads current settings on mount via `getSettings()` from `@/lib/api`.
+  - Persists changes via `updateSettings()` on form submit.
+  - Editable fields: `preferred_provider` (select with 4 options: claude, gpt-4o, gemini, ollama), `daily_new_limit` (number input, UI-clamped 1–50), `show_niqqud` (checkbox).
+  - Save button reflects saving/saved/error states with 2–3 s auto-reset to idle.
+  - Back navigation via `useRouter().push("/")` (plain button, not Link, consistent with not using Button asChild — base-ui Button doesn't support asChild).
+  - Loading and error states handled before the form renders.
+  - All user-visible copy in Portuguese.
+
+### Sensors
+
+- `npm run lint` — clean (no new warnings or errors).
+- `npm run build` — compiled successfully; `/settings` appears as `○` (static shell) in the route tree.
+- Backend sensors (ruff/mypy/pytest) not applicable — no backend files changed; tools require the Docker container environment. Pre-existing baseline: 39/39 PASS.
+
+### Residuals carried forward
+
+- `dash-001` streak edge-case test still open.
+- `X-User-ID` still trusted at the FastAPI layer — bound before external exposure.
+- Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land (before dash-009).
+- Direct server-component FastAPI fetch pattern in `page.tsx` must remain limited to session-derived user IDs.
+- `daily_new_limit` UI cap is 50; backend allows up to 500 — intentional gap until product decides a final UX limit.
+
 ## 2026-05-24 — dash-004: Dashboard UI
 
 ### What was done
