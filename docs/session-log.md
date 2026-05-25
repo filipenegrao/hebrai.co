@@ -29,6 +29,7 @@ Stats fetch in the server component calls FastAPI directly (not via the Next.js 
 - `X-User-ID` still directly trusted at FastAPI layer — bound before external exposure.
 - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land.
 - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+- Direct server-component FastAPI fetch is allowed only when `X-User-ID` comes from a validated server-side session; do not reuse this pattern in client components.
 
 ---
 

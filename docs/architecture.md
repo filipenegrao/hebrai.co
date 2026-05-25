@@ -57,6 +57,7 @@ lib -> components -> app routes/pages
 3. Next.js API routes attach the authenticated `user_id` and proxy requests to FastAPI.
 4. FastAPI reads/writes PostgreSQL, runs FSRS scheduling, and generates cached AI study content.
 5. The frontend renders session, dashboard, and settings experiences from typed responses.
+6. Next.js server components may call FastAPI directly with `FASTAPI_URL` only when a proxy route would create a circular self-call and the `user_id` comes strictly from a validated server-side session.
 
 ## Safety and quality guardrails
 

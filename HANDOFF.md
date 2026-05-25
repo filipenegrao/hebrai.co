@@ -22,6 +22,7 @@
   - `X-User-ID` still directly trusted at the FastAPI layer — bound before external exposure.
   - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land.
   - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+  - Direct server-component FastAPI fetch is now an allowed pattern only when `X-User-ID` comes from a validated server-side session; keep that constraint documented and do not copy it into client components.
 
 ## Goals completed this session (previous)
 
