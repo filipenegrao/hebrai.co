@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-25T21:20Z",
+  "last_updated": "2026-05-25T22:25Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -201,9 +201,9 @@
         {
           "id": "dash-007",
           "name": "HTTPS Nginx configuration",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 7."
+          "notes": "Dashboard/deploy plan Task 7. nginx/nginx.conf: HTTP 80 server block now returns 301 to HTTPS; HTTPS 443 ssl server block added with LetsEncrypt cert paths (/etc/letsencrypt/live/hebrai.co/fullchain.pem and privkey.pem), proxy to next:3000 with X-Forwarded-For and X-Forwarded-Proto headers added. docker-compose.yml nginx service: added /etc/letsencrypt:/etc/letsencrypt:ro volume mount. Also completed dash-006 typography cleanup: replaced all three remaining font-serif Hebrew surfaces with [font-family:var(--font-hebrew)] in login/page.tsx and ExerciseCard.tsx (Input and correct-answer span). grep confirms zero font-serif references remain in frontend/src/. Sensors: ESLint clean; build compiled. Nginx config syntax not verifiable locally (no nginx binary); will be validated on first VPS deploy. dash-008 is unblocked."
         },
         {
           "id": "dash-008",

@@ -43,7 +43,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-center text-2xl">
-            <span className="font-serif" dir="rtl">הֶבְרַאִי</span>
+            <span className="[font-family:var(--font-hebrew)]" dir="rtl" lang="he">הֶבְרַאִי</span>
           </CardTitle>
         </CardHeader>
         <CardContent>

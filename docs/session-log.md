@@ -2,6 +2,27 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-25 — dash-007: HTTPS Nginx configuration + dash-006 typography cleanup
+
+### What was done
+
+- `nginx/nginx.conf`: rewrote from single HTTP-only block to two-server HTTPS config. HTTP `80` block issues a `301` redirect to HTTPS. HTTPS `443 ssl` block: `ssl_certificate` and `ssl_certificate_key` point to `/etc/letsencrypt/live/hebrai.co/` paths; proxy to `next:3000` preserved with existing headers plus new `X-Forwarded-For` and `X-Forwarded-Proto`.
+- `docker-compose.yml`: added `/etc/letsencrypt:/etc/letsencrypt:ro` to the nginx service volumes so the container can read certs issued by Certbot on the VPS host.
+- `frontend/src/app/login/page.tsx`: replaced `font-serif` with `[font-family:var(--font-hebrew)]` on the logo `<span>`; also added `lang="he"` attribute.
+- `frontend/src/components/ExerciseCard.tsx`: replaced `font-serif` with `[font-family:var(--font-hebrew)]` on the typing Input and on the correct-answer `<span>` in the reveal block.
+- `grep` confirms zero `font-serif` references remain anywhere in `frontend/src/`.
+
+### Sensors
+
+- `npm run lint` — clean.
+- `npm run build` — compiled; route tree unchanged.
+- Nginx config syntax: no nginx binary locally; syntax will be verified on first VPS deploy with `nginx -t`.
+
+### Residuals
+
+- Nginx `ssl_protocols`/`ssl_ciphers` not hardened — nginx defaults are acceptable for now; add a Mozilla-recommended cipher suite before production exposure.
+- Same backend residuals as prior sessions (streak test, X-User-ID trust, provider/timezone 500 risk).
+
 ## 2026-05-25 — dash-006: Hebrew typography + dash-005 cleanup
 
 ### What was done

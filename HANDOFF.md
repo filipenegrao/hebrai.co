@@ -6,10 +6,29 @@
 ## Last update
 
 - **Date:** 2026-05-25
-- **Session:** `dash-006` — Hebrew typography + dash-005 cleanup.
+- **Session:** `dash-007` — HTTPS Nginx configuration + dash-006 typography cleanup.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-007` — HTTPS Nginx configuration.
+  - `nginx/nginx.conf`: HTTP `80` server block now issues `301` redirect to HTTPS. New `443 ssl` server block added for `hebrai.co` and `www.hebrai.co`, referencing LetsEncrypt cert at `/etc/letsencrypt/live/hebrai.co/{fullchain,privkey}.pem`. Proxy to `next:3000` preserved; added `X-Forwarded-For` and `X-Forwarded-Proto` headers.
+  - `docker-compose.yml`: nginx service now mounts `/etc/letsencrypt:/etc/letsencrypt:ro` so the container can read the certs issued by Certbot on the host.
+  - Typography cleanup (dash-006 carry-forward): replaced all three remaining `font-serif` Hebrew surfaces with `[font-family:var(--font-hebrew)]` — `login/page.tsx` (logo span), `ExerciseCard.tsx` (typing Input, correct-answer span). `grep` confirms zero `font-serif` references remain in `frontend/src/`.
+  - Sensors: `npm run lint` — clean; `npm run build` — compiled.
+  - Nginx config syntax not locally verifiable (no nginx binary on dev machine); will be validated on first VPS deploy via `nginx -t`.
+  - `dash-008` is unblocked.
+
+### Carry-forward residuals (unchanged)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land (before `dash-009`).
+  - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+  - Direct server-component FastAPI fetch pattern in `page.tsx` must stay limited to validated session-derived user IDs.
+  - `daily_new_limit` UI cap is 50; backend allows up to 500 — revisit before `dash-009`.
+  - Nginx `ssl_protocols` and `ssl_ciphers` directives not set explicitly — nginx defaults are reasonable but a hardened cipher suite (e.g. per Mozilla SSL config) should be added before production exposure.
+
+## Goals completed this session (previous)
 
 - Completed `dash-006` — Hebrew typography.
   - `frontend/src/app/layout.tsx`: added `Noto_Serif_Hebrew` from `next/font/google` with `subsets: ["hebrew"]` and `variable: "--font-hebrew"`. Variable injected into `<body>` className alongside existing Geist variables.
