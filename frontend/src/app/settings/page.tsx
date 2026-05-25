@@ -136,7 +136,7 @@ export default function SettingsPage() {
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    daily_new_limit: Math.max(1, Math.min(50, parseInt(e.target.value, 10) || 1)),
+                    daily_new_limit: (() => { const n = parseInt(e.target.value, 10); return Math.max(1, Math.min(50, isNaN(n) ? 1 : n)); })(),
                   })
                 }
               />
@@ -160,7 +160,7 @@ export default function SettingsPage() {
 
         <Button
           type="submit"
-          disabled={saveState === "saving"}
+          disabled={saveState !== "idle"}
           className="w-full"
           size="lg"
         >

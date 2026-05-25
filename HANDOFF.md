@@ -6,10 +6,28 @@
 ## Last update
 
 - **Date:** 2026-05-25
-- **Session:** `dash-005` — Settings page.
+- **Session:** `dash-006` — Hebrew typography + dash-005 cleanup.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-006` — Hebrew typography.
+  - `frontend/src/app/layout.tsx`: added `Noto_Serif_Hebrew` from `next/font/google` with `subsets: ["hebrew"]` and `variable: "--font-hebrew"`. Variable injected into `<body>` className alongside existing Geist variables.
+  - `frontend/src/components/HebrewWord.tsx`: replaced `font-serif` with `[font-family:var(--font-hebrew)]` — Hebrew text now uses the dedicated font variable throughout the app.
+  - `frontend/src/app/settings/page.tsx` (dash-005 cleanup): save button `disabled` changed to `saveState !== "idle"` (was `=== "saving"`, which left the button enabled during the saved/error flash); `parseInt(...) || 1` replaced with explicit `isNaN` guard so clearing the input to empty doesn't misfire.
+  - `STATUS.json`: `last_updated` bumped.
+  - Sensors: `npm run lint` — clean; `npm run build` — compiled; route tree unchanged.
+  - `dash-007` is unblocked.
+
+### Carry-forward residuals (unchanged)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land (before `dash-009`).
+  - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+  - Direct server-component FastAPI fetch pattern in `page.tsx` must stay limited to validated session-derived user IDs.
+  - `daily_new_limit` UI cap is 50; backend allows up to 500 — revisit before `dash-009`.
+
+## Goals completed this session (previous)
 
 - Completed `dash-005` — Settings page.
   - `frontend/src/app/settings/page.tsx`: client component. `useEffect` loads settings on mount via `getSettings()`; `useState` manages form state. On submit calls `updateSettings()` and reflects saving/saved/error states on the button (auto-resets after 2–3 s). Fields: `preferred_provider` (native `<select>` with 4 provider options matching backend allowlist), `daily_new_limit` (number input, UI-clamped 1–50), `show_niqqud` (checkbox). Loading and error states handled before the form. Back navigation uses `useRouter().push("/")` (plain button — base-ui `Button` does not support `asChild`). All copy in Portuguese.

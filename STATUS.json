@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-24T22:15Z",
+  "last_updated": "2026-05-25T21:20Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -194,9 +194,9 @@
         {
           "id": "dash-006",
           "name": "Hebrew typography",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 6."
+          "notes": "Dashboard/deploy plan Task 6. Added Noto_Serif_Hebrew from next/font/google in frontend/src/app/layout.tsx, exposed as CSS variable --font-hebrew. HebrewWord.tsx updated to use [font-family:var(--font-hebrew)] instead of font-serif. Also applied dash-005 QA cleanup in settings/page.tsx: disabled={saveState !== 'idle'} and explicit isNaN guard on daily_new_limit parseInt. Sensors: ESLint clean; build compiled — route tree unchanged. dash-007 is unblocked."
         },
         {
           "id": "dash-007",

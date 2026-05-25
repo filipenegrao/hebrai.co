@@ -2,6 +2,26 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-25 — dash-006: Hebrew typography + dash-005 cleanup
+
+### What was done
+
+- `frontend/src/app/layout.tsx`: imported `Noto_Serif_Hebrew` from `next/font/google` with `subsets: ["hebrew"]` and `variable: "--font-hebrew"`. Added the variable to the `<body>` className alongside the existing Geist variables.
+- `frontend/src/components/HebrewWord.tsx`: replaced `font-serif` with `[font-family:var(--font-hebrew)]`. All Hebrew text rendered through this component now resolves to Noto Serif Hebrew at runtime.
+- `frontend/src/app/settings/page.tsx` (dash-005 QA cleanup):
+  - Save button `disabled` condition corrected to `saveState !== "idle"` — previously only guarded `"saving"`, leaving the button clickable during the 2-second "saved"/"error" flash.
+  - `parseInt(...) || 1` replaced with an explicit `isNaN` guard: `const n = parseInt(...); isNaN(n) ? 1 : n`. The `|| 1` fallback would incorrectly coerce valid `0` to `1` if constraints were ever relaxed; the guard is semantically precise.
+- `STATUS.json`: `last_updated` bumped to 2026-05-25T21:20Z; `dash-006` marked done.
+
+### Sensors
+
+- `npm run lint` — clean.
+- `npm run build` — compiled; route tree unchanged.
+
+### Residuals carried forward
+
+- Same residuals as dash-005 (streak edge-case test, X-User-ID trust, stored provider/timezone 500 risk, daily_new_limit UI/backend gap).
+
 ## 2026-05-25 — dash-005: Settings page
 
 ### What was done

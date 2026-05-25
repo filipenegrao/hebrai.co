@@ -34,7 +34,7 @@ export function HebrewWord({
     <span
       dir="rtl"
       lang="he"
-      className={cn(sizeClasses[size], "font-serif leading-none tracking-wide", className)}
+      className={cn(sizeClasses[size], "[font-family:var(--font-hebrew)] leading-none tracking-wide", className)}
     >
       {displayText}
     </span>
