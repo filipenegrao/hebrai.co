@@ -2,6 +2,21 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-25 — dash-008: QA correction pass (health check)
+
+### What was done
+
+- `deploy/deploy.sh`: replaced the `curl`-based FastAPI health check with a `python3` urllib stdlib one-liner executed inside the `fastapi` container.
+
+### Why
+
+- QA rejected dash-008: the health check piped `docker compose exec -T fastapi curl -s http://localhost:8000/health`, but `backend/Dockerfile` (python:3.14-slim) does not install `curl`. The check therefore failed on every deploy even when the app was healthy, and would trigger a false `exit 1`. The replacement uses only `python3` (already in the image).
+
+### Checks
+
+- `bash -n deploy/deploy.sh` — passes.
+- Not verifiable locally: full script execution (needs a real VPS + running Docker stack). The fix is a straight substitution of an in-container command using a stdlib module guaranteed present in the python:3.14-slim base.
+
 ## 2026-05-25 — dash-008: VPS deployment scripts + dash-007 TLS/nginx hardening
 
 ### What was done

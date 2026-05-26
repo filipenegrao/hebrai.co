@@ -32,8 +32,9 @@ docker compose exec -T nginx nginx -s reload
 
 echo "=== Waiting for FastAPI health check ==="
 sleep 10
-STATUS=$(docker compose exec -T fastapi curl -s http://localhost:8000/health \
-  | python3 -c "import sys, json; print(json.load(sys.stdin)['status'])" 2>/dev/null || echo "error")
+STATUS=$(docker compose exec -T fastapi \
+  python3 -c "import urllib.request, json; print(json.loads(urllib.request.urlopen('http://localhost:8000/health').read())['status'])" \
+  2>/dev/null || echo "error")
 if [[ "$STATUS" == "ok" ]]; then
   echo "=== Deploy complete — FastAPI healthy ==="
 else

@@ -6,8 +6,14 @@
 ## Last update
 
 - **Date:** 2026-05-25
-- **Session:** `dash-008` — VPS deployment scripts + dash-007 TLS/nginx hardening.
+- **Session:** `dash-008` — VPS deployment scripts + dash-007 TLS/nginx hardening (+ QA correction pass).
 - **Branch / HEAD:** `main`.
+
+## QA correction pass (dash-008)
+
+- **Blocker fixed:** `deploy/deploy.sh` post-deploy health check used `docker compose exec -T fastapi curl -s ...`, but `backend/Dockerfile` (python:3.14-slim) installs only `build-essential` + `libpq-dev` — **no `curl`** — so the check failed on every deploy even when FastAPI was healthy.
+- **Fix:** replaced with a `python3` stdlib one-liner run inside the container — `python3 -c "import urllib.request, json; print(json.loads(urllib.request.urlopen('http://localhost:8000/health').read())['status'])"`. Uses only tools already present in the image; still resolves to `"ok"` / `"error"` and keeps the non-zero-exit-on-failure behavior.
+- Verified: `bash -n deploy/deploy.sh` passes. Full execution still requires a real VPS (Docker stack) — unverified locally.
 
 ## Goals completed this session
 
