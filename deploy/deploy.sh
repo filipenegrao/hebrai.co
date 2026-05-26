@@ -10,35 +10,34 @@
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-/opt/hebrai}"
+COMPOSE_ARGS=(
+  -f docker-compose.yml
+)
+
+if [[ -f docker-compose.vps-host-nginx.yml ]]; then
+  COMPOSE_ARGS+=(-f docker-compose.vps-host-nginx.yml)
+fi
+
 cd "$APP_DIR"
 
 echo "=== Pulling latest ==="
 git pull --ff-only
 
 echo "=== Building app images ==="
-docker compose build next fastapi
-
-echo "=== Validating nginx config (nginx -t) before touching the running stack ==="
-if ! docker compose run --rm --no-deps -T nginx nginx -t; then
-  echo "ERROR: nginx config test failed — aborting deploy, running stack untouched." >&2
-  exit 1
-fi
+docker compose "${COMPOSE_ARGS[@]}" build next fastapi
 
 echo "=== Starting / updating stack ==="
-docker compose up -d --remove-orphans
-
-echo "=== Reloading nginx (picks up edited nginx.conf and renewed certs) ==="
-docker compose exec -T nginx nginx -s reload
+docker compose "${COMPOSE_ARGS[@]}" up -d --remove-orphans postgres fastapi next
 
 echo "=== Waiting for FastAPI health check ==="
 sleep 10
-STATUS=$(docker compose exec -T fastapi \
+STATUS=$(docker compose "${COMPOSE_ARGS[@]}" exec -T fastapi \
   python3 -c "import urllib.request, json; print(json.loads(urllib.request.urlopen('http://localhost:8000/health').read())['status'])" \
   2>/dev/null || echo "error")
 if [[ "$STATUS" == "ok" ]]; then
   echo "=== Deploy complete — FastAPI healthy ==="
 else
   echo "=== ERROR: FastAPI health check failed after deploy ===" >&2
-  docker compose logs fastapi --tail=20
+  docker compose "${COMPOSE_ARGS[@]}" logs fastapi --tail=20
   exit 1
 fi

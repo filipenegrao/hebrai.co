@@ -1,0 +1,8 @@
+services:
+  next:
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  nginx:
+    profiles:
+      - container-edge
