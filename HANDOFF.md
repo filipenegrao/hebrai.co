@@ -6,10 +6,40 @@
 ## Last update
 
 - **Date:** 2026-05-25
-- **Session:** `dash-007` — HTTPS Nginx configuration + dash-006 typography cleanup.
+- **Session:** `dash-008` — VPS deployment scripts + dash-007 TLS/nginx hardening.
 - **Branch / HEAD:** `main`.
 
 ## Goals completed this session
+
+- Completed `dash-008` — VPS deployment scripts.
+  - `deploy/setup-vps.sh`: one-time Ubuntu 24.04 provisioning. Installs Docker + Certbot, clones the repo (idempotent — skips if `.git` already present), obtains the initial cert via **standalone**, installs renewal hooks, seeds `.env` from `.env.example` (only if absent). `REPO`/`DOMAIN`/`EMAIL`/`APP_DIR` are env-overridable; `REPO` defaults to a `CHANGE_ME` placeholder that hard-fails if not set (no real repo URL or secrets hardcoded).
+  - `deploy/deploy.sh`: idempotent redeploy. `git pull --ff-only` → build `next`/`fastapi` → **`nginx -t` gate in a throwaway `docker compose run --rm --no-deps` container before touching the running stack** → `up -d` → `nginx -s reload` → FastAPI `/health` check. Exits non-zero on bad nginx config or unhealthy backend.
+  - Both scripts `chmod +x`, pass `bash -n`. `shellcheck` not installed locally.
+  - **Certificate strategy decision (documented):** Certbot **standalone** authenticator for BOTH initial issuance and renewal. A single authenticator keeps issuance and the stored renewal config in agreement, avoiding the standalone-bootstrap/webroot-renewal mismatch. Renewal briefly stops the nginx container via `/etc/letsencrypt/renewal-hooks/pre/stop-nginx.sh` and restarts it via `post/start-nginx.sh` (~5–15 s downtime per ~60-day renewal). Ubuntu's systemd `certbot.timer` drives scheduling; no cron entry added. Webroot was deliberately rejected as the wrong fight at this scale (extra mounts, ACME-path carve-out, and an awkward bootstrap).
+  - **dash-007 hardening absorbed in this slice:**
+    1. HTTP→HTTPS redirect now uses the literal canonical host `https://hebrai.co$request_uri` (no `$host` reflection of forged Host headers).
+    2. HSTS `max-age=31536000; includeSubDomains` on the 443 block.
+    3. Cert mounts narrowed to `/etc/letsencrypt/live/hebrai.co` + `/etc/letsencrypt/archive/hebrai.co` (both required — `live/` holds relative symlinks that resolve into `archive/`; mounting only `live/` would break cert reads).
+    4. Explicit `ssl_protocols TLSv1.2 TLSv1.3` + Mozilla-intermediate `ssl_ciphers` + `ssl_prefer_server_ciphers off`.
+    5. `http2 on;` (nginx 1.25+ directive; `stable-alpine` is 1.27).
+    6. Standalone strategy documented here and in `docs/session-log.md`.
+    7. N/A — no webroot/manual challenge in the chosen model.
+    8. `nginx -t` is a mandatory gate in `deploy.sh` before the stack is started/reloaded.
+  - Sensors: `npm run lint` — clean; `npm run build` — compiled (no frontend files changed this slice).
+  - **Could not verify locally:** nginx config syntax (no nginx binary on dev machine; `nginx -t` also needs the live certs present), and both deploy scripts run unaltered the first time they hit a real VPS — that first execution is the de facto integration test. `dash-009` should exercise the full stack.
+  - `dash-009` is unblocked.
+
+### Carry-forward residuals (unchanged unless noted)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` still directly trusted at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause 500 on backend GET until DB CHECK constraints land (before `dash-009`).
+  - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+  - Direct server-component FastAPI fetch pattern in `page.tsx` must stay limited to validated session-derived user IDs.
+  - `daily_new_limit` UI cap is 50; backend allows up to 500 — revisit before `dash-009`.
+  - **Renewal causes ~5–15 s nginx downtime every ~60 days (standalone trade-off).** Acceptable pre-launch; revisit if zero-downtime renewal becomes a requirement (would mean migrating to webroot).
+  - **Deploy scripts and nginx TLS config are entirely unverified locally** — first real VPS run validates them. Set the real `REPO` URL when invoking `setup-vps.sh`.
+
+## Goals completed this session (previous)
 
 - Completed `dash-007` — HTTPS Nginx configuration.
   - `nginx/nginx.conf`: HTTP `80` server block now issues `301` redirect to HTTPS. New `443 ssl` server block added for `hebrai.co` and `www.hebrai.co`, referencing LetsEncrypt cert at `/etc/letsencrypt/live/hebrai.co/{fullchain,privkey}.pem`. Proxy to `next:3000` preserved; added `X-Forwarded-For` and `X-Forwarded-Proto` headers.

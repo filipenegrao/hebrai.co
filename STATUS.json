@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-25T22:25Z",
+  "last_updated": "2026-05-25T23:10Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -208,9 +208,9 @@
         {
           "id": "dash-008",
           "name": "VPS deployment scripts",
-          "status": "pending",
+          "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 8."
+          "notes": "Dashboard/deploy plan Task 8. Created deploy/setup-vps.sh (one-time Ubuntu 24.04 provisioning: installs Docker + Certbot, clones repo, obtains initial cert via standalone, installs renewal hooks) and deploy/deploy.sh (idempotent redeploy: pull, build, nginx -t gate in throwaway container, up -d, nginx reload, FastAPI health check). Both chmod +x; pass bash -n; shellcheck not installed locally. Certificate strategy decided: Certbot standalone authenticator for BOTH issuance and renewal (single authenticator avoids the standalone/webroot renewal-config mismatch). Renewal uses pre/post renewal-hooks that stop/start the nginx container (~5-15s downtime per ~60d renewal); Ubuntu certbot.timer drives scheduling, no cron added. Absorbed all dash-007 hardening: (1) HTTP->HTTPS redirect now uses literal canonical host https://hebrai.co (no Host-header reflection); (2) HSTS max-age=31536000; includeSubDomains on 443 block; (3) cert mounts narrowed to /etc/letsencrypt/live/hebrai.co + /etc/letsencrypt/archive/hebrai.co (both required — live symlinks resolve into archive); (4) explicit ssl_protocols TLSv1.2 TLSv1.3 + Mozilla-intermediate ssl_ciphers + ssl_prefer_server_ciphers off; (5) http2 on (nginx 1.25+ syntax; stable-alpine is 1.27); (6) standalone strategy documented in HANDOFF/session-log; (7) N/A (no webroot); (8) nginx -t mandatory gate before stack changes in deploy.sh. Sensors: frontend npm run lint clean, npm run build compiled (no frontend changes this slice). Not verifiable locally: nginx config syntax (no nginx binary; would also need live certs) and both scripts run unaltered against a real VPS — first real execution is the de facto test. dash-009 is unblocked."
         },
         {
           "id": "dash-009",

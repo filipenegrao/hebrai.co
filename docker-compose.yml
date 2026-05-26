@@ -48,7 +48,10 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      # Scope cert mounts to this domain only. Both live/ and archive/ are
+      # required: live/ holds relative symlinks that resolve into archive/.
+      - /etc/letsencrypt/live/hebrai.co:/etc/letsencrypt/live/hebrai.co:ro
+      - /etc/letsencrypt/archive/hebrai.co:/etc/letsencrypt/archive/hebrai.co:ro
     depends_on:
       - next
     networks:

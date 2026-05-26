@@ -2,6 +2,30 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-25 — dash-008: VPS deployment scripts + dash-007 TLS/nginx hardening
+
+### What was done
+
+- `deploy/setup-vps.sh` (new, executable): one-time Ubuntu 24.04 provisioning — installs Docker + Certbot, clones the repo (idempotent), obtains the initial cert via Certbot standalone, installs renewal hooks, seeds `.env` from `.env.example` if absent. No real repo URL or secrets baked in: `REPO` defaults to a `CHANGE_ME` placeholder that hard-fails until overridden; `DOMAIN`/`EMAIL`/`APP_DIR` are env-overridable.
+- `deploy/deploy.sh` (new, executable): idempotent redeploy — `git pull --ff-only`, build `next`/`fastapi`, validate nginx config with `nginx -t` in a throwaway `docker compose run --rm --no-deps` container *before* touching the running stack, `up -d`, `nginx -s reload`, then a FastAPI `/health` gate. Non-zero exit on invalid config or unhealthy backend.
+- `nginx/nginx.conf` (hardened): literal canonical-host redirect `https://hebrai.co$request_uri`; HSTS `max-age=31536000; includeSubDomains`; `ssl_protocols TLSv1.2 TLSv1.3`; Mozilla-intermediate `ssl_ciphers` + `ssl_prefer_server_ciphers off`; `http2 on`.
+- `docker-compose.yml` (hardened): nginx cert mounts narrowed from all of `/etc/letsencrypt` to `/etc/letsencrypt/live/hebrai.co` + `/etc/letsencrypt/archive/hebrai.co`. Both are required because `live/` contains relative symlinks (`../../archive/...`) that must resolve inside the container.
+
+### Decision: certificate renewal model
+
+Chose Certbot **standalone** for both issuance and renewal. A single authenticator keeps issuance and the stored renewal config consistent and avoids the painful standalone-bootstrap → webroot-renewal mismatch (where `live/hebrai.co.conf` records `authenticator = standalone` and `certbot renew` then fights nginx for port 80). Renewal stops/starts the nginx container via `renewal-hooks/pre` and `post` (~5–15 s downtime per ~60-day cycle), scheduled by Ubuntu's `certbot.timer`. Webroot (zero-downtime) was rejected as over-engineering at this scale; revisit if downtime-free renewal becomes a hard requirement.
+
+### Sensors
+
+- `npm run lint` — clean (no frontend changes this slice).
+- `npm run build` — compiled.
+- `bash -n` on both scripts — clean. `shellcheck` not installed locally.
+
+### Could not verify locally
+
+- nginx config syntax: no nginx binary on the dev machine, and `nginx -t` would also require the live certs to exist.
+- Both deploy scripts run unaltered the first time against a real VPS — that first run is the de facto integration test. `dash-009` should exercise the full stack end-to-end.
+
 ## 2026-05-25 — dash-007: HTTPS Nginx configuration + dash-006 typography cleanup
 
 ### What was done
