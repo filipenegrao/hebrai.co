@@ -5,9 +5,41 @@
 
 ## Last update
 
-- **Date:** 2026-05-25
-- **Session:** `dash-008` — VPS deployment scripts + dash-007 TLS/nginx hardening (+ QA correction pass).
+- **Date:** 2026-05-26
+- **Session:** `dash-009` — Full end-to-end verification (track close-out).
 - **Branch / HEAD:** `main`.
+
+## Goals completed this session
+
+- Completed `dash-009` — Full end-to-end verification. **`dashboard-deploy` track is now functionally complete for local development.**
+  - **Environment notes:** Docker daemon was down — started Docker Desktop (`open -a Docker`) for this slice. The `~/.docker/cli-plugins/docker-compose` symlink is a stale AppTranslocation path, so the real compose plugin was invoked directly at `/Applications/Docker.app/Contents/Resources/cli-plugins/docker-compose`. `docker` itself was run via `PATH=/Applications/Docker.app/Contents/Resources/bin`.
+  - **VERIFIED live:**
+    1. Backend `pytest tests/` in the fastapi container — **39/39 PASS**.
+    2. `frontend && npm run build` — compiled successfully.
+    3. Full-stack smoke (postgres + fastapi + next; nginx excluded locally — its cert mounts target absent `/etc/letsencrypt`): FastAPI `/health` → `ok`; PostgreSQL `SELECT COUNT(*) FROM words` → **20**.
+    4. **dash-008 health-check confirmed in practice:** the exact `deploy.sh` command (`docker compose exec -T fastapi python3 -c "import urllib.request, json; print(json.loads(urllib.request.urlopen('http://localhost:8000/health').read())['status'])"`) printed `ok`. The curl→python3 correction is sound.
+    5. Hardened nginx config validated via isolation `nginx -t` (throwaway self-signed cert mounted at the expected paths).
+    6. **Runtime TLS proxy proven:** standalone nginx on the compose network + temp cert → HTTPS request returned **HTTP 307, `Location: /login`** (the `proxy.ts` middleware redirect reached through the TLS front door), with `Strict-Transport-Security: max-age=31536000; includeSubDomains` present and no upstream errors. nginx image is 1.30.1 (confirms `http2 on` directive syntax).
+  - **FIX made this slice (verification-blocking; `nginx/nginx.conf` only):** nginx resolves literal `proxy_pass` upstream hostnames at **config-parse time**. `deploy.sh`'s pre-flight gate runs `docker compose run --rm --no-deps -T nginx nginx -t` **before** `up -d`, so on a **first deploy** (when `next` isn't running yet) the gate would fail with `host not found in upstream "next"` and abort a deploy that has a valid config. Fixed by deferring resolution to request time:
+    ```nginx
+    resolver 127.0.0.11 valid=30s ipv6=off;
+    set $upstream_next next:3000;
+    ...
+    proxy_pass http://$upstream_next;
+    ```
+    Re-proved by re-running the isolation `nginx -t` with **no network and `next` not running** → now passes; runtime proxy re-confirmed (307 / `/login` / HSTS). `deploy.sh` left unchanged — the gate is now a true config-only pre-flight, and as a bonus nginx picks up a restarted `next` without a reload.
+  - **NOT verifiable locally (VPS-only — by inspection only):** real Let's Encrypt issuance + standalone challenge, the stop/start renewal hooks, `deploy/setup-vps.sh` end-to-end, the `live/`↔`archive/` cert symlink resolution, `deploy.sh`'s `nginx -t` gate against the **real** cert mounts, and nginx serving over a real TLS chain.
+  - Sensors: backend pytest 39/39; `npm run build` clean; `bash -n` (deploy scripts) clean from dash-008. Stack torn down cleanly (`compose down`); no stray containers; only `nginx/nginx.conf` changed in the repo.
+
+### Carry-forward residuals (still open)
+  - `dash-001` streak edge-case test still open.
+  - `X-User-ID` still directly trusted/unbounded at the FastAPI layer — bound before external exposure.
+  - Invalid stored provider/timezone can still cause a 500 on backend GET until DB CHECK constraints land on `user_settings`.
+  - FastAPI `422` payloads forwarded through proxy unchanged; revisit before public exposure.
+  - Direct server-component FastAPI fetch pattern in `page.tsx` must stay limited to validated session-derived user IDs.
+  - `daily_new_limit` UI cap is 50; backend allows up to 500.
+  - Standalone cert renewal causes ~5–15 s nginx downtime per ~60-day cycle.
+  - **All VPS-only deploy/TLS items above remain unproven until a real deployment** — production cutover depends on them.
 
 ## QA correction pass (dash-008)
 

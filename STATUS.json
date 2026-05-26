@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-25T23:40Z",
+  "last_updated": "2026-05-26T00:40Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -153,7 +153,7 @@
     },
     {
       "name": "dashboard-deploy",
-      "status": "pending",
+      "status": "done",
       "quality_grade": "N/A",
       "features": [
         {
@@ -215,9 +215,9 @@
         {
           "id": "dash-009",
           "name": "Full end-to-end verification",
-          "status": "pending",
-          "tests": false,
-          "notes": "Dashboard/deploy plan Task 9."
+          "status": "done",
+          "tests": true,
+          "notes": "Dashboard/deploy plan Task 9. Verified live (Docker daemon started for this slice; compose plugin invoked directly at /Applications/Docker.app/Contents/Resources/cli-plugins/docker-compose because ~/.docker/cli-plugins symlink is a stale AppTranslocation path). VERIFIED: (1) backend pytest in container — 39/39 PASS; (2) frontend npm run build — compiled successfully; (3) full-stack smoke (postgres+fastapi+next; nginx excluded locally since cert mounts target absent /etc/letsencrypt) — FastAPI /health ok, PostgreSQL SELECT COUNT(*) FROM words = 20; (4) dash-008 health-check command run VERBATIM inside fastapi container -> printed 'ok' (in-practice confirmation, not inspection); (5) hardened nginx config validated via isolation nginx -t with throwaway self-signed cert; (6) runtime TLS proxy proven with standalone nginx on the compose network + temp cert: HTTPS request -> HTTP 307, Location: /login (proxy.ts middleware reached through TLS front door), Strict-Transport-Security header present, no upstream errors. FIX during this slice (verification-blocking, nginx.conf only): nginx resolves literal proxy_pass upstreams at config-parse time, so deploy.sh's pre-flight gate (docker compose run --rm --no-deps nginx nginx -t) would fail with 'host not found in upstream next' on a first deploy when next is not yet running. Replaced literal proxy_pass http://next:3000 with request-time resolution: resolver 127.0.0.11 valid=30s ipv6=off + set $upstream_next next:3000 + proxy_pass http://$upstream_next. Re-proved by re-running the isolation nginx -t with NO network and next not running -> now passes; runtime proxy re-confirmed (307/login/HSTS). deploy.sh unchanged. NOT VERIFIABLE LOCALLY (VPS-only, by inspection): real Let's Encrypt issuance + standalone challenge, renewal hooks, setup-vps.sh end-to-end, live/archive cert symlink resolution, deploy.sh nginx -t gate against the real cert mounts, and nginx over a real TLS cert chain. RESIDUALS: backend X-User-ID still trusted/unbounded; invalid stored provider/timezone can still 500 on backend GET (no DB CHECK constraints yet); daily_new_limit UI cap 50 vs backend 500; standalone renewal causes ~5-15s nginx downtime per ~60d. dashboard-deploy track is functionally complete for local development; production cutover depends on the VPS-only items above."
         }
       ]
     }

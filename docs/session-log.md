@@ -2,6 +2,37 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-26 — dash-009: Full end-to-end verification (track close-out)
+
+### Environment
+
+- Docker daemon was down; started Docker Desktop (`open -a Docker`) for this verification slice.
+- `~/.docker/cli-plugins/docker-compose` is a stale AppTranslocation symlink, so the compose plugin was invoked directly: `/Applications/Docker.app/Contents/Resources/cli-plugins/docker-compose`. `docker` run with `PATH=/Applications/Docker.app/Contents/Resources/bin`.
+
+### Commands run + key results
+
+- `compose build fastapi next` → both images built.
+- `compose run --rm --no-deps fastapi python -m pytest tests/ -v` → **39 passed**.
+- `cd frontend && npm run build` → compiled successfully.
+- `compose up -d postgres fastapi next` → all up (nginx intentionally excluded — its cert mounts target absent `/etc/letsencrypt`).
+- dash-008 health check, verbatim: `compose exec -T fastapi python3 -c "import urllib.request, json; print(json.loads(urllib.request.urlopen('http://localhost:8000/health').read())['status'])"` → `ok`.
+- `compose exec -T postgres psql ... -c "SELECT COUNT(*) FROM words;"` → **20**.
+- Isolation `nginx -t` (throwaway self-signed cert at expected paths) → syntax ok / test successful.
+- Runtime TLS proxy: standalone nginx on `hebraico_external` + temp cert, `curl -sk https://localhost:8443/ -H "Host: hebrai.co"` → **HTTP 307**, `Location: /login`, `Strict-Transport-Security: max-age=31536000; includeSubDomains`. No upstream errors. nginx 1.30.1.
+- `compose down` → clean teardown; no stray containers.
+
+### Fix made (verification-blocking, `nginx/nginx.conf` only)
+
+nginx resolves literal `proxy_pass` upstreams at config-parse time. `deploy.sh`'s gate (`docker compose run --rm --no-deps -T nginx nginx -t`) runs before `up -d`, so on a **first deploy** with `next` not yet running it would fail `host not found in upstream "next"` and abort a valid deploy. Switched to request-time resolution (`resolver 127.0.0.11 valid=30s ipv6=off; set $upstream_next next:3000; proxy_pass http://$upstream_next;`). Re-proved with the isolation `nginx -t` (no network, no `next`) now passing; runtime proxy re-confirmed (307 / `/login` / HSTS). `deploy.sh` unchanged.
+
+### Could not verify locally (VPS-only — by inspection)
+
+Real Let's Encrypt issuance + standalone challenge, renewal hooks, `setup-vps.sh` end-to-end, `live/`↔`archive/` symlink resolution, `deploy.sh`'s `nginx -t` gate against the real cert mounts, and nginx over a real TLS chain.
+
+### Outcome
+
+`dash-009` → done; `dashboard-deploy` domain → done. Track is functionally complete for local development; production cutover still depends on the VPS-only items above.
+
 ## 2026-05-25 — dash-008: QA correction pass (health check)
 
 ### What was done
