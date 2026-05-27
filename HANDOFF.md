@@ -5,8 +5,8 @@
 
 ## Last update
 
-- **Date:** 2026-05-27T20:21Z
-- **Session:** Forgot-password flow implemented and committed. Sensors clean.
+- **Date:** 2026-05-27T21:00Z
+- **Session:** QA/Security correction pass for forgot-password. Sensors clean.
 - **Branch / HEAD:** `main` — local ahead of `origin/main` by multiple commits (GitHub SSH not available on dev machine; rsync bootstrap required to deploy).
 
 ## Goals completed this session (forgot-password — 2026-05-27)
@@ -27,6 +27,17 @@
   - No automated test covers the reset email path (requires live SMTP and Better Auth DB).
   - The VPS has not been re-deployed with this change. Next deploy (rsync bootstrap) will pick it up.
   - Better Auth token expiry default is 1 hour — acceptable for now.
+
+## Goals completed this session (QA/Security correction pass for forgot-password — 2026-05-27)
+
+- **proxy.ts default export:** Added `export default proxy` alongside the named `proxy` export per Next.js 16 API reference. Task requested rename to `middleware.ts` but Next.js 16 docs (in repo at `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`) explicitly state `middleware.ts` is deprecated and the codemod migrates `middleware.ts` → `proxy.ts`, not the reverse. Renaming would silently break route protection; user confirmed keep `proxy.ts`.
+- **Same-origin check in `sendResetPassword`:** Before sending the email, the reset `url` is parsed and its origin is compared against `BETTER_AUTH_URL`. Mismatches (including malformed URLs or a misconfigured base) log a structured server-side error and abort the send without surfacing details to the client.
+- **Structured error logging for email delivery failures:** `sendEmail` is now wrapped in `try/catch`. Failures are logged as `[reset-password] email delivery failed: <message>`. The catch does not re-throw — anti-enumeration behavior (the HTTP response is unchanged) is preserved.
+- Sensors: `npm run lint` — clean; `npm run build` — compiled; `npm audit` — 2 moderate vulns in Next.js's internal postcss (pre-existing, fix requires downgrading Next.js to 9.3.3).
+
+### Residual risks (QA correction pass)
+  - `npm audit` 2 moderate: `postcss <8.5.10` in Next.js's internal dependency tree. Not introduced by this PR. The only fix (`npm audit fix --force`) would downgrade Next.js to 9.3.3 — do not apply. Monitor for a Next.js patch that upgrades its bundled postcss.
+  - VPS not yet redeployed with these changes.
 
 ## Deploy summary (2026-05-27)
 

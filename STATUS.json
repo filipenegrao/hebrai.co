@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-27T17:24Z",
+  "last_updated": "2026-05-27T21:00Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -70,7 +70,7 @@
           "name": "Route protection and dashboard shell",
           "status": "done",
           "tests": false,
-          "notes": "Route protection now uses frontend/src/proxy.ts, which protects all routes except /login and /api/auth. It checks better-auth session cookies and redirects to /login if missing. Dashboard uses server-side auth.api.getSession. Build and lint pass without the deprecated middleware warning."
+          "notes": "Route protection now uses frontend/src/proxy.ts (correct Next.js 16 convention — middleware.ts is deprecated in v16; codemod direction is middleware→proxy, not the reverse). Protected routes: all except /login, /reset-password, /api/auth. Checks better-auth session cookies and redirects to /login if missing. Exports both named proxy and default proxy per Next.js 16 API reference. Dashboard uses server-side auth.api.getSession. Build and lint pass."
         },
         {
           "id": "foundation-010",

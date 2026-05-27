@@ -2,6 +2,27 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-27 — QA/Security correction pass: forgot-password hardening
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `frontend/src/proxy.ts` | Added `export default proxy` alongside named export |
+| `frontend/src/lib/auth.ts` | Added same-origin URL check + structured error logging in `sendResetPassword` |
+
+### Key finding — Next.js 16 file convention
+
+Task requested rename `proxy.ts` → `middleware.ts`. Next.js 16 docs (in `node_modules/next/dist/docs/`) explicitly state `middleware.ts` is **deprecated** and the official codemod migrates `middleware.ts` → `proxy.ts`. Renaming would silently break route protection. User confirmed: keep `proxy.ts`, add default export.
+
+### Sensors
+
+- `npm run lint` → clean
+- `npm run build` → compiled; route tree unchanged
+- `npm audit` → 2 moderate (postcss `<8.5.10` in Next.js internal deps, pre-existing). Fix requires downgrading Next.js to 9.3.3 — do not apply.
+
+---
+
 ## 2026-05-27 — Forgot-password flow
 
 ### Files changed
