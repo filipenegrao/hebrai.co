@@ -1556,3 +1556,78 @@ Stack torn down cleanly with `docker compose down`.
 - Verify live session cards now return real Claude content instead of the placeholder note after the backend redeploy.
 - Fix GitHub SSH on the VPS so deploys can return to a real `git pull` flow instead of `rsync`.
 - Add OpenAI and Gemini adapters only after benchmarking quality/cost against the Claude baseline.
+
+## 2026-05-27 — Visible Claude badge in study cards
+
+### What was done
+
+- Added `ai_provider` to `backend/models.py` `CardWithContent`.
+- `backend/session_router.py` now returns the saved provider name with each generated card payload.
+- `frontend/src/lib/api.ts` updated the `CardWithContent` type accordingly.
+- `frontend/src/components/ExerciseCard.tsx` now renders a small provider badge:
+  - `Gerado com Claude`
+  - `Gerado com Gemini`
+  - `Gerado com OpenAI`
+  - `Gerado localmente`
+- Badge is shown only where AI-generated content is actually visible:
+  - multiple-choice explanation
+  - flashcard note block
+  - typing answer reveal
+
+### Verification
+
+- `cd frontend && npm run lint` — clean
+- `cd frontend && npm run build` — compiled successfully
+- `docker run --rm hebraico-fastapi pytest tests/test_session_router.py -q` — 7 passed
+
+### Decision
+
+- Keep the first UX improvement small and informative rather than adding a regenerate action or model selector immediately.
+- The goal is just to make the live Claude integration perceptible without interrupting the study flow.
+
+## 2026-05-27 — Lumen redesign first pass on core surfaces
+
+### What was done
+
+- Adopted the `Lumen` direction from `/Users/filipenegrao/Downloads/hebrai.co` as the chosen visual system.
+- Limited the first implementation pass to the main authenticated and auth-entry surfaces:
+  - `/login`
+  - `/`
+  - `/session`
+  - `/settings`
+- Rebuilt the shared theme layer first:
+  - `frontend/src/app/layout.tsx` now loads `Cormorant Garamond`, `IBM Plex Mono`, `David Libre`, and keeps `Noto Serif Hebrew`.
+  - `frontend/src/app/globals.css` now defines the dark `Lumen` token set and utility classes for the shared shell/panel typography.
+- Added `frontend/src/components/LumenChrome.tsx` with reusable shell pieces:
+  - `LumenShell`
+  - `LumenHeader`
+  - `LumenEyebrow`
+  - `LumenPageTitle`
+  - `LumenPanel`
+  - `LumenMetricCard`
+  - `LumenProgressDots`
+- Updated shared UI primitives and study components to fit the new system:
+  - `frontend/src/components/ui/button.tsx`
+  - `frontend/src/components/ui/card.tsx`
+  - `frontend/src/components/ui/input.tsx`
+  - `frontend/src/components/ui/label.tsx`
+  - `frontend/src/components/DashboardStats.tsx`
+  - `frontend/src/components/SessionProgress.tsx`
+  - `frontend/src/components/RatingBar.tsx`
+  - `frontend/src/components/ExerciseCard.tsx`
+- Reworked the page-level surfaces:
+  - `frontend/src/app/login/page.tsx`
+  - `frontend/src/app/page.tsx`
+  - `frontend/src/app/session/page.tsx`
+  - `frontend/src/app/settings/page.tsx`
+
+### Verification
+
+- `cd frontend && npm run lint` — clean
+- `cd frontend && npm run build` — compiled successfully
+
+### Notes
+
+- This was a frontend-only pass layered on top of the existing local Claude-badge changes already present in the checkout.
+- Better Auth still emits the pre-existing build-time warnings when `BETTER_AUTH_URL` / secret defaults are missing during local static generation; no auth config behavior changed in this pass.
+- No live browser walkthrough or screenshot QA was performed yet; this pass is validated by lint/build only.

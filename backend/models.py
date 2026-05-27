@@ -18,6 +18,7 @@ class CardWithContent(BaseModel):
     word: Word
     format: Literal["multiple_choice", "flashcard", "typing"]
     content: dict[str, Any]
+    ai_provider: str | None = None
 
 
 class NextCardsResponse(BaseModel):

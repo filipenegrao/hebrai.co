@@ -37,6 +37,26 @@ interface TypingContent {
   hint: string
 }
 
+function providerLabel(provider: string | null): string | null {
+  if (!provider) return null
+  if (provider === "claude") return "Gerado com Claude"
+  if (provider === "gemini") return "Gerado com Gemini"
+  if (provider === "gpt-4o") return "Gerado com OpenAI"
+  if (provider === "ollama") return "Gerado localmente"
+  return `Gerado com ${provider}`
+}
+
+function AiProviderBadge({ provider }: { provider: string | null }) {
+  const label = providerLabel(provider)
+  if (!label) return null
+
+  return (
+    <span className="inline-flex w-fit rounded-full border border-[var(--lumen-hairline)] bg-[rgba(229,184,95,0.08)] px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-[var(--lumen-gold)] uppercase">
+      {label}
+    </span>
+  )
+}
+
 function asMultipleChoice(c: Record<string, unknown>): MultipleChoiceContent {
   return {
     question: String(c.question ?? ""),
@@ -96,18 +116,29 @@ function MultipleChoiceExercise({
   const content = asMultipleChoice(card.content)
 
   return (
-    <Card className="w-full">
-      <CardHeader className="border-b">
-        <div className="flex flex-col items-center gap-3 py-2">
-          <HebrewWord text={card.word.hebrew} size="lg" />
-          <span className="text-sm text-muted-foreground italic">
+    <Card className="w-full overflow-hidden">
+      <CardHeader className="border-b border-[var(--lumen-hairline-soft)] pb-8">
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <span className="lumen-sc text-[10px] text-[var(--lumen-gold)]">
+            Sessão ativa
+          </span>
+          <div className="rounded-full bg-[radial-gradient(circle,rgba(229,184,95,0.18),transparent_68%)] px-12 py-8">
+            <HebrewWord
+              text={card.word.hebrew}
+              size="xl"
+              className="lumen-hebrew-glow"
+            />
+          </div>
+          <span className="text-lg text-muted-foreground italic">
             {card.word.transliteration}
           </span>
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 pt-4">
-        <p className="text-sm font-medium">{content.question}</p>
+      <CardContent className="flex flex-col gap-5 pt-6">
+        <p className="text-2xl leading-tight font-light italic text-[var(--lumen-bone)]">
+          {content.question}
+        </p>
         <div className="flex flex-col gap-2">
           {shuffled.map((opt, i) => {
             const isSelected = selectedIdx === i
@@ -118,33 +149,39 @@ function MultipleChoiceExercise({
                 onClick={() => !revealed && setSelectedIdx(i)}
                 disabled={revealed}
                 className={cn(
-                  "w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-colors",
+                  "grid w-full grid-cols-[32px_1fr] items-center gap-4 rounded-[24px] border px-5 py-4 text-left text-base italic transition-colors",
                   "disabled:pointer-events-none",
-                  !revealed && "hover:bg-muted",
+                  !revealed && "bg-[rgba(18,26,51,0.45)] hover:bg-[rgba(18,26,51,0.62)]",
                   revealed && opt.isCorrect &&
-                    "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-200",
+                    "border-[var(--lumen-gold)] bg-[rgba(229,184,95,0.12)] text-[var(--lumen-bone)] shadow-[0_0_24px_rgba(229,184,95,0.16)]",
                   revealed && isSelected && !opt.isCorrect &&
-                    "border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200",
-                  !revealed && "border-border bg-background",
-                  revealed && !opt.isCorrect && !isSelected && "border-border bg-background opacity-50"
+                    "border-red-400/30 bg-red-500/10 text-red-100",
+                  !revealed && "border-[var(--lumen-hairline-soft)] text-[var(--lumen-bone)]",
+                  revealed && !opt.isCorrect && !isSelected && "border-[var(--lumen-hairline-soft)] bg-[rgba(18,26,51,0.3)] text-[var(--lumen-bone-muted)] opacity-60"
                 )}
               >
-                {opt.text}
+                <span className="lumen-sc text-[11px] text-[var(--lumen-gold)]">
+                  {String.fromCharCode(65 + i)}
+                </span>
+                <span>{opt.text}</span>
               </button>
             )
           })}
         </div>
 
         {revealed && (
-          <p className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-            {content.explanation}
-          </p>
+          <div className="space-y-2">
+            <AiProviderBadge provider={card.ai_provider} />
+            <p className="rounded-[22px] border border-[var(--lumen-hairline-soft)] bg-[rgba(18,26,51,0.45)] px-4 py-3 text-sm italic text-muted-foreground">
+              {content.explanation}
+            </p>
+          </div>
         )}
       </CardContent>
 
       {revealed && (
-        <CardFooter className="flex-col gap-3 pt-4">
-          <p className="self-start text-xs font-medium text-muted-foreground">
+        <CardFooter className="flex-col gap-4 border-[var(--lumen-hairline-soft)] pt-5">
+          <p className="self-start text-xs font-medium italic text-muted-foreground">
             Qual era seu nível de conhecimento?
           </p>
           <RatingBar onRate={onRate} disabled={ratingDisabled} />
@@ -172,16 +209,25 @@ function FlashcardExercise({
 
   return (
     <Card className="w-full">
-      <CardHeader className="border-b">
-        <div className="flex flex-col items-center gap-3 py-2">
-          <HebrewWord text={card.word.hebrew} size="lg" />
-          <span className="text-sm text-muted-foreground italic">
+      <CardHeader className="border-b border-[var(--lumen-hairline-soft)] pb-8">
+        <div className="flex flex-col items-center gap-4 py-6 text-center">
+          <span className="lumen-sc text-[10px] text-[var(--lumen-gold)]">
+            Flashcard
+          </span>
+          <div className="rounded-full bg-[radial-gradient(circle,rgba(229,184,95,0.18),transparent_68%)] px-12 py-8">
+            <HebrewWord
+              text={card.word.hebrew}
+              size="xl"
+              className="lumen-hebrew-glow"
+            />
+          </div>
+          <span className="text-lg text-muted-foreground italic">
             {card.word.transliteration}
           </span>
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 pt-4">
+      <CardContent className="flex flex-col gap-5 pt-6">
         {!revealed ? (
           <Button
             type="button"
@@ -193,39 +239,42 @@ function FlashcardExercise({
           </Button>
         ) : (
           <div className="flex flex-col gap-3">
-            <div className="rounded-lg border border-border bg-muted/30 p-4">
-              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-[24px] border border-[var(--lumen-hairline-soft)] bg-[rgba(18,26,51,0.45)] p-5">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Significado
               </p>
-              <p className="font-medium">{card.word.gloss_pt}</p>
+              <p className="text-xl italic text-[var(--lumen-bone)]">{card.word.gloss_pt}</p>
             </div>
 
             {content.example_sentence && (
-              <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <div className="rounded-[24px] border border-[var(--lumen-hairline-soft)] bg-[rgba(18,26,51,0.45)] p-5">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Exemplo
                 </p>
                 <HebrewWord
                   text={content.example_sentence}
                   size="sm"
-                  className="block"
+                  className="lumen-hebrew-glow block"
                 />
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-3 text-sm italic text-muted-foreground">
                   {content.translation}
                 </p>
               </div>
             )}
 
             {content.note && (
-              <p className="text-xs text-muted-foreground">{content.note}</p>
+              <div className="space-y-2">
+                <AiProviderBadge provider={card.ai_provider} />
+                <p className="text-xs text-muted-foreground">{content.note}</p>
+              </div>
             )}
           </div>
         )}
       </CardContent>
 
       {revealed && (
-        <CardFooter className="flex-col gap-3 pt-4">
-          <p className="self-start text-xs font-medium text-muted-foreground">
+        <CardFooter className="flex-col gap-4 border-[var(--lumen-hairline-soft)] pt-5">
+          <p className="self-start text-xs font-medium italic text-muted-foreground">
             Qual era seu nível de conhecimento?
           </p>
           <RatingBar onRate={onRate} disabled={ratingDisabled} />
@@ -262,14 +311,19 @@ function TypingExercise({
 
   return (
     <Card className="w-full">
-      <CardHeader className="border-b">
-        <div className="flex flex-col gap-1 py-2">
-          <p className="font-medium">{content.prompt}</p>
-          <p className="text-xs text-muted-foreground">{content.hint}</p>
+      <CardHeader className="border-b border-[var(--lumen-hairline-soft)] pb-6">
+        <div className="flex flex-col gap-2 py-5">
+          <span className="lumen-sc text-[10px] text-[var(--lumen-gold)]">
+            Digitação
+          </span>
+          <p className="text-3xl leading-tight font-light italic text-[var(--lumen-bone)]">
+            {content.prompt}
+          </p>
+          <p className="text-sm italic text-muted-foreground">{content.hint}</p>
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 pt-4">
+      <CardContent className="flex flex-col gap-5 pt-6">
         <div className="flex gap-2">
           <Input
             dir="rtl"
@@ -279,41 +333,44 @@ function TypingExercise({
             onKeyDown={(e) => e.key === "Enter" && !submitted && handleSubmit()}
             placeholder="Digite em hebraico…"
             disabled={submitted}
-            className="[font-family:var(--font-hebrew)] text-lg"
+            className="h-14 [font-family:var(--font-hebrew)] text-2xl"
           />
           {!submitted && (
-            <Button type="button" onClick={handleSubmit} disabled={!value.trim()}>
+            <Button type="button" onClick={handleSubmit} disabled={!value.trim()} className="shrink-0">
               Verificar
             </Button>
           )}
         </div>
 
         {submitted && (
-          <div
-            className={cn(
-              "rounded-lg border p-3 text-sm",
-              isCorrect
-                ? "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-200"
-                : "border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200"
-            )}
-          >
-            {isCorrect ? (
-              <p>Correto!</p>
-            ) : (
-              <p>
-                Resposta correta:{" "}
-                <span dir="rtl" lang="he" className="[font-family:var(--font-hebrew)]">
-                  {content.answer}
-                </span>
-              </p>
-            )}
+          <div className="space-y-2">
+            <AiProviderBadge provider={card.ai_provider} />
+            <div
+              className={cn(
+                "rounded-[22px] border p-4 text-base italic",
+                isCorrect
+                  ? "border-[var(--lumen-gold)] bg-[rgba(229,184,95,0.12)] text-[var(--lumen-bone)]"
+                  : "border-red-400/30 bg-red-500/10 text-red-100"
+              )}
+            >
+              {isCorrect ? (
+                <p>Correto!</p>
+              ) : (
+                <p>
+                  Resposta correta:{" "}
+                  <span dir="rtl" lang="he" className="[font-family:var(--font-hebrew)]">
+                    {content.answer}
+                  </span>
+                </p>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
 
       {submitted && (
-        <CardFooter className="flex-col gap-3 pt-4">
-          <p className="self-start text-xs font-medium text-muted-foreground">
+        <CardFooter className="flex-col gap-4 border-[var(--lumen-hairline-soft)] pt-5">
+          <p className="self-start text-xs font-medium italic text-muted-foreground">
             Qual era seu nível de conhecimento?
           </p>
           <RatingBar onRate={onRate} disabled={ratingDisabled} />
@@ -349,8 +406,8 @@ export function ExerciseCard({ card, onRate, ratingDisabled }: ExerciseCardProps
         card.format !== "flashcard" &&
         card.format !== "typing" && (
           <Card className="w-full">
-            <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">
+            <CardContent className="pt-6">
+              <p className="text-sm italic text-muted-foreground">
                 Formato de exercício desconhecido.
               </p>
             </CardContent>

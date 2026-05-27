@@ -13,6 +13,7 @@ export interface CardWithContent {
   word: Word;
   format: "multiple_choice" | "flashcard" | "typing";
   content: Record<string, unknown>;
+  ai_provider: string | null;
 }
 
 export interface NextCardsResponse {

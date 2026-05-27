@@ -143,7 +143,15 @@ def get_next_cards(
             fsrs_state = _validate_fsrs_state(fsrs_state, card_id)
             fmt = determine_format(fsrs_state, format_override)
             content = _get_or_generate_content(cur, word, fmt, provider)
-            cards_out.append(CardWithContent(card_id=card_id, word=word, format=fmt, content=content))
+            cards_out.append(
+                CardWithContent(
+                    card_id=card_id,
+                    word=word,
+                    format=fmt,
+                    content=content,
+                    ai_provider=provider,
+                )
+            )
 
     return NextCardsResponse(cards=cards_out, session_size=len(cards_out))
 

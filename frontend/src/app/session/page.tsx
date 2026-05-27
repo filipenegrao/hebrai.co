@@ -5,6 +5,7 @@ import Link from "next/link"
 import { getNextCards, submitReview } from "@/lib/api"
 import type { CardWithContent } from "@/lib/api"
 import { ExerciseCard } from "@/components/ExerciseCard"
+import { LumenEyebrow, LumenHeader, LumenPanel, LumenShell } from "@/components/LumenChrome"
 import { SessionProgress } from "@/components/SessionProgress"
 
 type SessionState = "loading" | "active" | "empty" | "complete" | "error"
@@ -76,88 +77,127 @@ export default function SessionPage() {
 
   if (status === "loading") {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Carregando sessão…</p>
-      </main>
+      <LumenShell>
+        <div className="flex min-h-screen items-center justify-center px-6">
+          <p className="text-lg italic text-muted-foreground">Carregando sessão…</p>
+        </div>
+      </LumenShell>
     )
   }
 
   if (status === "error") {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-sm text-destructive">{errorMessage}</p>
-          <Link
-            href="/"
-            className="inline-flex h-8 items-center rounded-lg border border-border bg-background px-3 text-sm transition-colors hover:bg-muted"
-          >
-            Voltar ao início
-          </Link>
+      <LumenShell>
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <LumenPanel className="w-full max-w-lg items-center gap-5 text-center">
+            <LumenEyebrow>Erro de sessão</LumenEyebrow>
+            <p className="text-base text-destructive">{errorMessage}</p>
+            <Link
+              href="/"
+              className="inline-flex h-11 items-center rounded-full border border-[var(--lumen-hairline)] bg-[rgba(18,26,51,0.6)] px-5 text-sm italic transition-colors hover:bg-[rgba(18,26,51,0.76)]"
+            >
+              Voltar ao início
+            </Link>
+          </LumenPanel>
         </div>
-      </main>
+      </LumenShell>
     )
   }
 
   if (status === "empty") {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-muted-foreground">
-            Nenhum cartão para revisar hoje. Volte amanhã!
-          </p>
-          <Link
-            href="/"
-            className="inline-flex h-8 items-center rounded-lg border border-border bg-background px-3 text-sm transition-colors hover:bg-muted"
-          >
-            Voltar ao início
-          </Link>
+      <LumenShell>
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <LumenPanel className="w-full max-w-xl items-center gap-5 text-center">
+            <LumenEyebrow>Sessão vazia</LumenEyebrow>
+            <p className="text-lg italic text-muted-foreground">
+              Nenhum cartão para revisar hoje. Volte amanhã.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex h-11 items-center rounded-full border border-[var(--lumen-hairline)] bg-[rgba(18,26,51,0.6)] px-5 text-sm italic transition-colors hover:bg-[rgba(18,26,51,0.76)]"
+            >
+              Voltar ao início
+            </Link>
+          </LumenPanel>
         </div>
-      </main>
+      </LumenShell>
     )
   }
 
   if (status === "complete") {
     const count = reviewedCount > 0 ? reviewedCount : totalCards
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <h1 className="text-2xl font-semibold">Sessão concluída!</h1>
-          <p className="text-muted-foreground">
-            {count} {count === 1 ? "cartão revisado" : "cartões revisados"}.
-          </p>
-          <Link
-            href="/"
-            className="inline-flex h-8 items-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Voltar ao início
-          </Link>
+      <LumenShell>
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <LumenPanel className="w-full max-w-2xl items-center gap-6 text-center">
+            <LumenEyebrow>Sessão concluída</LumenEyebrow>
+            <div
+              dir="rtl"
+              lang="he"
+              className="text-7xl text-[var(--lumen-bone)] [font-family:var(--font-hebrew)] drop-shadow-[0_0_30px_rgba(229,184,95,0.22)]"
+            >
+              שָׁלוֹם
+            </div>
+            <h1 className="text-4xl font-light italic text-[var(--lumen-bone)]">
+              Muito bem.
+            </h1>
+            <p className="max-w-lg text-lg italic text-muted-foreground">
+              {count} {count === 1 ? "cartão revisado" : "cartões revisados"}.
+            </p>
+            <Link
+              href="/"
+              className="inline-flex h-12 items-center rounded-full border border-[var(--lumen-gold)] bg-[rgba(229,184,95,0.12)] px-6 text-base italic text-[var(--lumen-bone)] shadow-[inset_0_0_24px_rgba(229,184,95,0.18)] transition-colors hover:bg-[rgba(229,184,95,0.18)]"
+            >
+              Voltar ao início
+            </Link>
+          </LumenPanel>
         </div>
-      </main>
+      </LumenShell>
     )
   }
 
   // active
   const currentCard = cards[currentIndex]
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8">
-      <div className="flex w-full max-w-lg flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <SessionProgress done={currentIndex} total={totalCards} />
+    <LumenShell>
+      <LumenHeader
+        current="Sessão"
+        rightSlot={
           <Link
             href="/"
-            className="ml-4 shrink-0 text-xs text-muted-foreground underline-offset-4 hover:underline"
+            className="lumen-sc text-[10px] text-[var(--lumen-bone-muted)] transition-colors hover:text-[var(--lumen-bone)]"
           >
-            Sair
+            Encerrar
           </Link>
+        }
+      />
+
+      <div className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-6xl flex-col px-4 pb-8 pt-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+          <LumenPanel className="gap-4 px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <LumenEyebrow className="text-[var(--lumen-gold)]">
+                  Sessão de estudo
+                </LumenEyebrow>
+                <p className="mt-2 text-base italic text-[var(--lumen-bone-soft)]">
+                  Revele, responda e marque seu nível de domínio.
+                </p>
+              </div>
+              <SessionProgress done={currentIndex} total={totalCards} />
+            </div>
+          </LumenPanel>
+
+          {currentCard && (
+            <ExerciseCard
+              card={currentCard}
+              onRate={handleRate}
+              ratingDisabled={submitting}
+            />
+          )}
         </div>
-        {currentCard && (
-          <ExerciseCard
-            card={currentCard}
-            onRate={handleRate}
-            ratingDisabled={submitting}
-          />
-        )}
       </div>
-    </main>
+    </LumenShell>
   )
 }

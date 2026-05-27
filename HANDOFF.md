@@ -5,9 +5,52 @@
 
 ## Last update
 
-- **Date:** 2026-05-26
-- **Session:** Production follow-up — live VPS cutover and Anthropic provider wiring.
+- **Date:** 2026-05-27
+- **Session:** Frontend redesign — Lumen first pass on core surfaces.
 - **Branch / HEAD:** `main`.
+
+## Goals completed this session
+
+- Applied the first production-facing `Lumen` redesign pass across the main frontend surfaces.
+  - Chosen direction is the dark `Lumen` system from `/Users/filipenegrao/Downloads/hebrai.co`.
+  - Scope intentionally limited to the primary user-facing surfaces for now:
+    1. `/login`
+    2. `/`
+    3. `/session`
+    4. `/settings`
+  - Work sequence followed the requested order:
+    1. global tokens and fonts
+    2. shared chrome/components
+    3. page-level rewrites
+- Added a reusable `frontend/src/components/LumenChrome.tsx` layer.
+  - `LumenShell`
+  - `LumenHeader`
+  - `LumenEyebrow`
+  - `LumenPageTitle`
+  - `LumenPanel`
+  - `LumenMetricCard`
+  - `LumenProgressDots`
+- Reworked the global frontend theme for the new direction.
+  - `frontend/src/app/layout.tsx` now loads `Cormorant Garamond`, `IBM Plex Mono`, `David Libre`, and keeps `Noto Serif Hebrew`.
+  - `frontend/src/app/globals.css` now defines the `Lumen` token palette (`midnight`, `gold`, `bone`, glow/hairline variants) and adds shared utilities for the dark editorial shell.
+  - Shared shadcn/base-ui primitives (`Button`, `Card`, `Input`, `Label`) now inherit the new visual system instead of the default grayscale shell.
+- Rebuilt the four requested surfaces on top of the new tokens/components.
+  - `frontend/src/app/login/page.tsx`: split hero + auth card layout with Hebrew wordmark and product framing.
+  - `frontend/src/app/page.tsx`: new dashboard hero, day-program panel, and `Lumen` metrics treatment.
+  - `frontend/src/app/session/page.tsx`: new session shell around the existing exercise flow, including improved empty/error/complete states.
+  - `frontend/src/app/settings/page.tsx`: provider cards, session-size slider, niqqud toggle cards, and Lumen page framing.
+- Restyled the shared study UI without changing backend behavior.
+  - `DashboardStats`, `SessionProgress`, `RatingBar`, and `ExerciseCard` now render in the `Lumen` language.
+  - The previously-added Claude provider badge is preserved and now sits inside the new dark card treatments.
+- Sensors run for this redesign pass:
+  - `cd frontend && npm run lint` — clean
+  - `cd frontend && npm run build` — compiled successfully
+  - Build still emits the pre-existing Better Auth warnings/errors when env defaults are missing during static generation; this pass did not change auth config.
+
+### Carry-forward residuals from this redesign pass
+  - The redesign is only the first pass on the main surfaces. Secondary screens such as future progress/library/landing work are still untouched.
+  - The current checkout still contains the earlier uncommitted Claude badge payload changes in `backend/models.py`, `backend/session_router.py`, `frontend/src/lib/api.ts`, `HANDOFF.md`, and `docs/session-log.md`; this redesign was implemented on top of that local state and did not revert it.
+  - No browser-runtime visual QA was run in this pass; only lint/build validation is recorded here.
 
 ## Goals completed this session
 
@@ -31,6 +74,10 @@
   - Added `anthropic==0.104.1` to backend requirements and documented `ANTHROPIC_MODEL` in `.env.example`.
   - Tests: frontend `npm run lint` clean; frontend `npm run build` compiled; backend Docker image built cleanly; backend pytest in container **41/41 PASS**.
   - **Live verification:** a fresh public signup now returns real Claude-generated session cards with real distractors and Portuguese explanations; placeholder fallback text is no longer returned for `claude`.
+- Added a first visible UI cue for AI-backed content.
+  - `CardWithContent` now carries `ai_provider` from FastAPI to the frontend.
+  - `ExerciseCard` renders a subtle provider badge such as `Gerado com Claude` alongside revealed AI-generated content.
+  - Verification: frontend `npm run lint` clean; frontend `npm run build` compiled; backend `tests/test_session_router.py` in Docker **7/7 PASS**.
 
 ## Goals completed this session
 
