@@ -2,6 +2,31 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-27 — Forgot-password flow
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `frontend/src/lib/email.ts` | New — lazy nodemailer SMTP adapter |
+| `frontend/src/lib/auth.ts` | Added `sendResetPassword` callback |
+| `frontend/src/proxy.ts` | Added `/reset-password` to PUBLIC_PATHS |
+| `frontend/src/app/login/page.tsx` | Added `"forgot"` third mode |
+| `frontend/src/app/reset-password/page.tsx` | New — Suspense-wrapped, handles token + error=INVALID_TOKEN |
+| `.env.example` | Added SMTP_* vars |
+
+### Sensors
+
+- `npm run lint` → clean
+- `npm run build` → compiled; `/reset-password` as `○` (static) in route tree
+
+### Residuals
+
+- SMTP env vars must be set on VPS before reset emails deliver.
+- VPS not yet redeployed with this change.
+
+---
+
 ## 2026-05-27 — Lumen UI deploy to production (commit cd21e54)
 
 ### Sensors (local, pre-deploy)

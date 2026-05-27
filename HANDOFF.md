@@ -5,9 +5,28 @@
 
 ## Last update
 
-- **Date:** 2026-05-27T17:24Z
-- **Session:** Lumen UI deploy to production — commit `cd21e54` pushed live to `https://hebrai.co`.
-- **Branch / HEAD:** `main` — local ahead of `origin/main` by 1 commit (GitHub SSH not available on dev machine; rsync bootstrap used).
+- **Date:** 2026-05-27T20:21Z
+- **Session:** Forgot-password flow implemented and committed. Sensors clean.
+- **Branch / HEAD:** `main` — local ahead of `origin/main` by multiple commits (GitHub SSH not available on dev machine; rsync bootstrap required to deploy).
+
+## Goals completed this session (forgot-password — 2026-05-27)
+
+- Implemented full forgot-password / password-reset flow via Better Auth + nodemailer SMTP.
+  - **`frontend/src/lib/email.ts`** (new): lazy SMTP transport via nodemailer. `sendEmail({ to, subject, html })`. Transport created per-call to avoid module-top-level crash when SMTP env vars are absent during static build.
+  - **`frontend/src/lib/auth.ts`**: added `emailAndPassword.sendResetPassword` callback. Calls `sendEmail` to deliver a Portuguese reset-link email. Template includes the Better Auth `url` (full token link). No user data exposed beyond the email they entered.
+  - **`frontend/src/proxy.ts`**: added `/reset-password` to `PUBLIC_PATHS` — critical for email link landing.
+  - **`frontend/src/app/login/page.tsx`**: added third `"forgot"` mode. "Esqueci minha senha" link visible on the login mode. Uses `authClient.requestPasswordReset({ email, redirectTo: "/reset-password" })`. Generic success message "Se existir uma conta com este email, enviaremos instruções." (no email enumeration).
+  - **`frontend/src/app/reset-password/page.tsx`** (new): Suspense-wrapped `useSearchParams()`. Handles `?token=` (new-password form → `authClient.resetPassword`) and `?error=INVALID_TOKEN` (expired/invalid link copy with back-to-login button). Client-side password length (≥8) and match validation before API call.
+  - **`.env.example`**: documented `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`.
+  - **`frontend/package.json`**: added `nodemailer` dependency.
+- Sensors: `npm run lint` — clean; `npm run build` — compiled; `/reset-password` appears as `○` (static) in route tree.
+- Commit: `feat: add forgot-password flow with Better Auth and SMTP email`
+
+### Residuals for forgot-password
+  - SMTP env vars (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SMTP_SECURE`) must be set in the VPS `.env` before reset emails will deliver. `.env.example` now documents them.
+  - No automated test covers the reset email path (requires live SMTP and Better Auth DB).
+  - The VPS has not been re-deployed with this change. Next deploy (rsync bootstrap) will pick it up.
+  - Better Auth token expiry default is 1 hour — acceptable for now.
 
 ## Deploy summary (2026-05-27)
 
