@@ -11,32 +11,44 @@ import { LumenEyebrow, LumenPageTitle, LumenShell } from "@/components/LumenChro
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setInfo("");
     setLoading(true);
 
     try {
       if (mode === "login") {
         const { error } = await authClient.signIn.email({ email, password });
         if (error) throw new Error(error.message ?? "Erro desconhecido");
-      } else {
+        router.push("/");
+      } else if (mode === "register") {
         const { error } = await authClient.signUp.email({ email, password, name });
         if (error) throw new Error(error.message ?? "Erro desconhecido");
+        router.push("/");
+      } else {
+        await authClient.requestPasswordReset({ email, redirectTo: "/reset-password" });
+        setInfo("Se existir uma conta com este email, enviaremos instruções.");
       }
-      router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setLoading(false);
     }
+  }
+
+  function switchMode(next: "login" | "register" | "forgot") {
+    setError("");
+    setInfo("");
+    setMode(next);
   }
 
   return (
@@ -68,10 +80,14 @@ export default function LoginPage() {
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-2">
               <LumenEyebrow className="text-[var(--lumen-bone-muted)]">
-                {mode === "login" ? "Entrar" : "Criar conta"}
+                {mode === "login" ? "Entrar" : mode === "register" ? "Criar conta" : "Recuperar senha"}
               </LumenEyebrow>
               <h2 className="text-3xl font-light italic text-[var(--lumen-bone)]">
-                {mode === "login" ? "Volte ao seu ritmo." : "Comece sua jornada."}
+                {mode === "login"
+                  ? "Volte ao seu ritmo."
+                  : mode === "register"
+                  ? "Comece sua jornada."
+                  : "Redefina sua senha."}
               </h2>
             </div>
 
@@ -97,30 +113,55 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+              {mode !== "forgot" && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
+              {info ? <p className="text-sm text-[var(--lumen-bone-soft)]">{info}</p> : null}
               <Button type="submit" className="w-full" disabled={loading} size="lg">
-                {loading ? "A processar…" : mode === "login" ? "Entrar" : "Criar conta"}
+                {loading
+                  ? "A processar…"
+                  : mode === "login"
+                  ? "Entrar"
+                  : mode === "register"
+                  ? "Criar conta"
+                  : "Enviar instruções"}
               </Button>
-              <button
-                type="button"
-                className="w-full text-sm italic text-[var(--lumen-bone-soft)] transition-colors hover:text-[var(--lumen-bone)]"
-                onClick={() => {
-                  setError("");
-                  setMode(mode === "login" ? "register" : "login");
-                }}
-              >
-                {mode === "login" ? "Criar conta" : "Já tenho conta"}
-              </button>
+              {mode === "login" ? (
+                <div className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    className="w-full text-sm italic text-[var(--lumen-bone-soft)] transition-colors hover:text-[var(--lumen-bone)]"
+                    onClick={() => switchMode("register")}
+                  >
+                    Criar conta
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full text-sm italic text-[var(--lumen-bone-soft)] transition-colors hover:text-[var(--lumen-bone)]"
+                    onClick={() => switchMode("forgot")}
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full text-sm italic text-[var(--lumen-bone-soft)] transition-colors hover:text-[var(--lumen-bone)]"
+                  onClick={() => switchMode("login")}
+                >
+                  Já tenho conta
+                </button>
+              )}
             </form>
           </CardContent>
         </Card>
