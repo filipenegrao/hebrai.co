@@ -24,6 +24,7 @@ services:
       - postgres
     networks:
       - internal
+      - external
 
   next:
     build:

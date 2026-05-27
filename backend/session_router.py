@@ -62,7 +62,7 @@ def _get_or_generate_content(cur, word: Word, fmt: str, provider: str) -> dict:
         raw = cached[0]
         return raw if isinstance(raw, dict) else json.loads(raw)
 
-    content = generate_content(word, fmt)
+    content = generate_content(word, fmt, provider_name=provider)
     cur.execute(
         """
         INSERT INTO ai_content_cache (word_id, provider, prompt_hash, content)

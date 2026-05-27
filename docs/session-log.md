@@ -1502,3 +1502,57 @@ Stack torn down cleanly with `docker compose down`.
   - document `docker-entrypoint-initdb.d` first-init-only behavior for DB resets
   - add `.env.example` placeholders and guidance for `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and `GOOGLE_API_KEY`
   - replace raw Better Auth error forwarding with safe Portuguese user-facing messages before enabling auth flows
+
+## 2026-05-26 — Production cutover and Anthropic provider wiring
+
+### What was done
+
+- Cut over `hebrai.co` to the real VPS with **host nginx** as the public edge and Docker running only `postgres`, `fastapi`, and `next`.
+- Synced the repo to `~/apps/hebrai` on the VPS, created a live `.env`, and started the app stack with `next` bound on `127.0.0.1:3000`.
+- Ran Better Auth migration successfully on the VPS with:
+  - `npm exec --yes @better-auth/cli migrate -- --config src/lib/auth.ts --yes`
+- Installed the host nginx site and issued the real Let's Encrypt certificate for:
+  - `hebrai.co`
+  - `www.hebrai.co`
+- Verified live:
+  - `https://hebrai.co` and `https://www.hebrai.co` return `HTTP/2 307` to `/login`
+  - HSTS is present
+  - login page HTML is served through the public domain
+  - Better Auth signup and session retrieval work against the public domain
+- Wired the first real AI provider in the backend:
+  - added `anthropic==0.104.1`
+  - `backend/ai_service.py` now routes the `claude` provider through the Anthropic SDK when `ANTHROPIC_API_KEY` is configured
+  - default Claude model is `claude-sonnet-4-20250514`
+  - optional override: `ANTHROPIC_MODEL`
+  - `backend/session_router.py` now passes the saved provider name into `generate_content()`
+  - prompt hash version bumped to `v2` so stale placeholder "Claude" cache entries are bypassed and regenerated after deploy
+- Attached `fastapi` to both Docker networks (`internal` + `external`). This preserves the internal trust boundary at the port layer while allowing outbound Anthropic API calls; `internal: true` alone prevented DNS/internet access and caused `anthropic.APIConnectionError`.
+- Added `.env.example` guidance for `ANTHROPIC_MODEL`.
+
+### Verification
+
+- Frontend:
+  - `cd frontend && npm run lint` — clean
+  - `cd frontend && npm run build` — compiled successfully
+- Backend:
+  - local host Python did not have `pytest` installed, so validation used the repo's Docker path instead
+  - FastAPI image built successfully with the Anthropic dependency
+  - `docker run --rm hebraico-fastapi pytest tests/test_ai_service.py -q` — 12 passed
+  - `docker run --rm hebraico-fastapi pytest tests/ -q` — 41 passed
+- Production live checks:
+  - public HTTPS reachable for apex and `www`
+  - live signup succeeded and returned a secure Better Auth session cookie
+  - live `get-session` succeeded with that cookie
+  - after VPS env recovery (`BETTER_AUTH_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, DB password sync, Anthropic key restored), a fresh public signup returned **real Claude-generated** session cards with real distractors and Portuguese explanations
+
+### Decisions
+
+- Anthropic / Claude is the first production-grade provider baseline.
+- The current settings schema remains provider-level only. `claude` is now real; `gpt-4o`, `gemini`, and `ollama` are still accepted settings values but continue to fall back to placeholder content until their adapters are implemented.
+- Prompt-hash versioning is the simplest safe way to invalidate old placeholder "Claude" cache entries without a DB migration.
+
+### Follow-ups
+
+- Verify live session cards now return real Claude content instead of the placeholder note after the backend redeploy.
+- Fix GitHub SSH on the VPS so deploys can return to a real `git pull` flow instead of `rsync`.
+- Add OpenAI and Gemini adapters only after benchmarking quality/cost against the Claude baseline.

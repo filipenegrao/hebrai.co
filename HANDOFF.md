@@ -6,8 +6,31 @@
 ## Last update
 
 - **Date:** 2026-05-26
-- **Session:** `dash-009` — Full end-to-end verification (track close-out).
+- **Session:** Production follow-up — live VPS cutover and Anthropic provider wiring.
 - **Branch / HEAD:** `main`.
+
+## Goals completed this session
+
+- Completed the first live production cutover for `hebrai.co` on the VPS.
+  - DNS for `hebrai.co` and `www.hebrai.co` points to the VPS.
+  - Production shape changed from container-edge nginx to **host nginx** on the VPS, with Docker exposing only the app stack (`next` on `127.0.0.1:3000`, `fastapi` internal-only, `postgres` internal-only).
+  - App code was synced to the VPS at `~/apps/hebrai` and configured with a real `.env`.
+  - Better Auth migration was run successfully via `npm exec --yes @better-auth/cli migrate -- --config src/lib/auth.ts --yes`.
+  - Host nginx + Let's Encrypt succeeded for both `hebrai.co` and `www.hebrai.co`; HTTPS is live with HSTS and reverse proxying to `127.0.0.1:3000`.
+  - Live validation:
+    1. `https://hebrai.co` and `https://www.hebrai.co` return `HTTP/2 307` to `/login`.
+    2. Login page HTML is served through the public domain.
+    3. Better Auth public session endpoint returns `null` anonymously and valid session JSON with a real cookie.
+    4. A throwaway smoke user was created successfully through the public domain.
+- Wired the first real AI provider path in the backend: **Anthropic / Claude**.
+  - `backend/ai_service.py` now resolves the `claude` provider through the official Anthropic Python SDK when `ANTHROPIC_API_KEY` is present.
+  - Default Anthropic model is `claude-sonnet-4-20250514`, overridable via `ANTHROPIC_MODEL` or `DEFAULT_AI_MODEL`.
+  - `backend/session_router.py` now passes the saved provider name into `generate_content()`.
+  - `hash_prompt()` now includes a prompt-version prefix (`v2`) so previously cached placeholder "Claude" content is bypassed and regenerated as real AI output after deploy.
+  - `docker-compose.yml` now attaches `fastapi` to both `internal` and `external` networks. This keeps FastAPI off public ports while restoring outbound internet access for Anthropic/OpenAI/Gemini SDK calls.
+  - Added `anthropic==0.104.1` to backend requirements and documented `ANTHROPIC_MODEL` in `.env.example`.
+  - Tests: frontend `npm run lint` clean; frontend `npm run build` compiled; backend Docker image built cleanly; backend pytest in container **41/41 PASS**.
+  - **Live verification:** a fresh public signup now returns real Claude-generated session cards with real distractors and Portuguese explanations; placeholder fallback text is no longer returned for `claude`.
 
 ## Goals completed this session
 
@@ -32,6 +55,7 @@
   - Sensors: backend pytest 39/39; `npm run build` clean; `bash -n` (deploy scripts) clean from dash-008. Stack torn down cleanly (`compose down`); no stray containers; only `nginx/nginx.conf` changed in the repo.
 
 ### Carry-forward residuals (still open)
+  - VPS deploy path still uses `rsync` bootstrap; the VPS checkout is **not** a usable git clone yet because the server's GitHub SSH key/config is broken (`no such identity /home/filipe/.ssh/github_openclaw`). Future deploy automation should restore a real `git pull` flow.
   - `dash-001` streak edge-case test still open.
   - `X-User-ID` still directly trusted/unbounded at the FastAPI layer — bound before external exposure.
   - Invalid stored provider/timezone can still cause a 500 on backend GET until DB CHECK constraints land on `user_settings`.
@@ -39,7 +63,7 @@
   - Direct server-component FastAPI fetch pattern in `page.tsx` must stay limited to validated session-derived user IDs.
   - `daily_new_limit` UI cap is 50; backend allows up to 500.
   - Standalone cert renewal causes ~5–15 s nginx downtime per ~60-day cycle.
-  - **All VPS-only deploy/TLS items above remain unproven until a real deployment** — production cutover depends on them.
+  - Anthropic is the only real provider wired today. `gpt-4o`, `gemini`, and `ollama` remain accepted settings values but still fall back to placeholder content until their adapters are implemented.
 
 ## QA correction pass (dash-008)
 

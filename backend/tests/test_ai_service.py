@@ -1,9 +1,10 @@
 import json
+import os
 import pytest
 from unittest.mock import MagicMock, patch
 
 from models import Word
-from ai_service import hash_prompt, generate_content, _build_prompt
+from ai_service import hash_prompt, generate_content, _build_prompt, _GenerateResponse, _Choice, _Message
 
 
 @pytest.fixture
@@ -113,3 +114,31 @@ def test_generate_content_placeholder_typing(sample_word):
     with patch("ai_service.provider.generate", side_effect=NotImplementedError):
         result = generate_content(sample_word, "typing")
     assert result["answer"] == sample_word.hebrew
+
+
+def test_generate_content_passes_provider_name(sample_word):
+    mock = MagicMock()
+    mock.choices[0].message.content = json.dumps(
+        {
+            "prompt": "Como se escreve 'terra' em hebraico?",
+            "answer": "אֶרֶץ",
+            "hint": "Começa com aleph (א)",
+        }
+    )
+
+    with patch("ai_service.provider.generate", return_value=mock) as generate:
+        generate_content(sample_word, "typing", provider_name="gemini")
+
+    assert generate.call_args.kwargs["provider_name"] == "gemini"
+
+
+def test_generate_content_uses_anthropic_model_env_override(sample_word):
+    response = _GenerateResponse(
+        choices=[_Choice(message=_Message(content=json.dumps({"answer": "אֶרֶץ", "hint": "x", "prompt": "y"})))]
+    )
+
+    with patch.dict(os.environ, {"ANTHROPIC_MODEL": "claude-test-model"}, clear=False):
+        with patch("ai_service.provider.generate", return_value=response) as generate:
+            generate_content(sample_word, "typing", provider_name="claude")
+
+    assert generate.call_args.kwargs["model"] == "claude-test-model"

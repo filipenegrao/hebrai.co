@@ -1,24 +1,76 @@
 import hashlib
 import json
 import os
+from dataclasses import dataclass
+
 from models import Word
 
-_DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+_PROMPT_VERSION = "v2"
+_DEFAULT_PROVIDER_MODELS = {
+    "claude": "claude-sonnet-4-20250514",
+}
+
+
+@dataclass
+class _Message:
+    content: str
+
+
+@dataclass
+class _Choice:
+    message: _Message
+
+
+@dataclass
+class _GenerateResponse:
+    choices: list[_Choice]
 
 
 class _Provider:
     """Placeholder provider interface. Real SDK wrappers are added in the AI provider task.
     Expected response shape: response.choices[0].message.content -> JSON string."""
 
-    def generate(self, model: str, messages: list[dict], temperature: float = 0.3):
-        raise NotImplementedError("No AI provider configured")
+    def generate(
+        self,
+        provider_name: str,
+        model: str,
+        messages: list[dict],
+        temperature: float = 0.3,
+    ) -> _GenerateResponse:
+        if provider_name == "claude":
+            return self._generate_anthropic(model=model, messages=messages, temperature=temperature)
+        raise NotImplementedError(f"No AI provider configured for {provider_name!r}")
+
+    def _generate_anthropic(
+        self,
+        model: str,
+        messages: list[dict],
+        temperature: float = 0.3,
+    ) -> _GenerateResponse:
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise NotImplementedError("ANTHROPIC_API_KEY is not configured")
+
+        from anthropic import Anthropic
+
+        client = Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model=model,
+            max_tokens=1024,
+            temperature=temperature,
+            messages=messages,
+        )
+        text = "".join(block.text for block in response.content if getattr(block, "type", None) == "text").strip()
+        if not text:
+            raise ValueError("Anthropic returned no text content")
+        return _GenerateResponse(choices=[_Choice(message=_Message(content=text))])
 
 
 provider = _Provider()
 
 
 def hash_prompt(word_id: int, exercise_format: str, provider_name: str) -> str:
-    key = f"{word_id}:{exercise_format}:{provider_name}"
+    key = f"{_PROMPT_VERSION}:{word_id}:{exercise_format}:{provider_name}"
     return hashlib.sha256(key.encode()).hexdigest()[:16]
 
 
@@ -95,11 +147,23 @@ def _placeholder_content(exercise_format: str, word: Word) -> dict:
     }
 
 
-def generate_content(word: Word, exercise_format: str, model: str | None = None) -> dict:
+def generate_content(
+    word: Word,
+    exercise_format: str,
+    provider_name: str = "claude",
+    model: str | None = None,
+) -> dict:
     prompt = _build_prompt(word, exercise_format)
+    resolved_model = (
+        model
+        or os.environ.get("DEFAULT_AI_MODEL")
+        or os.environ.get("ANTHROPIC_MODEL")
+        or _DEFAULT_PROVIDER_MODELS.get(provider_name)
+    )
     try:
         response = provider.generate(
-            model=model or os.environ.get("DEFAULT_AI_MODEL", _DEFAULT_MODEL),
+            provider_name=provider_name,
+            model=resolved_model or "",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
         )
