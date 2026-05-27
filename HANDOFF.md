@@ -5,9 +5,23 @@
 
 ## Last update
 
-- **Date:** 2026-05-27
-- **Session:** Frontend redesign — Lumen first pass on core surfaces.
-- **Branch / HEAD:** `main`.
+- **Date:** 2026-05-27T17:24Z
+- **Session:** Lumen UI deploy to production — commit `cd21e54` pushed live to `https://hebrai.co`.
+- **Branch / HEAD:** `main` — local ahead of `origin/main` by 1 commit (GitHub SSH not available on dev machine; rsync bootstrap used).
+
+## Deploy summary (2026-05-27)
+
+- **Commit deployed:** `cd21e54` (Refactor DashboardStats to use LumenMetricCard, update styling and layout, add AI provider badge)
+- **Sensors:** `npm run lint` clean; `npm run build` compiled (Better Auth env warnings pre-existing)
+- **Push:** failed — GitHub SSH key not configured on dev machine; origin remains at `28b7576`
+- **Sync:** rsync to `vps:~/apps/hebrai/` completed; `.env` not touched
+- **VPS rebuild:** `docker compose up -d --build fastapi next` — both images built and containers recreated
+- **Container health:** postgres up (unchanged), fastapi up, next up (127.0.0.1:3000→3000)
+- **Production smoke:**
+  - `https://hebrai.co/login` → HTTP/2 200, HSTS present ✓
+  - `https://hebrai.co` → HTTP/2 307 → `/login`, HSTS present ✓
+- **QA verdict:** APPROVED WITH RESERVATIONS. Availability/TLS smoke passed; browser-level visual QA and authenticated session API smoke were not performed in this deploy cycle.
+- **Security verdict:** ADVISORY. No critical vulnerabilities introduced. Main new hardening item is provider allowlist validation before passing `preferred_provider` into `generate_content()`.
 
 ## Goals completed this session
 
@@ -49,8 +63,10 @@
 
 ### Carry-forward residuals from this redesign pass
   - The redesign is only the first pass on the main surfaces. Secondary screens such as future progress/library/landing work are still untouched.
-  - The current checkout still contains the earlier uncommitted Claude badge payload changes in `backend/models.py`, `backend/session_router.py`, `frontend/src/lib/api.ts`, `HANDOFF.md`, and `docs/session-log.md`; this redesign was implemented on top of that local state and did not revert it.
-  - No browser-runtime visual QA was run in this pass; only lint/build validation is recorded here.
+  - The Claude badge payload changes in `backend/models.py`, `backend/session_router.py`, and `frontend/src/lib/api.ts` are now committed in `cd21e54` and deployed to the VPS.
+  - No browser-runtime visual QA was run during implementation; the VPS deploy smoke only confirmed availability/TLS and anonymous redirect behavior.
+  - Production is ahead of `origin/main` by 1 commit because GitHub SSH/push failed on the dev machine. Fix push/source-of-truth drift before treating the VPS as auditable production state.
+  - Add an allowlist guard in `backend/session_router.py` before passing `preferred_provider` into `generate_content()` so corrupt DB values fall back safely before DB CHECK constraints land.
 
 ## Goals completed this session
 

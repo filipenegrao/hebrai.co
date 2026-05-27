@@ -2,6 +2,67 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-27 — Lumen UI deploy to production (commit cd21e54)
+
+### Sensors (local, pre-deploy)
+
+- `cd frontend && npm run lint` → **clean**
+- `cd frontend && npm run build` → **compiled successfully** (Better Auth env warnings are pre-existing)
+
+### Push attempt
+
+- `git push origin main` → **failed** (GitHub SSH key not configured on dev machine; documented carry-forward from earlier sessions).
+- Origin remains at `28b7576`. rsync bootstrap deployed `cd21e54` directly to VPS.
+
+### rsync
+
+```
+rsync -az --delete --exclude '.git' --exclude '.env' --exclude '.env.*' \
+  --exclude 'frontend/node_modules' --exclude 'frontend/.next' \
+  --exclude 'backend/.pytest_cache' --exclude '__pycache__' \
+  ./ vps:~/apps/hebrai/
+```
+Completed successfully. VPS `.env` not touched.
+
+### VPS rebuild
+
+```
+docker compose -f docker-compose.yml -f docker-compose.vps-host-nginx.yml up -d --build fastapi next
+```
+- `hebrai-fastapi` image: built (cache hit on pip layer)
+- `hebrai-next` image: built from source (16 s compile); all 11 routes compiled
+- Both containers recreated and started
+
+### Container status
+
+| Container | Image | Status |
+|---|---|---|
+| hebrai-postgres-1 | postgres:18-alpine | Up (unchanged) |
+| hebrai-fastapi-1 | hebrai-fastapi | Up (recreated) |
+| hebrai-next-1 | hebrai-next | Up (recreated, 127.0.0.1:3000→3000) |
+
+### Production smoke
+
+- `curl -sI https://hebrai.co/login` → **HTTP/2 200**, HSTS present ✓
+- `curl -sI https://hebrai.co` → **HTTP/2 307**, `Location: /login`, HSTS present ✓
+
+### Review results
+
+- QA verdict: **APPROVED WITH RESERVATIONS**.
+  - Availability/TLS smoke passed.
+  - Browser-level visual QA, authenticated route checks, and `/api/session/next-cards` response validation were not performed.
+- Security verdict: **ADVISORY**.
+  - No critical vulnerabilities introduced.
+  - `ai_provider` is not sensitive, but `backend/session_router.py` should validate `preferred_provider` against the provider allowlist before passing it to `generate_content()`.
+
+### Residual risks (unchanged from prior sessions)
+
+- GitHub SSH key on dev machine not configured — push to origin still uses rsync bootstrap.
+- X-User-ID still trusted/unbounded at FastAPI layer.
+- Invalid stored provider/timezone can 500 on GET (no DB CHECK constraints yet).
+- `anthropic`, `gpt-4o`, `gemini`, `ollama` accepted by settings; only `claude` has a real adapter.
+- Production is now one commit ahead of `origin/main`; fix GitHub SSH/push before relying on GitHub as the deployed source of truth.
+
 ## 2026-05-26 — dash-009: Full end-to-end verification (track close-out)
 
 ### Environment
