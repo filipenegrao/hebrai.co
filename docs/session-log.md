@@ -21,6 +21,13 @@ Task requested rename `proxy.ts` → `middleware.ts`. Next.js 16 docs (in `node_
 - `npm run build` → compiled; route tree unchanged
 - `npm audit` → 2 moderate (postcss `<8.5.10` in Next.js internal deps, pre-existing). Fix requires downgrading Next.js to 9.3.3 — do not apply.
 
+### Review closeout
+
+- QA verdict: `APPROVED`.
+- Security verdict: `CLEAN`.
+- Merge/push state: `main` is synced with `origin/main` at `254a25d`.
+- Deploy prerequisite: set `BETTER_AUTH_URL=https://hebrai.co`, `NEXT_PUBLIC_BETTER_AUTH_URL=https://hebrai.co`, and all `SMTP_*` vars on the VPS before activation.
+
 ---
 
 ## 2026-05-27 — Forgot-password flow

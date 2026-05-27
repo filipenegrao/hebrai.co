@@ -5,9 +5,9 @@
 
 ## Last update
 
-- **Date:** 2026-05-27T21:00Z
-- **Session:** QA/Security correction pass for forgot-password. Sensors clean.
-- **Branch / HEAD:** `main` — local ahead of `origin/main` by multiple commits (GitHub SSH not available on dev machine; rsync bootstrap required to deploy).
+- **Date:** 2026-05-27T21:18Z
+- **Session:** Forgot-password flow cleared by QA and Security; ready to deploy after VPS env setup.
+- **Branch / HEAD:** `main` — synced with `origin/main` at `254a25d`.
 
 ## Goals completed this session (forgot-password — 2026-05-27)
 
@@ -34,10 +34,13 @@
 - **Same-origin check in `sendResetPassword`:** Before sending the email, the reset `url` is parsed and its origin is compared against `BETTER_AUTH_URL`. Mismatches (including malformed URLs or a misconfigured base) log a structured server-side error and abort the send without surfacing details to the client.
 - **Structured error logging for email delivery failures:** `sendEmail` is now wrapped in `try/catch`. Failures are logged as `[reset-password] email delivery failed: <message>`. The catch does not re-throw — anti-enumeration behavior (the HTTP response is unchanged) is preserved.
 - Sensors: `npm run lint` — clean; `npm run build` — compiled; `npm audit` — 2 moderate vulns in Next.js's internal postcss (pre-existing, fix requires downgrading Next.js to 9.3.3).
+- Review closeout: QA verdict `APPROVED`; Security verdict `CLEAN`. Safe to merge/deploy after VPS env vars are set.
 
 ### Residual risks (QA correction pass)
   - `npm audit` 2 moderate: `postcss <8.5.10` in Next.js's internal dependency tree. Not introduced by this PR. The only fix (`npm audit fix --force`) would downgrade Next.js to 9.3.3 — do not apply. Monitor for a Next.js patch that upgrades its bundled postcss.
   - VPS not yet redeployed with these changes.
+  - Before deploy, confirm VPS `.env` has `BETTER_AUTH_URL=https://hebrai.co`, `NEXT_PUBLIC_BETTER_AUTH_URL=https://hebrai.co`, and all `SMTP_*` vars.
+  - Run Better Auth migration on the VPS before first reset attempt if schema drift is possible.
 
 ## Deploy summary (2026-05-27)
 
