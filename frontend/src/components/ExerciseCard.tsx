@@ -333,7 +333,7 @@ function TypingExercise({
             onKeyDown={(e) => e.key === "Enter" && !submitted && handleSubmit()}
             placeholder="Digite em hebraico…"
             disabled={submitted}
-            className="h-14 [font-family:var(--font-hebrew)] text-2xl"
+            className="lumen-hebrew h-14 text-2xl"
           />
           {!submitted && (
             <Button type="button" onClick={handleSubmit} disabled={!value.trim()} className="shrink-0">
@@ -358,7 +358,7 @@ function TypingExercise({
               ) : (
                 <p>
                   Resposta correta:{" "}
-                  <span dir="rtl" lang="he" className="[font-family:var(--font-hebrew)]">
+                  <span dir="rtl" lang="he" className="lumen-hebrew">
                     {content.answer}
                   </span>
                 </p>

@@ -5,9 +5,24 @@
 
 ## Last update
 
-- **Date:** 2026-05-28T14:26Z
-- **Session:** Typekit typography swap deployed to VPS.
-- **Code deploy commit:** `a6e4a0f` — pushed to `origin/main`.
+- **Date:** 2026-05-28T14:41Z
+- **Session:** Narkiss Hebrew font enforcement deployed to VPS.
+- **Previous code deploy commit:** `a6e4a0f` — pushed to `origin/main`.
+
+## Deploy summary (2026-05-28 — Narkiss enforcement)
+
+- **Issue:** Garamond Typekit fonts rendered, but the Hebrew Narkiss face did not appear to take effect on `hebrai.co`.
+- **Finding:** The Typekit CSS at `https://use.typekit.net/coa1zta.css` includes `@font-face` and `.tk-narkiss-asaf-variable` for `narkiss-asaf-variable`; the Narkiss WOFF2 endpoint returns HTTP 200. The weak point was local application: Hebrew callsites used Tailwind arbitrary `[font-family:var(--font-hebrew)]` and could inherit Latin-oriented style/weight context.
+- **Fix:** Added `.lumen-hebrew` in `frontend/src/app/globals.css` with direct `font-family: "narkiss-asaf-variable", sans-serif`, `font-style: normal`, `font-weight: 400`, and `font-variation-settings: "wght" 400`. Replaced Hebrew callsites across login, dashboard, session complete, settings niqqud preview, shared header, `HebrewWord`, and typing-answer UI to use `.lumen-hebrew`.
+- **Local sensors:**
+  - `cd frontend && npm run lint` — clean.
+  - `cd frontend && npm run build` — compiled. Better Auth local default-secret/base-url warnings remain unchanged and non-fatal.
+- **VPS deploy:** rsync completed with env/build artifacts excluded; `docker compose -f docker-compose.yml -f docker-compose.vps-host-nginx.yml up -d --build next` completed. Compose rebuilt/recreated `fastapi` from cache due service graph behavior; no backend source change was involved.
+- **Production smoke:**
+  - `https://hebrai.co/login` → HTTP/2 200 with HSTS/security headers.
+  - Production login HTML now renders the hero Hebrew word with class `lumen-hebrew`.
+  - VPS-side CSS check confirms deployed chunk includes `.lumen-hebrew{font-variation-settings:"wght" 400;font-family:narkiss-asaf-variable,sans-serif;font-style:normal;font-weight:400}`.
+  - VPS `docker compose ps` shows postgres, fastapi, and next up; next logs show Next.js ready on `0.0.0.0:3000`.
 
 ## Deploy summary (2026-05-28 — Typekit typography)
 

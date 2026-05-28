@@ -224,7 +224,7 @@ export default function SettingsPage() {
                 <div
                   dir="rtl"
                   lang="he"
-                  className="text-5xl text-[var(--lumen-bone)] [font-family:var(--font-hebrew)] drop-shadow-[0_0_20px_rgba(229,184,95,0.2)]"
+                  className="lumen-hebrew text-5xl text-[var(--lumen-bone)] drop-shadow-[0_0_20px_rgba(229,184,95,0.2)]"
                 >
                   שָׁלוֹם
                 </div>
@@ -245,7 +245,7 @@ export default function SettingsPage() {
                 <div
                   dir="rtl"
                   lang="he"
-                  className="text-5xl text-[var(--lumen-bone-soft)] [font-family:var(--font-hebrew)]"
+                  className="lumen-hebrew text-5xl text-[var(--lumen-bone-soft)]"
                 >
                   שלום
                 </div>

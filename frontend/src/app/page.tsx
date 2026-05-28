@@ -64,7 +64,7 @@ export default async function DashboardPage() {
                   <span
                     dir="rtl"
                     lang="he"
-                    className="mr-3 inline-block align-middle text-6xl text-[var(--lumen-bone)] [font-family:var(--font-hebrew)] drop-shadow-[0_0_28px_rgba(229,184,95,0.28)] sm:text-7xl"
+                    className="lumen-hebrew mr-3 inline-block align-middle text-6xl text-[var(--lumen-bone)] drop-shadow-[0_0_28px_rgba(229,184,95,0.28)] sm:text-7xl"
                   >
                     שָׁלוֹם
                   </span>

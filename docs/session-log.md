@@ -2,6 +2,27 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-28 — Narkiss Hebrew font enforcement
+
+### What was done
+
+- Confirmed the Adobe kit CSS includes `narkiss-asaf-variable` and that the Narkiss WOFF2 endpoint returns HTTP 200.
+- Added `.lumen-hebrew` to `frontend/src/app/globals.css` with direct Narkiss font-family, normal style, weight 400, and `"wght" 400` variation setting.
+- Replaced all remaining Hebrew callsites that used Tailwind arbitrary `[font-family:var(--font-hebrew)]` with `.lumen-hebrew`.
+
+### Sensors
+
+- `cd frontend && npm run lint` → clean
+- `cd frontend && npm run build` → compiled. Better Auth local-env warnings remain unchanged and non-fatal.
+
+### Deploy and smoke
+
+- Synced repo to `vps:~/apps/hebrai/` with env/build artifacts excluded.
+- Rebuilt/recreated `next` with `docker compose -f docker-compose.yml -f docker-compose.vps-host-nginx.yml up -d --build next`.
+- `https://hebrai.co/login` → HTTP/2 200 with HSTS/security headers.
+- Production HTML shows the Hebrew hero word using `class="lumen-hebrew ..."`.
+- VPS-side CSS check confirms `.lumen-hebrew{font-variation-settings:"wght" 400;font-family:narkiss-asaf-variable,sans-serif;font-style:normal;font-weight:400}` in the deployed CSS chunk.
+
 ## 2026-05-28 — Typekit typography swap and VPS deploy
 
 ### Files changed

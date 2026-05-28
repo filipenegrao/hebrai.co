@@ -181,6 +181,13 @@
     font-style: italic;
   }
 
+  .lumen-hebrew {
+    font-family: "narkiss-asaf-variable", sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-variation-settings: "wght" 400;
+  }
+
   .lumen-hebrew-glow {
     color: var(--lumen-bone);
     text-shadow:

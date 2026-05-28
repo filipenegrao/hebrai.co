@@ -65,7 +65,7 @@ export default function LoginPage() {
             <div
               dir="rtl"
               lang="he"
-              className="text-7xl leading-none text-[var(--lumen-bone)] [font-family:var(--font-hebrew)] drop-shadow-[0_0_36px_rgba(229,184,95,0.25)] sm:text-8xl"
+              className="lumen-hebrew text-7xl leading-none text-[var(--lumen-bone)] drop-shadow-[0_0_36px_rgba(229,184,95,0.25)] sm:text-8xl"
             >
               הֶבְרַאִי
             </div>

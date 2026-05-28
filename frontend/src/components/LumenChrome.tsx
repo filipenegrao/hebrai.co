@@ -72,7 +72,7 @@ export function LumenHeader({
           <span
             dir="rtl"
             lang="he"
-            className="text-lg text-[var(--lumen-gold)] [font-family:var(--font-hebrew)]"
+            className="lumen-hebrew text-lg text-[var(--lumen-gold)]"
           >
             א
           </span>

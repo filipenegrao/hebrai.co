@@ -135,7 +135,7 @@ export default function SessionPage() {
             <div
               dir="rtl"
               lang="he"
-              className="text-7xl text-[var(--lumen-bone)] [font-family:var(--font-hebrew)] drop-shadow-[0_0_30px_rgba(229,184,95,0.22)]"
+              className="lumen-hebrew text-7xl text-[var(--lumen-bone)] drop-shadow-[0_0_30px_rgba(229,184,95,0.22)]"
             >
               שָׁלוֹם
             </div>
