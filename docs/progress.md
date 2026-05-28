@@ -2,7 +2,7 @@
 
 > Human-readable roadmap. Canonical task state is `STATUS.json`.
 
-Updated: 2026-05-24
+Updated: 2026-05-28
 
 ## In progress
 
@@ -10,17 +10,14 @@ Updated: 2026-05-24
 
 ## Backlog
 
-### Dashboard and deploy
-- [x] `dash-001` — Daily stats endpoint (stats_router.py, test_stats_router.py, main.py wired)
-- [x] `dash-002` — Settings endpoint (settings_router.py, test_settings_router.py, main.py wired)
-- [x] `dash-003` — Stats and settings proxy routes (api/stats/daily/route.ts, api/settings/route.ts, api.ts helpers)
-- [x] `dash-004` — Dashboard UI (DashboardStats.tsx, full page.tsx with session check and non-blocking stats)
-- [ ] `dash-005` to `dash-009` — Settings page, typography, and deployment plan
+(None)
 
 ## Done
 
 - [x] Foundation section closed (`foundation-001` to `foundation-010`)
 - [x] Core engine section closed (`core-001` to `core-009`)
+- [x] Dashboard/deploy section closed (`dash-001` to `dash-009`)
+- [x] 2026-05-28 Typekit font swap for Hebrew and Latin UI typography
 - [x] `foundation-010` — Full stack smoke test
 - [x] `foundation-009` — Route protection and dashboard shell
 - [x] `foundation-008` — Auth pages

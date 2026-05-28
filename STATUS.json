@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-05-28T02:20Z",
+  "last_updated": "2026-05-28T14:22Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -196,7 +196,7 @@
           "name": "Hebrew typography",
           "status": "done",
           "tests": false,
-          "notes": "Dashboard/deploy plan Task 6. Added Noto_Serif_Hebrew from next/font/google in frontend/src/app/layout.tsx, exposed as CSS variable --font-hebrew. HebrewWord.tsx updated to use [font-family:var(--font-hebrew)] instead of font-serif. Also applied dash-005 QA cleanup in settings/page.tsx: disabled={saveState !== 'idle'} and explicit isNaN guard on daily_new_limit parseInt. Sensors: ESLint clean; build compiled — route tree unchanged. dash-007 is unblocked."
+          "notes": "Dashboard/deploy plan Task 6. Added Noto_Serif_Hebrew from next/font/google in frontend/src/app/layout.tsx, exposed as CSS variable --font-hebrew. HebrewWord.tsx updated to use [font-family:var(--font-hebrew)] instead of font-serif. Also applied dash-005 QA cleanup in settings/page.tsx: disabled={saveState !== 'idle'} and explicit isNaN guard on daily_new_limit parseInt. Sensors: ESLint clean; build compiled — route tree unchanged. dash-007 is unblocked. 2026-05-28 follow-up: replaced the earlier next/font Google stack with Adobe Typekit link https://use.typekit.net/coa1zta.css; --font-hebrew now maps to narkiss-asaf-variable, --font-latin to garamond-premier-pro, and --font-latin-small-caps to garamond-premier-pro-caption. Frontend lint/build passed; local /login HTML smoke confirmed the Typekit stylesheet link."
         },
         {
           "id": "dash-007",
