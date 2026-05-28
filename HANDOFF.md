@@ -5,9 +5,36 @@
 
 ## Last update
 
-- **Date:** 2026-05-27T22:36Z
-- **Session:** Forgot-password flow deployed to VPS.
-- **Branch / HEAD:** `main` — synced with `origin/main` at `f4997d0`.
+- **Date:** 2026-05-28T14:26Z
+- **Session:** Typekit typography swap deployed to VPS.
+- **Code deploy commit:** `a6e4a0f` — pushed to `origin/main`.
+
+## Deploy summary (2026-05-28 — Typekit typography)
+
+- **Commit deployed:** `a6e4a0f` (`style: switch typography to Typekit`)
+- **Scope:** frontend typography only.
+  - `frontend/src/app/layout.tsx`: removed `next/font/google` font loading and added `<link rel="stylesheet" href="https://use.typekit.net/coa1zta.css">` at the document root.
+  - `frontend/src/app/globals.css`: mapped `--font-hebrew` to `narkiss-asaf-variable, sans-serif`; `--font-latin` to `garamond-premier-pro, serif`; and `--font-latin-small-caps` to `garamond-premier-pro-caption, serif`.
+  - Existing Hebrew callsites continue to use `var(--font-hebrew)`; the base Latin font and heading font now use `var(--font-latin)`; `.lumen-sc` now uses the caption/small-caps Typekit family.
+- **Local sensors:**
+  - `cd frontend && npm run lint` — clean.
+  - `cd frontend && npm run build` — compiled. Better Auth default-secret/base-url warnings remain the known local-env warning pattern; build exited 0.
+  - Local smoke: `http://127.0.0.1:3026/login` returned HTTP 200 and rendered the Typekit stylesheet link.
+- **Sync/publish:**
+  - `git push origin main` succeeded (`154a193..a6e4a0f`).
+  - `rsync` to `vps:~/apps/hebrai/` completed with `.env`, `.env.*`, `frontend/node_modules`, and `frontend/.next` excluded.
+  - VPS rebuild/recreate: `docker compose -f docker-compose.yml -f docker-compose.vps-host-nginx.yml up -d --build next` completed. Compose also rebuilt/recreated `fastapi` from cache because of the service graph; no backend source change was involved.
+- **Production smoke:**
+  - `https://hebrai.co/login` → HTTP/2 200, HSTS/security headers present.
+  - `https://hebrai.co` → HTTP/2 307 → `/login`, HSTS/security headers present.
+  - `https://hebrai.co/login` HTML includes both preload and stylesheet entries for `https://use.typekit.net/coa1zta.css`.
+  - VPS `docker compose ps` shows postgres, fastapi, and next up; next logs show Next.js ready with `Network: http://0.0.0.0:3000`.
+- **Review note:** No separate human-carried Builder/QA/Security cycle was run despite the orchestrator prompt's ideal workflow. This was a narrow CSS/layout slice; local sensors and production smoke passed. No credential or auth-boundary changes were made.
+
+### Residuals for Typekit typography
+
+- Browser-level visual inspection through the in-app Browser plugin could not be run because the Node REPL browser control tool was unavailable in this session. Local and production HTML smokes confirmed the stylesheet is served.
+- Runtime font rendering still depends on the Adobe Typekit kit `coa1zta` containing the requested families and allowing the production domain.
 
 ## Deploy summary (2026-05-27 — forgot-password)
 

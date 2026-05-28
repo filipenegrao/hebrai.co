@@ -2,6 +2,49 @@
 
 Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** snapshot between sessions.
 
+## 2026-05-28 — Typekit typography swap and VPS deploy
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `frontend/src/app/layout.tsx` | Removed `next/font/google` usage and added the Adobe Typekit stylesheet link |
+| `frontend/src/app/globals.css` | Mapped Hebrew, general Latin, and small-caps Latin font variables to Typekit families |
+| `STATUS.json` | Recorded the typography follow-up under `dash-006` |
+| `docs/progress.md` | Reconciled dashboard/deploy progress as complete and added the Typekit follow-up |
+
+### Font mapping
+
+- Hebrew: `narkiss-asaf-variable, sans-serif`
+- General Latin: `garamond-premier-pro, serif`
+- Small-caps Latin: `garamond-premier-pro-caption, serif`
+- Stylesheet: `https://use.typekit.net/coa1zta.css`
+
+### Sensors
+
+- `cd frontend && npm run lint` → clean
+- `cd frontend && npm run build` → compiled. Better Auth default-secret/base-url warnings are the known local-env pattern and did not fail the build.
+- Local smoke: `http://127.0.0.1:3026/login` returned HTTP 200 and included the Typekit stylesheet link in rendered HTML.
+
+### Deploy
+
+- Commit: `a6e4a0f` (`style: switch typography to Typekit`)
+- Push: `git push origin main` succeeded (`154a193..a6e4a0f`).
+- Sync: `rsync` to `vps:~/apps/hebrai/` completed with `.env`, `.env.*`, `frontend/node_modules`, and `frontend/.next` excluded.
+- VPS rebuild: `docker compose -f docker-compose.yml -f docker-compose.vps-host-nginx.yml up -d --build next` completed. Compose also rebuilt/recreated `fastapi` from cache; no backend source changed.
+
+### Production smoke
+
+- `https://hebrai.co/login` → HTTP/2 200 with HSTS/security headers.
+- `https://hebrai.co` → HTTP/2 307 to `/login` with HSTS/security headers.
+- Production login HTML includes `https://use.typekit.net/coa1zta.css` as preload and stylesheet.
+- VPS `docker compose ps` shows postgres, fastapi, and next up; Next logs show the server ready on `0.0.0.0:3000`.
+
+### Residuals
+
+- In-app Browser visual verification could not run because the Node REPL browser control tool was unavailable in this session; verification used HTTP/HTML smoke instead.
+- Final rendered font availability depends on the Adobe Typekit kit containing the requested families and permitting `hebrai.co`.
+
 ## 2026-05-27 — QA/Security correction pass: forgot-password hardening
 
 ### Files changed
