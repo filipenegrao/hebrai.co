@@ -5,9 +5,30 @@
 
 ## Last update
 
-- **Date:** 2026-05-27T21:18Z
-- **Session:** Forgot-password flow cleared by QA and Security; ready to deploy after VPS env setup.
-- **Branch / HEAD:** `main` — synced with `origin/main` at `254a25d`.
+- **Date:** 2026-05-27T22:36Z
+- **Session:** Forgot-password flow deployed to VPS.
+- **Branch / HEAD:** `main` — synced with `origin/main` at `f4997d0`.
+
+## Deploy summary (2026-05-27 — forgot-password)
+
+- **Commit deployed:** `f4997d0` (docs/state closeout after forgot-password QA/Security)
+- **VPS env prerequisites:** confirmed present without printing values: `BETTER_AUTH_URL`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`.
+- **Sync:** rsync to `vps:~/apps/hebrai/` completed with `.env` and `.env.*` excluded; VPS `.env` was not overwritten by this deploy.
+- **Build/restart:** `docker compose -f docker-compose.yml -f docker-compose.vps-host-nginx.yml up -d --build next` completed. Compose also rebuilt/recreated `fastapi` from cache due service graph behavior; no backend source change was involved.
+- **Local sensors:** `cd frontend && npm run lint` — clean; `cd frontend && npm run build` — compiled. Build shows `/reset-password` as static and `Proxy (Middleware)` active.
+- **Production smoke:**
+  - `https://hebrai.co/reset-password` → HTTP/2 200, HSTS/security headers present.
+  - `https://hebrai.co/login` → HTTP/2 200, HSTS/security headers present.
+  - `https://hebrai.co` → HTTP/2 307 → `/login`, HSTS/security headers present.
+  - `docker compose ps` → postgres, fastapi, next all up.
+  - `docker compose logs --tail=80 next` → Next.js ready, no runtime errors.
+- **Migration note:** attempted host-side `npm exec @better-auth/cli migrate`, but the VPS host has Node 18 and the CLI began compiling native sqlite deps. The process was stopped before migration. Better Auth tables were already created during earlier VPS cutover; no new schema issue was observed during this deploy.
+- **Post-deploy fix:** password-reset requests initially failed in the UI with `Load failed`. Next logs showed Postgres auth failure `28P01` for user `hebrai`. `.env` was internally consistent, but the persisted Postgres role password no longer matched the current `.env` value. Repaired by running `ALTER USER hebrai WITH PASSWORD ...` inside the Postgres container using the current `.env` value without printing it, then restarted `next`.
+- **Post-fix smoke:** `POST https://hebrai.co/api/auth/request-password-reset` now returns HTTP 200 with Better Auth's generic anti-enumeration response. Fresh logs show no DB auth failure after the repair.
+- **Second post-deploy fix:** user still saw `Load failed`. Running Next container showed `BETTER_AUTH_URL=http://localhost:80` and `NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:80`, so the browser bundle could call localhost. Updated both VPS `.env` values to `https://hebrai.co`, rebuilt/recreated `next`, and verified the running container now has both values set to `https://hebrai.co`.
+- **Final reset smoke:** `POST https://hebrai.co/api/auth/request-password-reset` returns HTTP 200 with the generic Better Auth response after the URL rebuild; fresh Next logs show no runtime errors from that request.
+- **Email delivery fix:** reset requests returned success but no email arrived. Logs showed `email delivery failed: connect ECONNREFUSED 127.0.0.1:587`, proving `SMTP_*` keys existed in VPS `.env` but were not passed into the `next` container. Added `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM` to the `next` service environment in `docker-compose.yml`, synced/recreated `next`, and confirmed the reset endpoint still returns HTTP 200 with no fresh SMTP error logs.
+- **Next bind fix:** after recreating `next`, host nginx briefly returned 502 because the standalone server was not reliably reachable through the published port. Added `HOSTNAME=0.0.0.0` and `PORT=3000` to the `next` service environment. Recreated `next`; logs now show `Network: http://0.0.0.0:3000`, and `https://hebrai.co/login` returns HTTP 200.
 
 ## Goals completed this session (forgot-password — 2026-05-27)
 
@@ -23,9 +44,9 @@
 - Commit: `feat: add forgot-password flow with Better Auth and SMTP email`
 
 ### Residuals for forgot-password
-  - SMTP env vars (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SMTP_SECURE`) must be set in the VPS `.env` before reset emails will deliver. `.env.example` now documents them.
+  - SMTP env vars (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SMTP_SECURE`) are now present in the VPS `.env` as of the 2026-05-27 deploy. `.env.example` documents them.
   - No automated test covers the reset email path (requires live SMTP and Better Auth DB).
-  - The VPS has not been re-deployed with this change. Next deploy (rsync bootstrap) will pick it up.
+  - Deployed to VPS on 2026-05-27. User should perform an end-to-end reset request with a real inbox to confirm Resend delivery.
   - Better Auth token expiry default is 1 hour — acceptable for now.
 
 ## Goals completed this session (QA/Security correction pass for forgot-password — 2026-05-27)
@@ -38,9 +59,8 @@
 
 ### Residual risks (QA correction pass)
   - `npm audit` 2 moderate: `postcss <8.5.10` in Next.js's internal dependency tree. Not introduced by this PR. The only fix (`npm audit fix --force`) would downgrade Next.js to 9.3.3 — do not apply. Monitor for a Next.js patch that upgrades its bundled postcss.
-  - VPS not yet redeployed with these changes.
-  - Before deploy, confirm VPS `.env` has `BETTER_AUTH_URL=https://hebrai.co`, `NEXT_PUBLIC_BETTER_AUTH_URL=https://hebrai.co`, and all `SMTP_*` vars.
-  - Run Better Auth migration on the VPS before first reset attempt if schema drift is possible.
+  - Deployed to VPS on 2026-05-27 with required env vars present.
+  - Host-side Better Auth CLI migration should not be run with the VPS system Node 18 path. Use a Node 24 container/tooling path if future Better Auth migrations are needed.
 
 ## Deploy summary (2026-05-27)
 
