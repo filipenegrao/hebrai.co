@@ -9,6 +9,7 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 - Confirmed the Adobe kit CSS includes `narkiss-asaf-variable` and that the Narkiss WOFF2 endpoint returns HTTP 200.
 - Added `.lumen-hebrew` to `frontend/src/app/globals.css` with direct Narkiss font-family, normal style, weight 400, and `"wght" 400` variation setting.
 - Replaced all remaining Hebrew callsites that used Tailwind arbitrary `[font-family:var(--font-hebrew)]` with `.lumen-hebrew`.
+- User still saw Lucida fallback, so added a first-party single-weight `@font-face` alias named `hebrai-narkiss-asaf` that points directly to the Adobe Narkiss WOFF2 URL and changed `--font-hebrew` to prefer that alias before `narkiss-asaf-variable`.
 
 ### Sensors
 
@@ -22,6 +23,7 @@ Append-only dated notes. Use [`HANDOFF.md`](../HANDOFF.md) for the **current** s
 - `https://hebrai.co/login` → HTTP/2 200 with HSTS/security headers.
 - Production HTML shows the Hebrew hero word using `class="lumen-hebrew ..."`.
 - VPS-side CSS check confirms `.lumen-hebrew{font-variation-settings:"wght" 400;font-family:narkiss-asaf-variable,sans-serif;font-style:normal;font-weight:400}` in the deployed CSS chunk.
+- Second deploy CSS check confirms the production chunk contains `@font-face{font-family:hebrai-narkiss-asaf;...format("woff2");font-weight:400...}` and `.lumen-hebrew{font-family:var(--font-hebrew);font-synthesis:none;font-variation-settings:normal;font-style:normal;font-weight:400}`.
 
 ## 2026-05-28 — Typekit typography swap and VPS deploy
 

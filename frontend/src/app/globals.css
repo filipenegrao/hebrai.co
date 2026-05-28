@@ -4,6 +4,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "hebrai-narkiss-asaf";
+  src: url("https://use.typekit.net/af/636e94/0000000000000000774cc16d/31/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3")
+    format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -49,7 +59,7 @@
 }
 
 :root {
-  --font-hebrew: "narkiss-asaf-variable", sans-serif;
+  --font-hebrew: "hebrai-narkiss-asaf", "narkiss-asaf-variable", sans-serif;
   --font-latin: "garamond-premier-pro", serif;
   --font-latin-small-caps: "garamond-premier-pro-caption", serif;
   --font-plex-mono: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo,
@@ -182,10 +192,11 @@
   }
 
   .lumen-hebrew {
-    font-family: "narkiss-asaf-variable", sans-serif;
+    font-family: var(--font-hebrew);
     font-style: normal;
     font-weight: 400;
-    font-variation-settings: "wght" 400;
+    font-synthesis: none;
+    font-variation-settings: normal;
   }
 
   .lumen-hebrew-glow {
