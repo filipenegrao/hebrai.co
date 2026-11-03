@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from ai_service import ProviderError, generate_content, hash_prompt
 from db import db_connection
 from fsrs_service import determine_format, schedule_review
-from models import CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse, Word
+from models import CardWithContent, ExerciseFormat, NextCardsResponse, ReviewRequest, ReviewResponse, Word
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +38,13 @@ def _validate_fsrs_state(fsrs_state: Any, card_id: int) -> dict:
     return fsrs_state
 
 
-def _row_to_parts(row: tuple) -> tuple[int, dict, str | None, Word]:
-    """Unpack a joined cards+words DB row."""
+def _row_to_parts(row: tuple) -> tuple[int, dict, ExerciseFormat | None, Word]:
+    """Unpack a joined cards+words DB row.
+
+    `format_override` is narrowed to ExerciseFormat by the CHECK constraint on
+    cards.format_override (database/migrations/001_initial_schema.sql), which
+    permits exactly those three values or NULL.
+    """
     card_id, _user_id, _word_id, fsrs_state, format_override = row[:5]
     w_id, hebrew, transliteration, gloss_pt, morphology, frequency_rank, source_ref = row[5:]
     word = Word(
@@ -54,7 +59,7 @@ def _row_to_parts(row: tuple) -> tuple[int, dict, str | None, Word]:
     return card_id, fsrs_state or {}, format_override, word
 
 
-def _get_or_generate_content(cur, word: Word, fmt: str, provider: str) -> dict:
+def _get_or_generate_content(cur, word: Word, fmt: ExerciseFormat, provider: str) -> dict:
     prompt_hash = hash_prompt(word.id, fmt, provider)
     cur.execute(
         "SELECT content FROM ai_content_cache WHERE word_id = %s AND provider = %s AND prompt_hash = %s",
@@ -159,7 +164,7 @@ def get_next_cards(
                 CardWithContent(
                     card_id=card_id,
                     word=word,
-                    format=fmt,  # type: ignore[arg-type]  # determine_format returns one of the literals
+                    format=fmt,
                     content=content,
                     ai_provider=provider,
                 )

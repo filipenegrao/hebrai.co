@@ -1,9 +1,17 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import os
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from models import Word
+
+if TYPE_CHECKING:
+    # anthropic is imported lazily at call time, so the SDK types are only
+    # needed for annotations (deferred by the __future__ import above).
+    from anthropic.types import MessageParam
 
 _PROMPT_VERSION = "v2"
 _DEFAULT_PROVIDER_MODELS = {
@@ -38,7 +46,7 @@ class _Provider:
         self,
         provider_name: str,
         model: str,
-        messages: list[dict],
+        messages: list[MessageParam],
     ) -> _GenerateResponse:
         if provider_name == "claude":
             return self._generate_anthropic(model=model, messages=messages)
@@ -47,13 +55,14 @@ class _Provider:
     def _generate_anthropic(
         self,
         model: str,
-        messages: list[dict],
+        messages: list[MessageParam],
     ) -> _GenerateResponse:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             raise NotImplementedError("ANTHROPIC_API_KEY is not configured")
 
         from anthropic import Anthropic
+        from anthropic.types import TextBlock
 
         client = Anthropic(api_key=api_key)
         # Adaptive thinking is on by default and spends output tokens, so
@@ -61,14 +70,12 @@ class _Provider:
         response = client.messages.create(
             model=model,
             max_tokens=4096,
-            messages=messages,  # type: ignore[arg-type]  # dicts built above match MessageParam
+            messages=messages,
         )
-        # The `type == "text"` guard narrows to TextBlock, which mypy cannot see through getattr.
-        text = "".join(
-            block.text  # type: ignore[union-attr]
-            for block in response.content
-            if getattr(block, "type", None) == "text"
-        ).strip()
+        # isinstance narrows the ContentBlock union to TextBlock, so `.text` is
+        # statically known to exist. The equivalent getattr(block, "type") guard
+        # read the same at runtime but told the type checker nothing.
+        text = "".join(block.text for block in response.content if isinstance(block, TextBlock)).strip()
         if not text:
             raise ValueError("Anthropic returned no text content")
         return _GenerateResponse(choices=[_Choice(message=_Message(content=text))])

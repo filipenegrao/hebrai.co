@@ -3,15 +3,31 @@ from datetime import datetime
 from fsrs import Card as FSRSCard
 from fsrs import Rating, Scheduler, State
 
+from models import ExerciseFormat
+
 _scheduler = Scheduler()
 
 _RATING_MAP = {1: Rating.Again, 2: Rating.Hard, 3: Rating.Good, 4: Rating.Easy}
 
 
-def fsrs_state_to_card(state: dict) -> FSRSCard:
-    card = FSRSCard()
+class AppCard(FSRSCard):
+    """An fsrs ``Card`` plus the repetition counter the application owns.
+
+    fsrs 6.3.1 models no repetition count: ``Card`` is a plain dataclass holding
+    only ``card_id``, ``state``, ``step``, ``stability``, ``difficulty``, ``due``
+    and ``last_review``. ``reps`` is therefore ours, persisted in the
+    ``cards.fsrs_state`` JSONB column rather than by the library. Declaring it on
+    a subclass keeps the attribute typed and survives a future fsrs release that
+    adds ``__slots__`` to ``Card``, which plain attribute assignment would not.
+    """
+
+    reps: int = 0
+
+
+def fsrs_state_to_card(state: dict) -> AppCard:
+    card = AppCard()
     if not state:
-        card.reps = 0  # type: ignore[attr-defined]  # fsrs 6 dropped Card.reps; kept as an app-side counter
+        card.reps = 0
         return card
 
     if "state" in state:
@@ -32,7 +48,7 @@ def fsrs_state_to_card(state: dict) -> FSRSCard:
     if last_review:
         card.last_review = datetime.fromisoformat(last_review)
 
-    card.reps = state.get("reps", 0)  # type: ignore[attr-defined]  # see fsrs_state_to_card above
+    card.reps = state.get("reps", 0)
     return card
 
 
@@ -46,19 +62,21 @@ def card_to_fsrs_state(card: FSRSCard) -> dict:
         "difficulty": card.difficulty,
         "due": due.isoformat() if due else None,
         "last_review": last_review.isoformat() if last_review else None,
+        # Accepts any fsrs Card, including the plain ones the scheduler returns,
+        # which carry no `reps`; AppCard supplies it.
         "reps": getattr(card, "reps", 0),
     }
 
 
 def schedule_review(fsrs_state: dict, rating: int) -> dict:
     card = fsrs_state_to_card(fsrs_state)
-    card, _ = _scheduler.review_card(card, _RATING_MAP[rating])
-    state = card_to_fsrs_state(card)
+    reviewed, _ = _scheduler.review_card(card, _RATING_MAP[rating])
+    state = card_to_fsrs_state(reviewed)
     state["reps"] = fsrs_state.get("reps", 0) + 1
     return state
 
 
-def determine_format(fsrs_state: dict, format_override: str | None) -> str:
+def determine_format(fsrs_state: dict, format_override: ExerciseFormat | None) -> ExerciseFormat:
     if format_override:
         return format_override
     reps = fsrs_state.get("reps", 0) if fsrs_state else 0
