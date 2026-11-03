@@ -1896,6 +1896,10 @@ new-card `INSERT`s were discarded along with the failed request.
   `stop_reason=end_turn`.
 - Local `backend/` vs VPS `backend/` dry-run rsync: only the three edited files
   differ, so the VPS copy had not drifted.
+- Production, after deploy: a real session through the UI logged
+  `GET /session/next-cards` → 200 and five `POST /session/review` → 200, with no
+  `ProviderError`, traceback or `not_found` in the backend logs. `ai_content_cache`
+  holds 36 rows for provider `claude`, `review_log` 23 rows.
 
 ### Notes
 
