@@ -10,34 +10,62 @@
 #   bash deploy/push-deploy.sh frontend
 #   bash deploy/push-deploy.sh              # whole tree
 #
-# Override the target via the environment:
-#   VPS_HOST=1.2.3.4 VPS_PORT=22 VPS_USER=ubuntu bash deploy/push-deploy.sh
+# This repository is public, so the target is not hardcoded. Put it in
+# deploy/.deploy.env, which is gitignored:
+#
+#   VPS_HOST=vps-alias-or-ip
+#   VPS_USER=deploy-user
+#   VPS_PORT=22
+#   APP_DIR=/srv/hebrai
+#   SSH_KEY=~/.ssh/some_key        # optional; omit to use your ssh config
+#
+# Environment variables win over that file:
+#   VPS_HOST=1.2.3.4 bash deploy/push-deploy.sh backend
 #
 # A dry run shows what would change without writing anything:
 #   DRY_RUN=1 bash deploy/push-deploy.sh backend
 #
 set -euo pipefail
 
-VPS_HOST="${VPS_HOST:-200.141.31.16}"
-VPS_PORT="${VPS_PORT:-2222}"
-VPS_USER="${VPS_USER:-filipe}"
-APP_DIR="${APP_DIR:-/home/filipe/apps/hebrai}"
-SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519_filipe_nopass}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG="${DEPLOY_ENV:-$REPO_ROOT/deploy/.deploy.env}"
+
+# File values are defaults; anything already exported stays as it is.
+if [[ -f "$CONFIG" ]]; then
+  while IFS='=' read -r key value; do
+    [[ "$key" =~ ^[A-Z_][A-Z0-9_]*$ ]] || continue
+    [[ -n "${!key:-}" ]] || printf -v "$key" '%s' "${value%$'\r'}"
+    export "${key?}"
+  done < "$CONFIG"
+fi
+
+VPS_PORT="${VPS_PORT:-22}"
+APP_DIR="${APP_DIR:-/srv/hebrai}"
+
+for required in VPS_HOST VPS_USER; do
+  if [[ -z "${!required:-}" ]]; then
+    echo "ERROR: $required is not set. Put it in $CONFIG or pass it in the" >&2
+    echo "       environment, e.g. VPS_HOST=… VPS_USER=… bash deploy/push-deploy.sh" >&2
+    exit 1
+  fi
+done
 
 SUBDIR="${1:-}"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 SSH_CMD=(ssh -p "$VPS_PORT")
-if [[ -f "$SSH_KEY" ]]; then
-  SSH_CMD+=(-i "$SSH_KEY")
+if [[ -n "${SSH_KEY:-}" ]]; then
+  SSH_CMD+=(-i "${SSH_KEY/#\~/$HOME}")
 fi
 
 # Never --delete: the VPS app directory holds .env and other untracked state
-# that is deliberately absent from the repo.
+# that is deliberately absent from the repo. The .env.example include has to
+# come first, because rsync applies the first matching rule.
 RSYNC_ARGS=(
   -ai
+  --include '.env.example'
+  --exclude '.env*'
+  --exclude '.deploy.env'
   --exclude '.git'
-  --exclude '.env'
   --exclude '__pycache__'
   --exclude '.pytest_cache'
   --exclude '.venv'
@@ -50,20 +78,28 @@ if [[ -n "${DRY_RUN:-}" ]]; then
   echo "=== DRY RUN — nothing will be written ==="
 fi
 
-SRC="$REPO_ROOT/"
-DEST="$APP_DIR/"
+sync_dir() {
+  local src="$1" dest="$2"
+  echo "=== Syncing $src -> $VPS_USER@$VPS_HOST:$dest ==="
+  rsync "${RSYNC_ARGS[@]}" -e "${SSH_CMD[*]}" "$src" "$VPS_USER@$VPS_HOST:$dest"
+}
+
+# deploy/ always goes first: a partial sync still has to run the current
+# deploy.sh on the box, not whatever version happens to be there.
+sync_dir "$REPO_ROOT/deploy/" "$APP_DIR/deploy/"
+
 if [[ -n "$SUBDIR" ]]; then
   SUBDIR="${SUBDIR%/}"
   if [[ ! -d "$REPO_ROOT/$SUBDIR" ]]; then
     echo "ERROR: $SUBDIR is not a directory in $REPO_ROOT" >&2
     exit 1
   fi
-  SRC="$REPO_ROOT/$SUBDIR/"
-  DEST="$APP_DIR/$SUBDIR/"
+  if [[ "$SUBDIR" != "deploy" ]]; then
+    sync_dir "$REPO_ROOT/$SUBDIR/" "$APP_DIR/$SUBDIR/"
+  fi
+else
+  sync_dir "$REPO_ROOT/" "$APP_DIR/"
 fi
-
-echo "=== Syncing $SRC -> $VPS_USER@$VPS_HOST:$DEST ==="
-rsync "${RSYNC_ARGS[@]}" -e "${SSH_CMD[*]}" "$SRC" "$VPS_USER@$VPS_HOST:$DEST"
 
 if [[ -n "${DRY_RUN:-}" ]]; then
   echo "=== DRY RUN complete — deploy.sh was not run ==="

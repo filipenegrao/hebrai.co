@@ -5,9 +5,20 @@
 
 ## Last update
 
-- **Date:** 2026-05-28T14:41Z
-- **Session:** Narkiss Hebrew font enforcement deployed to VPS.
-- **Previous code deploy commit:** `a6e4a0f` — pushed to `origin/main`.
+- **Date:** 2026-11-03T20:05Z
+- **Session:** Retired `claude-sonnet-4` model fixed (the 502 on "iniciar sessão"); deploy scripts retargeted at the current VPS.
+- **Previous code deploy commit:** `e44b71e` — on branch `fix/retired-claude-sonnet-4-model`, PR #1, not yet merged to `origin/main`.
+
+## Deploy summary (2026-11-03 — retired Claude model)
+
+- **Issue:** `ERRO DE SESSÃO Failed to fetch cards: 502` after login → "iniciar sessão".
+- **Root cause:** `claude-sonnet-4-20250514` was retired from the Claude API on 2026-06-15. `_get_or_generate_content()` called it for every uncached card and got `anthropic.NotFoundError: 404 not_found_error`; nothing caught it, so Starlette answered with its plain-text `Internal Server Error`, and `frontend/src/app/api/session/next-cards/route.ts` returns 502 whenever `upstream.json()` cannot parse the body. No data was corrupted — `db_connection()` rolls back on exception, so the new-card `INSERT`s were discarded with the failed request.
+- **Fix:** default claude model is `claude-sonnet-5-5`; `temperature` removed from the whole call chain (Sonnet 5.5 rejects non-default sampling parameters with a 400); `max_tokens` 1024 → 4096 because adaptive thinking is on by default and spends output tokens before the JSON; new `ProviderError` wraps provider failures and `session_router` turns it into a JSON 503.
+- **Sensors:** `python -m pytest -q` in the `hebrai-fastapi` image — 42 passed. Live call against `claude-sonnet-5-5` with the real `_build_prompt` output for all three formats — bare JSON, expected keys, 1.8–3.0s, `stop_reason=end_turn`.
+- **VPS deploy:** rsync of `backend/` then `docker compose … build fastapi && up -d --no-deps fastapi`. `/health` → `{"status": "ok"}`, and the running container serves `claude-sonnet-5-5`. Backend-only, so `next` was not rebuilt.
+- **Production smoke:** not yet confirmed through the UI — the user has to click "iniciar sessão"; `docker logs hebrai-fastapi-1` shows no `next-cards` request since the container was recreated.
+- **Deploy tooling:** the app dir on this box is `/home/filipe/apps/hebrai` and is **not** a git clone, so `deploy.sh`'s unconditional `git pull --ff-only` could never have run there (the broken server-side GitHub key noted below is still unfixed). `APP_DIR` now defaults to that path in `deploy.sh`, `migrate-auth.sh` and `setup-vps.sh`; `deploy.sh` pulls only when `.git` is present; `setup-vps.sh` leaves an rsync-fed directory alone and chowns a `/home/*` app dir to the deploy user; and the new `deploy/push-deploy.sh` rsyncs the tree (or one subdirectory, always syncing `deploy/` first) from a workstation and then runs `deploy.sh` on the box. The repository is public, so the target lives in the gitignored `deploy/.deploy.env`, not in the script. `DRY_RUN=1` shows the changes without writing. `install-host-nginx.sh` needed no change — it is keyed on `DOMAIN`, and its `proxy_read_timeout 180s` matches what the box already serves, which is ample for ~3s per generated card.
+- **Repo location:** the working copy moved out of iCloud to `~/dev/hebrai.co`.
 
 ## Deploy summary (2026-05-28 — Narkiss enforcement)
 

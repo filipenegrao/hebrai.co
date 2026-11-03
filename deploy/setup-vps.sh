@@ -55,6 +55,19 @@ elif [[ -f "$APP_DIR/docker-compose.yml" ]]; then
 else
   git clone "$REPO" "$APP_DIR"
 fi
+
+# This script runs as root, so hand the tree to the deploy user when APP_DIR
+# lives under a home directory — otherwise push-deploy.sh cannot write to it.
+APP_USER="${APP_USER:-}"
+if [[ -z "$APP_USER" && "$APP_DIR" == /home/* ]]; then
+  APP_USER="${APP_DIR#/home/}"
+  APP_USER="${APP_USER%%/*}"
+fi
+if [[ -n "$APP_USER" ]] && id -u "$APP_USER" >/dev/null 2>&1; then
+  echo "=== Giving $APP_DIR to $APP_USER ==="
+  chown -R "$APP_USER": "$APP_DIR"
+fi
+
 cd "$APP_DIR"
 
 echo "=== Setting up .env ==="
