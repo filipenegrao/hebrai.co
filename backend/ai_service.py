@@ -7,7 +7,7 @@ from models import Word
 
 _PROMPT_VERSION = "v2"
 _DEFAULT_PROVIDER_MODELS = {
-    "claude": "claude-sonnet-4-20250514",
+    "claude": "claude-sonnet-5-5",
 }
 
 
@@ -26,6 +26,10 @@ class _GenerateResponse:
     choices: list[_Choice]
 
 
+class ProviderError(RuntimeError):
+    """The AI provider could not produce usable content for a card."""
+
+
 class _Provider:
     """Placeholder provider interface. Real SDK wrappers are added in the AI provider task.
     Expected response shape: response.choices[0].message.content -> JSON string."""
@@ -35,17 +39,15 @@ class _Provider:
         provider_name: str,
         model: str,
         messages: list[dict],
-        temperature: float = 0.3,
     ) -> _GenerateResponse:
         if provider_name == "claude":
-            return self._generate_anthropic(model=model, messages=messages, temperature=temperature)
+            return self._generate_anthropic(model=model, messages=messages)
         raise NotImplementedError(f"No AI provider configured for {provider_name!r}")
 
     def _generate_anthropic(
         self,
         model: str,
         messages: list[dict],
-        temperature: float = 0.3,
     ) -> _GenerateResponse:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
@@ -54,10 +56,11 @@ class _Provider:
         from anthropic import Anthropic
 
         client = Anthropic(api_key=api_key)
+        # Adaptive thinking is on by default and spends output tokens, so
+        # max_tokens has to leave room for both the reasoning and the JSON.
         response = client.messages.create(
             model=model,
-            max_tokens=1024,
-            temperature=temperature,
+            max_tokens=4096,
             messages=messages,
         )
         text = "".join(block.text for block in response.content if getattr(block, "type", None) == "text").strip()
@@ -165,12 +168,17 @@ def generate_content(
             provider_name=provider_name,
             model=resolved_model or "",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
         )
     except NotImplementedError:
         return _placeholder_content(exercise_format, word)
+    except Exception as exc:
+        raise ProviderError(
+            f"Provider {provider_name!r} failed for model {resolved_model!r}: {exc}"
+        ) from exc
     text = response.choices[0].message.content.strip()
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
-        raise ValueError(f"Provider returned non-JSON content for format {exercise_format!r}: {exc}") from exc
+        raise ProviderError(
+            f"Provider {provider_name!r} returned non-JSON content for format {exercise_format!r}: {exc}"
+        ) from exc

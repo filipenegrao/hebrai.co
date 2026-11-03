@@ -1854,3 +1854,68 @@ Stack torn down cleanly with `docker compose down`.
 - This was a frontend-only pass layered on top of the existing local Claude-badge changes already present in the checkout.
 - Better Auth still emits the pre-existing build-time warnings when `BETTER_AUTH_URL` / secret defaults are missing during local static generation; no auth config behavior changed in this pass.
 - No live browser walkthrough or screenshot QA was performed yet; this pass is validated by lint/build only.
+
+## 2026-11-03 — Retired Claude model broke the study session (502)
+
+### Problem
+
+Clicking "iniciar sessão" on hebrai.co showed `ERRO DE SESSÃO Failed to fetch cards: 502`.
+
+Root cause chain, confirmed in `docker logs hebrai-fastapi-1` on the VPS:
+
+1. `claude-sonnet-4-20250514` was retired from the Claude API on 2026-06-15.
+2. `_get_or_generate_content()` called it for every uncached card and got
+   `anthropic.NotFoundError: 404 not_found_error`.
+3. Nothing caught it, so Starlette answered with its plain-text `Internal Server Error`.
+4. `frontend/src/app/api/session/next-cards/route.ts` returns 502 when
+   `upstream.json()` cannot parse the body — hence the 502 rather than a 500 or 503.
+
+The DB was never corrupted: `db_connection()` rolls back on exception, so the
+new-card `INSERT`s were discarded along with the failed request.
+
+### Changes
+
+- `backend/ai_service.py`
+  - Default claude model is now `claude-sonnet-5-5`.
+  - Dropped `temperature` from the whole call chain — Sonnet 5.5 rejects
+    non-default sampling parameters with a 400.
+  - `max_tokens` 1024 → 4096: adaptive thinking is on by default and spends
+    output tokens before the JSON is produced.
+  - New `ProviderError` wraps provider API failures and non-JSON replies.
+- `backend/session_router.py` — catches `ProviderError`, logs it, and returns a
+  JSON 503. `api.ts` only reports `res.status`, so the user still sees a bare
+  number — but the failure is now legible in the logs and the network tab
+  instead of masquerading as a proxy-level 502.
+- `.env.example`, `HANDOFF.md` — model id updated.
+
+### Verification
+
+- `python -m pytest -q` in the `hebrai-fastapi` image — 42 passed.
+- Live check inside the running container: `claude-sonnet-5-5` is accepted by the
+  pinned `anthropic==0.104.1`, returns bare JSON (no markdown fences), 1.6s,
+  `stop_reason=end_turn`.
+- Local `backend/` vs VPS `backend/` dry-run rsync: only the three edited files
+  differ, so the VPS copy had not drifted.
+- Production, after deploy: a real session through the UI logged
+  `GET /session/next-cards` → 200 and five `POST /session/review` → 200, with no
+  `ProviderError`, traceback or `not_found` in the backend logs. `ai_content_cache`
+  holds 36 rows for provider `claude`, `review_log` 23 rows.
+
+### Notes
+
+- The repo was moved out of iCloud to `~/dev/hebrai.co`.
+- The app moved to a new VPS, on a non-standard SSH port, and its app
+  directory is **not** a git checkout — deploys go by rsync. The connection
+  details live in the gitignored `deploy/.deploy.env`, since this repository
+  is public.
+- `deploy/*.sh` were updated for that box in the same pass: `deploy.sh` and
+  `migrate-auth.sh` derive `APP_DIR` from their own location instead of a
+  hardcoded path, `deploy.sh` only runs `git pull` when the app dir is
+  actually a clone, `setup-vps.sh` leaves an rsync-fed directory alone and
+  chowns a `/home/*` app dir to the deploy user, and the new
+  `deploy/push-deploy.sh` ships the tree (or one subdirectory, always syncing
+  `deploy/` first) from a workstation and then runs `deploy.sh` on the box.
+  `DRY_RUN=1` makes it show the changes without writing.
+- Host nginx already sets `proxy_read_timeout 180s`, so the ~3s per generated
+  card leaves plenty of headroom for a 5-card session.
+- `anthropic==0.104.1` is old; bumping it is a separate follow-up.

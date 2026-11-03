@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 from typing import Any
 
@@ -7,7 +8,9 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from db import db_connection
 from models import Word, CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse
 from fsrs_service import schedule_review, determine_format
-from ai_service import generate_content, hash_prompt
+from ai_service import ProviderError, generate_content, hash_prompt
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/session", tags=["session"])
 
@@ -62,7 +65,16 @@ def _get_or_generate_content(cur, word: Word, fmt: str, provider: str) -> dict:
         raw = cached[0]
         return raw if isinstance(raw, dict) else json.loads(raw)
 
-    content = generate_content(word, fmt, provider_name=provider)
+    try:
+        content = generate_content(word, fmt, provider_name=provider)
+    except ProviderError as exc:
+        # Surface a JSON 503 instead of a plain-text 500, which the Next proxy
+        # could only report to the user as an opaque 502.
+        logger.error("AI content generation failed for word %s: %s", word.id, exc)
+        raise HTTPException(
+            status_code=503,
+            detail="Serviço de IA indisponível. Tente novamente em instantes.",
+        ) from exc
     cur.execute(
         """
         INSERT INTO ai_content_cache (word_id, provider, prompt_hash, content)

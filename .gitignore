@@ -1,5 +1,6 @@
 # Environment
 .env
+deploy/.deploy.env
 .env.local
 .env.*.local
 

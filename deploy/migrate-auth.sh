@@ -7,7 +7,7 @@
 #
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/hebrai}"
+APP_DIR="${APP_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 COMPOSE_ARGS=(
   -f docker-compose.yml
 )

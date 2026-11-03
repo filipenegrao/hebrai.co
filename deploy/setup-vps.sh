@@ -15,7 +15,7 @@ set -euo pipefail
 DOMAIN="${DOMAIN:-hebrai.co}"
 EMAIL="${EMAIL:-CHANGE_ME@example.com}"
 REPO="${REPO:-https://github.com/CHANGE_ME/hebrai.co.git}"
-APP_DIR="${APP_DIR:-/opt/hebrai}"
+APP_DIR="${APP_DIR:-/srv/hebrai}"
 
 if [[ "$REPO" == *CHANGE_ME* ]]; then
   echo "ERROR: set REPO to the real repository URL, e.g.:" >&2
@@ -45,12 +45,29 @@ apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-compose-plug
 echo "=== Installing nginx + Certbot ==="
 apt-get install -y -qq nginx certbot
 
-echo "=== Cloning repo into $APP_DIR ==="
+echo "=== Seeding $APP_DIR ==="
+mkdir -p "$APP_DIR"
 if [[ -d "$APP_DIR/.git" ]]; then
   echo "Repo already present at $APP_DIR — skipping clone."
+elif [[ -f "$APP_DIR/docker-compose.yml" ]]; then
+  echo "Source already present at $APP_DIR without a .git — leaving it alone."
+  echo "Push updates with deploy/push-deploy.sh instead of git pull."
 else
   git clone "$REPO" "$APP_DIR"
 fi
+
+# This script runs as root, so hand the tree to the deploy user when APP_DIR
+# lives under a home directory — otherwise push-deploy.sh cannot write to it.
+APP_USER="${APP_USER:-${SUDO_USER:-}}"
+if [[ -z "$APP_USER" && "$APP_DIR" == /home/* ]]; then
+  APP_USER="${APP_DIR#/home/}"
+  APP_USER="${APP_USER%%/*}"
+fi
+if [[ -n "$APP_USER" ]] && id -u "$APP_USER" >/dev/null 2>&1; then
+  echo "=== Giving $APP_DIR to $APP_USER ==="
+  chown -R "$APP_USER": "$APP_DIR"
+fi
+
 cd "$APP_DIR"
 
 echo "=== Setting up .env ==="
