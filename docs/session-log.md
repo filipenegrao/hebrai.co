@@ -1854,3 +1854,52 @@ Stack torn down cleanly with `docker compose down`.
 - This was a frontend-only pass layered on top of the existing local Claude-badge changes already present in the checkout.
 - Better Auth still emits the pre-existing build-time warnings when `BETTER_AUTH_URL` / secret defaults are missing during local static generation; no auth config behavior changed in this pass.
 - No live browser walkthrough or screenshot QA was performed yet; this pass is validated by lint/build only.
+
+## 2026-11-03 — Retired Claude model broke the study session (502)
+
+### Problem
+
+Clicking "iniciar sessão" on hebrai.co showed `ERRO DE SESSÃO Failed to fetch cards: 502`.
+
+Root cause chain, confirmed in `docker logs hebrai-fastapi-1` on the VPS:
+
+1. `claude-sonnet-4-20250514` was retired from the Claude API on 2026-06-15.
+2. `_get_or_generate_content()` called it for every uncached card and got
+   `anthropic.NotFoundError: 404 not_found_error`.
+3. Nothing caught it, so Starlette answered with its plain-text `Internal Server Error`.
+4. `frontend/src/app/api/session/next-cards/route.ts` returns 502 when
+   `upstream.json()` cannot parse the body — hence the 502 rather than a 500 or 503.
+
+The DB was never corrupted: `db_connection()` rolls back on exception, so the
+new-card `INSERT`s were discarded along with the failed request.
+
+### Changes
+
+- `backend/ai_service.py`
+  - Default claude model is now `claude-sonnet-5-5`.
+  - Dropped `temperature` from the whole call chain — Sonnet 5.5 rejects
+    non-default sampling parameters with a 400.
+  - `max_tokens` 1024 → 4096: adaptive thinking is on by default and spends
+    output tokens before the JSON is produced.
+  - New `ProviderError` wraps provider API failures and non-JSON replies.
+- `backend/session_router.py` — catches `ProviderError`, logs it, and returns a
+  JSON 503 so a future provider outage is readable instead of an opaque 502.
+- `.env.example`, `HANDOFF.md` — model id updated.
+
+### Verification
+
+- `python -m pytest -q` in the `hebrai-fastapi` image — 42 passed.
+- Live check inside the running container: `claude-sonnet-5-5` is accepted by the
+  pinned `anthropic==0.104.1`, returns bare JSON (no markdown fences), 1.6s,
+  `stop_reason=end_turn`.
+- Local `backend/` vs VPS `backend/` dry-run rsync: only the three edited files
+  differ, so the VPS copy had not drifted.
+
+### Notes
+
+- The repo was moved out of iCloud to `~/dev/hebrai.co`.
+- The VPS is now `200.141.31.16`, SSH port 2222, app dir
+  `/home/filipe/apps/hebrai`, and it is **not** a git checkout — deploys go by
+  rsync. `deploy/*.sh` still describe the old box (`85.31.62.19`, `/opt/hebrai`)
+  and need updating.
+- `anthropic==0.104.1` is old; bumping it is a separate follow-up.
