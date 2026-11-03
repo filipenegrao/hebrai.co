@@ -14,6 +14,7 @@ Updated: 2026-11-03
 
 ## Done
 
+- [x] 2026-11-03 CI trigger fixed — a stacked pull request no longer runs zero checks
 - [x] 2026-11-03 Backend type mismatches fixed — all five `# type: ignore` comments replaced by real types
 - [x] 2026-11-03 Harness CI toolchain — `pyproject.toml`, ruff/mypy/pytest config, CI green
 - [x] 2026-11-03 Deploy scripts retargeted to the current VPS (`deploy/push-deploy.sh` added)

@@ -1,8 +1,10 @@
 name: Harness CI
 
 on:
+  # No `branches` filter: that key matches the PR's BASE branch, so with
+  # [main, develop] a stacked PR onto a feature branch ran no checks at all and
+  # showed up as clean — green by absence, which reads the same as verified.
   pull_request:
-    branches: [main, develop]
   push:
     branches: [main]
 
