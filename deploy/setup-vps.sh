@@ -15,7 +15,7 @@ set -euo pipefail
 DOMAIN="${DOMAIN:-hebrai.co}"
 EMAIL="${EMAIL:-CHANGE_ME@example.com}"
 REPO="${REPO:-https://github.com/CHANGE_ME/hebrai.co.git}"
-APP_DIR="${APP_DIR:-/opt/hebrai}"
+APP_DIR="${APP_DIR:-/home/filipe/apps/hebrai}"
 
 if [[ "$REPO" == *CHANGE_ME* ]]; then
   echo "ERROR: set REPO to the real repository URL, e.g.:" >&2
@@ -45,9 +45,13 @@ apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-compose-plug
 echo "=== Installing nginx + Certbot ==="
 apt-get install -y -qq nginx certbot
 
-echo "=== Cloning repo into $APP_DIR ==="
+echo "=== Seeding $APP_DIR ==="
+mkdir -p "$APP_DIR"
 if [[ -d "$APP_DIR/.git" ]]; then
   echo "Repo already present at $APP_DIR — skipping clone."
+elif [[ -f "$APP_DIR/docker-compose.yml" ]]; then
+  echo "Source already present at $APP_DIR without a .git — leaving it alone."
+  echo "Push updates with deploy/push-deploy.sh instead of git pull."
 else
   git clone "$REPO" "$APP_DIR"
 fi

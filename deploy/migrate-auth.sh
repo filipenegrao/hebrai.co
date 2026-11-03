@@ -7,7 +7,7 @@
 #
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/hebrai}"
+APP_DIR="${APP_DIR:-/home/filipe/apps/hebrai}"
 COMPOSE_ARGS=(
   -f docker-compose.yml
 )

@@ -1902,6 +1902,13 @@ new-card `INSERT`s were discarded along with the failed request.
 - The repo was moved out of iCloud to `~/dev/hebrai.co`.
 - The VPS is now `200.141.31.16`, SSH port 2222, app dir
   `/home/filipe/apps/hebrai`, and it is **not** a git checkout — deploys go by
-  rsync. `deploy/*.sh` still describe the old box (`85.31.62.19`, `/opt/hebrai`)
-  and need updating.
+  rsync.
+- `deploy/*.sh` were updated for that box in the same pass: `APP_DIR` now
+  defaults to `/home/filipe/apps/hebrai`, `deploy.sh` only runs `git pull` when
+  the app dir is actually a clone, `setup-vps.sh` leaves an rsync-fed directory
+  alone, and the new `deploy/push-deploy.sh` ships the tree (or one
+  subdirectory) from a workstation and then runs `deploy.sh` on the box.
+  `DRY_RUN=1` makes it show the changes without writing.
+- Host nginx already sets `proxy_read_timeout 180s`, so the ~3s per generated
+  card leaves plenty of headroom for a 5-card session.
 - `anthropic==0.104.1` is old; bumping it is a separate follow-up.
