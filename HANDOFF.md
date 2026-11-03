@@ -5,9 +5,56 @@
 
 ## Last update
 
-- **Date:** 2026-11-03T20:05Z
-- **Session:** Retired `claude-sonnet-4` model fixed (the 502 on "iniciar sessão"); deploy scripts retargeted at the current VPS.
-- **Previous code deploy commit:** `e44b71e` — on branch `fix/retired-claude-sonnet-4-model`, PR #1, not yet merged to `origin/main`.
+- **Date:** 2026-11-03T21:40Z
+- **Session:** Harness CI toolchain — the Ruff, Mypy and Pytest jobs made green for the first time.
+- **Branch:** `chore/ci-green`, rebased onto `main` after PR #1 merged. No deploy; tooling and config only.
+
+## Session summary (2026-11-03 — Harness CI toolchain)
+
+- **Issue:** `.github/workflows/harness-ci.yml` has existed since the start of the project, but PR #1 was the
+  repository's first pull request, so the checks ran for the first time today and had never been green. Three
+  jobs failed for reasons that predate any recent change:
+  - `Mypy` and `Pytest` run `pip install -e ".[dev]"`, but no `pyproject.toml` or `setup.py` existed anywhere
+    in the repo. Both jobs died at install, before running a single check.
+  - `Ruff` ran `ruff check .` with no configuration at all. CI's unpinned `pip install ruff` resolved to
+    0.17.3, whose default rule set is wider than earlier releases, and reported 25 findings.
+- **Fix — `pyproject.toml` at the repo root:**
+  - Runtime dependencies mirror `backend/requirements.txt` pin for pin; the `dev` extra adds `pytest`,
+    `pytest-mock`, `httpx`, `ruff==0.17.3` and `mypy==2.1.0`.
+  - `[tool.setuptools] packages = []` — the repo is not a Python package, and without this setuptools'
+    flat-layout discovery aborts on the multiple top-level directories.
+  - `requires-python = ">=3.12"`, which covers both the 3.12 the workflow installs and the 3.14 in
+    `backend/Dockerfile`. CI stays on 3.12 as the conservative lower bound; neither was moved, since bumping
+    either one is a deployment call rather than a CI fix.
+  - `[tool.pytest.ini_options]` with `pythonpath = ["backend"]` and `testpaths = ["backend/tests"]`, because
+    the tests import `from models import Word` with no package prefix.
+- **Fix — Ruff configuration:** `select = ["E4", "E7", "E9", "F", "I", "B", "SIM", "RUF"]`, `line-length = 120`,
+  `src = ["backend"]` so first-party modules sort correctly, `extend-exclude = ["frontend"]`.
+  `ignore = ["B008"]` — B008 flags `Depends()` in an argument default, which is FastAPI's documented
+  dependency-injection idiom and must not be rewritten. Ruff is pinned in the workflow as well: an unpinned
+  version bump alone could turn the job red, as the 0.15 → 0.17 default change showed.
+- **Fix — the 24 remaining findings, all style, no behavior change:** 13 unsorted import blocks and 4 unused
+  imports auto-fixed; by hand, 2 `raise ... from exc`, 1 tuple concatenation → unpacking, 1 nested `with`
+  combined, 1 unused unpacked name prefixed, 1 en dash in a comment. `import psycopg2` in `backend/db.py`
+  was confirmed side-effect-free before removal (`from psycopg2.pool import …` already imports the package,
+  and nothing patches `db.psycopg2`).
+- **Fix — Mypy:** permissive by design (`ignore_missing_imports = true`, `python_version = "3.12"`, no strict),
+  run over the whole repo. Scoping with `files` would have been pointless, since the workflow passes `.`
+  positionally and that overrides it. With the real dependencies installed mypy found 15 errors in 3 files,
+  all third-party type mismatches in code that was never typed. Silenced with 5 narrow per-line
+  `# type: ignore[code]` comments rather than module-wide disables, so everything else in those files stays
+  checked. Worth revisiting later, and deliberately out of scope here:
+  - `fsrs_service.py` stores its own `card.reps` counter on an `fsrs.Card`; fsrs 6 no longer declares that
+    attribute, so it works only because Python allows the assignment.
+  - `ai_service.py` builds `messages` as plain dicts and narrows content blocks through `getattr`.
+  - `session_router.py` passes a `str` where `CardWithContent.format` declares a `Literal`.
+- **Local sensors** (the ruff and mypy versions CI resolves, with `pip install -e ".[dev]"` actually
+  exercised in a clean venv, which is what proves the setuptools config):
+  - `ruff check .` — all checks passed.
+  - `mypy .` — success, no issues found in 16 source files.
+  - `pytest` — 42 passed, with `DATABASE_URL` and `ANTHROPIC_API_KEY` unset.
+- **Not done:** no deploy, no Docker verification (the daemon was down on this machine), and no change to
+  `backend/Dockerfile` or to the workflow's Python version.
 
 ## Deploy summary (2026-11-03 — retired Claude model)
 
