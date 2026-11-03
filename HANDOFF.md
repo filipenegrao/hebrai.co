@@ -5,9 +5,11 @@
 
 ## Last update
 
-- **Date:** 2026-11-03T21:40Z
+- **Date:** 2026-11-03T20:54Z
 - **Session:** Harness CI toolchain — the Ruff, Mypy and Pytest jobs made green for the first time.
 - **Branch:** `chore/ci-green`, rebased onto `main` after PR #1 merged. No deploy; tooling and config only.
+- **Previous code deploy commit:** `e44b71e` — PR #1, merged to `origin/main` as `d8bdb58`. Unchanged by this
+  session: nothing here was deployed, and no backend behavior changed.
 
 ## Session summary (2026-11-03 — Harness CI toolchain)
 
