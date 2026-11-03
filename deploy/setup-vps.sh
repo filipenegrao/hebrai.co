@@ -15,7 +15,7 @@ set -euo pipefail
 DOMAIN="${DOMAIN:-hebrai.co}"
 EMAIL="${EMAIL:-CHANGE_ME@example.com}"
 REPO="${REPO:-https://github.com/CHANGE_ME/hebrai.co.git}"
-APP_DIR="${APP_DIR:-/home/filipe/apps/hebrai}"
+APP_DIR="${APP_DIR:-/srv/hebrai}"
 
 if [[ "$REPO" == *CHANGE_ME* ]]; then
   echo "ERROR: set REPO to the real repository URL, e.g.:" >&2

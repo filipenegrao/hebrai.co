@@ -1900,14 +1900,17 @@ new-card `INSERT`s were discarded along with the failed request.
 ### Notes
 
 - The repo was moved out of iCloud to `~/dev/hebrai.co`.
-- The VPS is now `200.141.31.16`, SSH port 2222, app dir
-  `/home/filipe/apps/hebrai`, and it is **not** a git checkout — deploys go by
-  rsync.
-- `deploy/*.sh` were updated for that box in the same pass: `APP_DIR` now
-  defaults to `/home/filipe/apps/hebrai`, `deploy.sh` only runs `git pull` when
-  the app dir is actually a clone, `setup-vps.sh` leaves an rsync-fed directory
-  alone, and the new `deploy/push-deploy.sh` ships the tree (or one
-  subdirectory) from a workstation and then runs `deploy.sh` on the box.
+- The app moved to a new VPS, on a non-standard SSH port, and its app
+  directory is **not** a git checkout — deploys go by rsync. The connection
+  details live in the gitignored `deploy/.deploy.env`, since this repository
+  is public.
+- `deploy/*.sh` were updated for that box in the same pass: `deploy.sh` and
+  `migrate-auth.sh` derive `APP_DIR` from their own location instead of a
+  hardcoded path, `deploy.sh` only runs `git pull` when the app dir is
+  actually a clone, `setup-vps.sh` leaves an rsync-fed directory alone and
+  chowns a `/home/*` app dir to the deploy user, and the new
+  `deploy/push-deploy.sh` ships the tree (or one subdirectory, always syncing
+  `deploy/` first) from a workstation and then runs `deploy.sh` on the box.
   `DRY_RUN=1` makes it show the changes without writing.
 - Host nginx already sets `proxy_read_timeout 180s`, so the ~3s per generated
   card leaves plenty of headroom for a 5-card session.
