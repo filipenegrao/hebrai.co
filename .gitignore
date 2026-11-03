@@ -31,3 +31,10 @@ Thumbs.db
 
 # Database
 *.dump
+
+# Python tooling
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+__pycache__/
