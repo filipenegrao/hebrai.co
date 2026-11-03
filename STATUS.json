@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-11-03T22:40Z",
+  "last_updated": "2026-11-03T21:13Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -238,7 +238,7 @@
           "name": "Backend type mismatches resolved",
           "status": "done",
           "tests": true,
-          "notes": "The five per-line `# type: ignore` comments from ci-001 removed and replaced by real types; zero remain in backend/. fsrs_service: fsrs 6.3.1 models no repetition count (Card is a plain dataclass), so the app-side `reps` counter — already persisted in cards.fsrs_state JSONB — is declared on an AppCard(Card) subclass instead of assigned to an undeclared attribute, which also survives a future fsrs adding __slots__. Scheduling verified unchanged: with enable_fuzzing=False, review_card returns bit-identical state for AppCard and Card over seven rating sequences; the default fuzzing already makes two base Cards disagree on `due`. ai_service: messages annotated list[MessageParam] (the type anthropic 0.104.1's Messages.create accepts), imported under TYPE_CHECKING so the SDK stays lazily imported; content blocks narrowed with isinstance(block, TextBlock). models/session_router: shared ExerciseFormat Literal alias used for determine_format's return type, with format_override typed from the existing DB CHECK constraint rather than validated at runtime. No behavior change; 42 tests pass unedited. Sensors: ruff clean, mypy clean over 16 files, pytest 42 passed. Not verified in Docker (daemon down); no deploy."
+          "notes": "The five per-line `# type: ignore` comments from ci-001 removed and replaced by real types; zero remain in backend/. fsrs_service: fsrs 6.3.1 models no repetition count (Card is a plain dataclass), so the app-side `reps` counter — already persisted in cards.fsrs_state JSONB — is declared on an AppCard(Card) subclass instead of assigned to an undeclared attribute, which also survives a future fsrs adding __slots__. Scheduling verified unchanged: with enable_fuzzing=False, review_card returns bit-identical state for AppCard and Card over seven rating sequences; the default fuzzing already makes two base Cards disagree on `due`. ai_service: messages annotated list[MessageParam] (the type anthropic 0.104.1's Messages.create accepts), imported under TYPE_CHECKING so the SDK stays lazily imported; content blocks narrowed with isinstance(block, TextBlock), verified against the pinned SDK's own response parsing via a mocked transport (thinking + text blocks) because _generate_anthropic has no test. models/session_router: shared ExerciseFormat Literal alias used for determine_format's return type, with format_override typed from the existing DB CHECK constraint rather than validated at runtime. No behavior change; 42 tests pass unedited. Sensors: ruff clean, mypy clean over 16 files, pytest 42 passed. Not verified in Docker (daemon down); no deploy."
         }
       ]
     }

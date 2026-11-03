@@ -62,8 +62,10 @@ def card_to_fsrs_state(card: FSRSCard) -> dict:
         "difficulty": card.difficulty,
         "due": due.isoformat() if due else None,
         "last_review": last_review.isoformat() if last_review else None,
-        # Accepts any fsrs Card, including the plain ones the scheduler returns,
-        # which carry no `reps`; AppCard supplies it.
+        # Takes a plain fsrs Card, so `reps` cannot be read as an attribute:
+        # `Scheduler.review_card` is annotated to return `Card` (it preserves the
+        # subclass at runtime, via copy(), but not statically), and the roundtrip
+        # test passes a base Card with `reps` set dynamically.
         "reps": getattr(card, "reps", 0),
     }
 

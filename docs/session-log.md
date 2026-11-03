@@ -1970,8 +1970,9 @@ Repository tooling and configuration. No application behavior changed.
   on an `AppCard(Card)` subclass — typed, and still working if a future fsrs adds `__slots__` to `Card`.
   Dropping `reps` from the card object altogether was rejected because `test_new_card_has_zero_reps` and
   `test_roundtrip_state_preserves_reps` read `card.reps`, and editing tests was out of scope.
-  `card_to_fsrs_state` deliberately keeps `getattr(card, "reps", 0)`: it takes any fsrs `Card`, including the
-  plain ones `review_card` returns.
+  `card_to_fsrs_state` deliberately keeps `getattr(card, "reps", 0)`: it takes a plain `Card`, and
+  `review_card` is annotated to return `Card` even though `copy()` preserves the subclass at runtime; the
+  roundtrip test also passes a base `Card` with `reps` set dynamically.
 - `backend/ai_service.py` — `messages` annotated `list[MessageParam]`, confirmed against the installed
   anthropic 0.104.1 (`Messages.create` takes `Iterable[MessageParam]`) rather than assumed from the version
   number. Imported under `TYPE_CHECKING` with `from __future__ import annotations`, so the SDK stays lazily
@@ -2000,9 +2001,13 @@ Repository tooling and configuration. No application behavior changed.
   decimal. The cause is fsrs's `enable_fuzzing=True` default, not the subclass — a base `Card` compared
   against another base `Card` disagreed on `due` in 4 of 7 sequences under the same conditions.
 - All five ignores were removed; none needed to be kept and justified.
-- `_generate_anthropic` has no test coverage — every `ai_service` test patches `provider.generate` above it —
-  so the `isinstance` narrowing is guaranteed by the type checker, not by a test. Worth a test when a real
-  provider response is available to fixture.
+- `_generate_anthropic` has no test coverage — every `ai_service` test patches `provider.generate` above it.
+  Since mypy only proves `.text` exists after narrowing, not that the SDK emits `TextBlock` at all, the change
+  was verified locally against the pinned SDK: with `anthropic.Anthropic` patched to use an
+  `httpx.MockTransport` returning a `thinking` block then a `text` block (the real shape, adaptive thinking
+  being on by default), the SDK builds `ThinkingBlock` and `TextBlock`, `isinstance` keeps only the text one,
+  and the result matches the old `getattr` code exactly. Left as a local check, not a committed test, so the
+  suite stays at 42. Worth fixturing a real response later.
 - Branched off `chore/ci-green` because PR #2 was still open and that is where `pyproject.toml` and the
   ignores live. The PR (#3) targets `main`, because the workflow only triggers on pull requests to `main` or
   `develop` — a PR based on `chore/ci-green` would have run no checks at all. The workflow itself was left

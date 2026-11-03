@@ -5,7 +5,7 @@
 
 ## Last update
 
-- **Date:** 2026-11-03T22:40Z
+- **Date:** 2026-11-03T21:13Z
 - **Session:** Backend type mismatches fixed — the five `# type: ignore` comments from the CI session removed.
 - **Branch:** `chore/fix-mypy-types`, PR #3, targeting `main`. Started off `chore/ci-green` because PR #2 was
   still open and that is where `pyproject.toml` and the ignores lived; #2 was squash-merged as `e87e59e`
@@ -29,8 +29,9 @@
   keeps it typed and keeps working if a future fsrs release adds `__slots__` to `Card`.
   - Moving `reps` out of the card object entirely was rejected: `test_new_card_has_zero_reps` and
     `test_roundtrip_state_preserves_reps` both read `card.reps`, and editing tests was out of scope.
-  - `card_to_fsrs_state` still reads `getattr(card, "reps", 0)` on purpose — it accepts any fsrs `Card`,
-    including the plain ones the scheduler returns and the one the roundtrip test builds.
+  - `card_to_fsrs_state` still reads `getattr(card, "reps", 0)` on purpose: it takes a plain `Card`, and
+    `Scheduler.review_card` is *annotated* to return `Card` — at runtime it preserves the subclass through
+    `copy()`, but not statically — while the roundtrip test passes a base `Card` with `reps` set dynamically.
   - **No scheduling change, verified:** with `enable_fuzzing=False`, `Scheduler.review_card` returns
     bit-identical state for `AppCard` and `Card` across seven rating sequences. With fsrs's default fuzzing
     on, two *base* `Card`s already disagree on `due`, so the fuzz — not the subclass — explains any
@@ -55,8 +56,12 @@
   - `mypy .` — success, no issues found in 16 source files, with zero `# type: ignore` left in `backend/`.
   - `pytest` — 42 passed, unedited, with `DATABASE_URL` and `ANTHROPIC_API_KEY` unset.
 - **Not done:** no deploy, no Docker verification, and no change to `deploy/`, the frontend, or the PR #1
-  Claude-model fix. `_generate_anthropic` remains untested — the tests patch `provider.generate` above it, so
-  the `isinstance` narrowing is covered by the type checker rather than by a test.
+  Claude-model fix. `_generate_anthropic` has no test — the tests patch `provider.generate` above it — so the
+  `isinstance` narrowing was verified locally against the pinned SDK's own response parsing instead: with a
+  mocked transport returning a `thinking` block followed by a `text` block (the real shape, since adaptive
+  thinking is on by default), the SDK constructs `ThinkingBlock` and `TextBlock`, `isinstance` selects only
+  the latter, and the extracted text is identical to what the previous `getattr` version produced. Worth a
+  committed test once a real provider response can be fixtured.
 
 ## Session summary (2026-11-03 — Harness CI toolchain)
 
