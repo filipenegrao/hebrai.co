@@ -14,6 +14,7 @@ Updated: 2026-05-28
 
 ## Done
 
+- [x] 2026-11-03 Migrated off the retired `claude-sonnet-4-20250514` model (fixed the 502 on "iniciar sessão")
 - [x] Foundation section closed (`foundation-001` to `foundation-010`)
 - [x] Core engine section closed (`core-001` to `core-009`)
 - [x] Dashboard/deploy section closed (`dash-001` to `dash-009`)

@@ -1883,7 +1883,9 @@ new-card `INSERT`s were discarded along with the failed request.
     output tokens before the JSON is produced.
   - New `ProviderError` wraps provider API failures and non-JSON replies.
 - `backend/session_router.py` — catches `ProviderError`, logs it, and returns a
-  JSON 503 so a future provider outage is readable instead of an opaque 502.
+  JSON 503. `api.ts` only reports `res.status`, so the user still sees a bare
+  number — but the failure is now legible in the logs and the network tab
+  instead of masquerading as a proxy-level 502.
 - `.env.example`, `HANDOFF.md` — model id updated.
 
 ### Verification
