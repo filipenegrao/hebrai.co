@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from models import Word
-from ai_service import hash_prompt, generate_content, _build_prompt, _GenerateResponse, _Choice, _Message
+from ai_service import ProviderError, hash_prompt, generate_content, _build_prompt, _GenerateResponse, _Choice, _Message
 
 
 @pytest.fixture
@@ -90,7 +90,7 @@ def test_generate_content_raises_on_malformed_json(sample_word):
     mock.choices[0].message.content = "not valid json {"
 
     with patch("ai_service.provider.generate", return_value=mock):
-        with pytest.raises(ValueError, match="non-JSON"):
+        with pytest.raises(ProviderError, match="non-JSON"):
             generate_content(sample_word, "flashcard")
 
 
@@ -142,3 +142,8 @@ def test_generate_content_uses_anthropic_model_env_override(sample_word):
             generate_content(sample_word, "typing", provider_name="claude")
 
     assert generate.call_args.kwargs["model"] == "claude-test-model"
+
+def test_generate_content_raises_provider_error_on_api_failure(sample_word):
+    with patch("ai_service.provider.generate", side_effect=RuntimeError("404 not_found_error")):
+        with pytest.raises(ProviderError, match="not_found_error"):
+            generate_content(sample_word, "flashcard")

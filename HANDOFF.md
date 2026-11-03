@@ -180,7 +180,7 @@
     4. A throwaway smoke user was created successfully through the public domain.
 - Wired the first real AI provider path in the backend: **Anthropic / Claude**.
   - `backend/ai_service.py` now resolves the `claude` provider through the official Anthropic Python SDK when `ANTHROPIC_API_KEY` is present.
-  - Default Anthropic model is `claude-sonnet-4-20250514`, overridable via `ANTHROPIC_MODEL` or `DEFAULT_AI_MODEL`.
+  - Default Anthropic model is `claude-sonnet-5-5`, overridable via `ANTHROPIC_MODEL` or `DEFAULT_AI_MODEL`.
   - `backend/session_router.py` now passes the saved provider name into `generate_content()`.
   - `hash_prompt()` now includes a prompt-version prefix (`v2`) so previously cached placeholder "Claude" content is bypassed and regenerated as real AI output after deploy.
   - `docker-compose.yml` now attaches `fastapi` to both `internal` and `external` networks. This keeps FastAPI off public ports while restoring outbound internet access for Anthropic/OpenAI/Gemini SDK calls.
