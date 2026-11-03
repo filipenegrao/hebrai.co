@@ -143,7 +143,10 @@ def test_generate_content_uses_anthropic_model_env_override(sample_word):
 
     assert generate.call_args.kwargs["model"] == "claude-test-model"
 
+
 def test_generate_content_raises_provider_error_on_api_failure(sample_word):
-    with patch("ai_service.provider.generate", side_effect=RuntimeError("404 not_found_error")):
-        with pytest.raises(ProviderError, match="not_found_error"):
-            generate_content(sample_word, "flashcard")
+    with (
+        patch("ai_service.provider.generate", side_effect=RuntimeError("404 not_found_error")),
+        pytest.raises(ProviderError, match="not_found_error"),
+    ):
+        generate_content(sample_word, "flashcard")
