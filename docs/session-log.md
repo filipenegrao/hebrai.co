@@ -1956,3 +1956,56 @@ Repository tooling and configuration. No application behavior changed.
 - B008 is ignored deliberately, not worked around: `Depends()` in an argument default is the FastAPI idiom.
 - PR #1 merged while this work was in progress, so the branch was rebased onto the new `main` and the style
   pass re-derived on top of it. No change of PR #1's was reverted or altered.
+
+## 2026-11-03 — Backend type mismatches (the five `# type: ignore` comments removed)
+
+### What was done
+
+- Picked up the three mismatches the CI session (`ci-001`) silenced rather than fixed. `warn_unused_ignores`
+  was already on, so any ignore left unnecessary would have failed the Mypy job — that was the safety net.
+- `backend/fsrs_service.py` — inspected the installed fsrs 6.3.1 instead of assuming its API. `Card` is a
+  plain `@dataclass(init=False)` with `card_id`, `state`, `step`, `stability`, `difficulty`, `due` and
+  `last_review` only: the library models no repetition count, so there is no library field to adopt. `reps`
+  is the application's and is already persisted in the `cards.fsrs_state` JSONB column, so it is now declared
+  on an `AppCard(Card)` subclass — typed, and still working if a future fsrs adds `__slots__` to `Card`.
+  Dropping `reps` from the card object altogether was rejected because `test_new_card_has_zero_reps` and
+  `test_roundtrip_state_preserves_reps` read `card.reps`, and editing tests was out of scope.
+  `card_to_fsrs_state` deliberately keeps `getattr(card, "reps", 0)`: it takes any fsrs `Card`, including the
+  plain ones `review_card` returns.
+- `backend/ai_service.py` — `messages` annotated `list[MessageParam]`, confirmed against the installed
+  anthropic 0.104.1 (`Messages.create` takes `Iterable[MessageParam]`) rather than assumed from the version
+  number. Imported under `TYPE_CHECKING` with `from __future__ import annotations`, so the SDK stays lazily
+  imported at call time. Content blocks narrowed with `isinstance(block, TextBlock)`.
+- `backend/models.py`, `backend/session_router.py` — `ExerciseFormat` Literal alias extracted to `models.py`
+  and used for `determine_format`'s return type and for `CardWithContent.format` / `ReviewRequest.format_used`.
+  `_row_to_parts` types the DB-sourced `format_override` as `ExerciseFormat | None`, which the existing
+  `CHECK (format_override IN (...))` constraint guarantees; no runtime validation was added, because that
+  would have changed behavior on invalid rows.
+
+### Sensors
+
+- `ruff check .` (ruff 0.17.3, the CI-pinned version) — all checks passed
+- `mypy .` (mypy 2.1.0, dependencies installed) — no issues in 16 source files
+- `grep -rn "type: ignore" backend/` — no matches
+- `pytest` — 42 passed, unedited, with `DATABASE_URL` and `ANTHROPIC_API_KEY` unset
+- `python3 -c "import json; json.load(open('STATUS.json'))"` — valid
+- Scheduling equivalence: with `Scheduler(enable_fuzzing=False)`, `review_card` returns bit-identical
+  `to_dict()` state for `AppCard` and `Card` over seven rating sequences
+
+### Notes
+
+- No behavior change, and no data migration: stored `fsrs_state` is read and written exactly as before, so no
+  already-scheduled card shifts.
+- The first equivalence run showed `due` differing while `stability` and `difficulty` matched to the last
+  decimal. The cause is fsrs's `enable_fuzzing=True` default, not the subclass — a base `Card` compared
+  against another base `Card` disagreed on `due` in 4 of 7 sequences under the same conditions.
+- All five ignores were removed; none needed to be kept and justified.
+- `_generate_anthropic` has no test coverage — every `ai_service` test patches `provider.generate` above it —
+  so the `isinstance` narrowing is guaranteed by the type checker, not by a test. Worth a test when a real
+  provider response is available to fixture.
+- Branched off `chore/ci-green` because PR #2 was still open and that is where `pyproject.toml` and the
+  ignores live. The PR targets `main` and carries #2's commits until #2 merges: the workflow only triggers on
+  pull requests to `main` or `develop`, so a PR based on `chore/ci-green` would have run no checks at all.
+  The workflow itself was left untouched.
+- Docker was still down on this machine, so the sensors ran in a clean venv with the CI-pinned tool versions.
+  The jobs on the pull request are the authoritative check.

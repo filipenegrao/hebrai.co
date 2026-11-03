@@ -5,11 +5,56 @@
 
 ## Last update
 
-- **Date:** 2026-11-03T20:54Z
-- **Session:** Harness CI toolchain — the Ruff, Mypy and Pytest jobs made green for the first time.
-- **Branch:** `chore/ci-green`, rebased onto `main` after PR #1 merged. No deploy; tooling and config only.
+- **Date:** 2026-11-03T22:40Z
+- **Session:** Backend type mismatches fixed — the five `# type: ignore` comments from the CI session removed.
+- **Branch:** `chore/fix-mypy-types`, branched off `chore/ci-green` (PR #2, still open at the time). Stacked:
+  the PR targets `main` and carries #2's commits until #2 merges. No deploy; typing only.
 - **Previous code deploy commit:** `e44b71e` — PR #1, merged to `origin/main` as `d8bdb58`. Unchanged by this
   session: nothing here was deployed, and no backend behavior changed.
+
+## Session summary (2026-11-03 — Backend type mismatches)
+
+- **Issue:** the CI session silenced mypy's 15 findings with five per-line `# type: ignore` comments so the
+  CI work would not become a refactor, and turned on `warn_unused_ignores = true` so those ignores could not
+  outlive the mismatch they covered. All five are now replaced by real types. Nothing here was a live bug;
+  this is fragility reduction. No behavior changed, and the 42 backend tests pass unedited.
+- **Fix — `fsrs_service.py` (the one with real breakage potential):** the code stored a `reps` counter on an
+  `fsrs.Card`, which worked only because Python allows assigning an undeclared attribute. Inspecting the
+  installed fsrs 6.3.1 confirmed `Card` is a plain `@dataclass(init=False)` holding only `card_id`, `state`,
+  `step`, `stability`, `difficulty`, `due` and `last_review` — the library models no repetition count at all,
+  so there is no library field to migrate to. `reps` is therefore the application's, and it is already
+  persisted in the `cards.fsrs_state` JSONB column. It is now declared on an `AppCard(Card)` subclass, which
+  keeps it typed and keeps working if a future fsrs release adds `__slots__` to `Card`.
+  - Moving `reps` out of the card object entirely was rejected: `test_new_card_has_zero_reps` and
+    `test_roundtrip_state_preserves_reps` both read `card.reps`, and editing tests was out of scope.
+  - `card_to_fsrs_state` still reads `getattr(card, "reps", 0)` on purpose — it accepts any fsrs `Card`,
+    including the plain ones the scheduler returns and the one the roundtrip test builds.
+  - **No scheduling change, verified:** with `enable_fuzzing=False`, `Scheduler.review_card` returns
+    bit-identical state for `AppCard` and `Card` across seven rating sequences. With fsrs's default fuzzing
+    on, two *base* `Card`s already disagree on `due`, so the fuzz — not the subclass — explains any
+    difference. No stored `fsrs_state` is reinterpreted and no data migration was needed.
+- **Fix — `ai_service.py`:** `messages` is annotated `list[MessageParam]`, the type
+  `client.messages.create()` actually accepts in the pinned anthropic 0.104.1 (confirmed in the installed
+  package: `Messages.create` takes `Iterable[MessageParam]`). It is imported under `TYPE_CHECKING` with
+  `from __future__ import annotations`, so the SDK stays lazily imported at call time as before. The content
+  blocks are narrowed with `isinstance(block, TextBlock)` instead of a `getattr(block, "type")` guard the
+  type checker could not see through.
+- **Fix — `session_router.py` / `models.py`:** the exercise-format literal is extracted to a shared
+  `ExerciseFormat` alias in `models.py` and used for `determine_format`'s return type, rather than casting at
+  the point of use. `_row_to_parts` declares the DB-sourced `format_override` as `ExerciseFormat | None`,
+  which the `CHECK (format_override IN ('flashcard', 'multiple_choice', 'typing'))` constraint in
+  `database/migrations/001_initial_schema.sql` already guarantees. No runtime validation was added, since
+  that would have changed behavior. The alias is a plain assignment, not a PEP 695 `type` statement, so
+  Pydantic keeps inlining the enum in the OpenAPI schema instead of emitting a `$ref`.
+- **Ignores kept:** none. All five were removed; `warn_unused_ignores = true` would have failed the Mypy job
+  on any that had become unnecessary, so it served as the safety net it was turned on to be.
+- **Local sensors** (CI-pinned ruff 0.17.3 and mypy 2.1.0 in a clean venv; Docker was still down):
+  - `ruff check .` — all checks passed.
+  - `mypy .` — success, no issues found in 16 source files, with zero `# type: ignore` left in `backend/`.
+  - `pytest` — 42 passed, unedited, with `DATABASE_URL` and `ANTHROPIC_API_KEY` unset.
+- **Not done:** no deploy, no Docker verification, and no change to `deploy/`, the frontend, or the PR #1
+  Claude-model fix. `_generate_anthropic` remains untested — the tests patch `provider.generate` above it, so
+  the `isinstance` narrowing is covered by the type checker rather than by a test.
 
 ## Session summary (2026-11-03 — Harness CI toolchain)
 
