@@ -7,8 +7,10 @@
 
 - **Date:** 2026-11-03T22:40Z
 - **Session:** Backend type mismatches fixed — the five `# type: ignore` comments from the CI session removed.
-- **Branch:** `chore/fix-mypy-types`, branched off `chore/ci-green` (PR #2, still open at the time). Stacked:
-  the PR targets `main` and carries #2's commits until #2 merges. No deploy; typing only.
+- **Branch:** `chore/fix-mypy-types`, PR #3, targeting `main`. Started off `chore/ci-green` because PR #2 was
+  still open and that is where `pyproject.toml` and the ignores lived; #2 was squash-merged as `e87e59e`
+  mid-session, so the branch was rebased onto `main` and now carries only its own two commits. No deploy;
+  typing only.
 - **Previous code deploy commit:** `e44b71e` — PR #1, merged to `origin/main` as `d8bdb58`. Unchanged by this
   session: nothing here was deployed, and no backend behavior changed.
 

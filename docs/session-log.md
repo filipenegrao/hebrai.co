@@ -2004,8 +2004,13 @@ Repository tooling and configuration. No application behavior changed.
   so the `isinstance` narrowing is guaranteed by the type checker, not by a test. Worth a test when a real
   provider response is available to fixture.
 - Branched off `chore/ci-green` because PR #2 was still open and that is where `pyproject.toml` and the
-  ignores live. The PR targets `main` and carries #2's commits until #2 merges: the workflow only triggers on
-  pull requests to `main` or `develop`, so a PR based on `chore/ci-green` would have run no checks at all.
-  The workflow itself was left untouched.
+  ignores live. The PR (#3) targets `main`, because the workflow only triggers on pull requests to `main` or
+  `develop` — a PR based on `chore/ci-green` would have run no checks at all. The workflow itself was left
+  untouched.
+- PR #2 was **squash-merged** into `main` as `e87e59e` while this work was in progress, so `main` gained #2's
+  changes as one commit while this branch still carried #2's originals — which GitHub reported as conflicts
+  in seven files. Resolved by `git rebase --onto origin/main 9848586`, leaving only this session's two
+  commits on top of `main`. Nothing of #2's was reverted or altered, and the sensors were re-run on the
+  rebased tree.
 - Docker was still down on this machine, so the sensors ran in a clean venv with the CI-pinned tool versions.
   The jobs on the pull request are the authoritative check.
