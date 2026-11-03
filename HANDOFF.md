@@ -5,14 +5,27 @@
 
 ## Last update
 
-- **Date:** 2026-11-03T21:13Z
-- **Session:** Backend type mismatches fixed — the five `# type: ignore` comments from the CI session removed.
-- **Branch:** `chore/fix-mypy-types`, PR #3, targeting `main`. Started off `chore/ci-green` because PR #2 was
-  still open and that is where `pyproject.toml` and the ignores lived; #2 was squash-merged as `e87e59e`
-  mid-session, so the branch was rebased onto `main` and now carries only its own two commits. No deploy;
-  typing only.
-- **Previous code deploy commit:** `e44b71e` — PR #1, merged to `origin/main` as `d8bdb58`. Unchanged by this
-  session: nothing here was deployed, and no backend behavior changed.
+- **Date:** 2026-11-03T22:10Z
+- **Session:** CI trigger fixed — a stacked pull request no longer runs zero checks.
+- **Branch:** `ci/run-checks-on-every-pr`, PR #4, targeting `main`. Workflow only; no backend change,
+  no deploy.
+- **Previous code deploy commit:** `e44b71e` — PR #1, merged to `origin/main` as `d8bdb58`. Unchanged by
+  this session; `main` is now at `7af4cdd` (PRs #1, #2 and #3 merged).
+
+## CI trigger (2026-11-03 — PR #4)
+
+- **Issue:** `on.pull_request.branches` filters on the pull request's **base** branch. With
+  `[main, develop]`, a stacked pull request onto a feature branch matched no trigger and ran **no checks
+  at all**, which GitHub displays as a PR with nothing failing — indistinguishable from verified. Found
+  while stacking PR #3 onto PR #2's branch.
+- **Fix:** dropped the `branches` filter from `pull_request`, so every pull request runs Ruff, Mypy,
+  Pytest and the documentation check whatever it targets. The `push` filter stays on `main`, the only
+  long-lived branch.
+- **Verification:** the workflow YAML was parsed before pushing (loads cleanly, all five jobs intact, no
+  base filter on `pull_request`). PR #4 targets `main` and is green, so the ordinary path did not
+  regress. The stacked case was then exercised for real: a throwaway PR (#5) targeting
+  `ci/run-checks-on-every-pr` ran all five checks and passed, where before it would have run none. That
+  PR and its branch were closed and deleted.
 
 ## Session summary (2026-11-03 — Backend type mismatches)
 

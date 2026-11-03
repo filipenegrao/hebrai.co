@@ -2019,3 +2019,44 @@ Repository tooling and configuration. No application behavior changed.
   rebased tree.
 - Docker was still down on this machine, so the sensors ran in a clean venv with the CI-pinned tool versions.
   The jobs on the pull request are the authoritative check.
+
+## 2026-11-03 — CI trigger: a stacked PR ran zero checks
+
+### Problem
+
+`on.pull_request.branches` filters on the pull request's **base** branch, not its
+head. With `[main, develop]`, a pull request stacked onto a feature branch
+matched no trigger and ran no checks at all. GitHub then shows that PR with
+nothing failing, which looks the same as verified.
+
+Green by absence is the one failure mode a CI gate must not have: a red check
+says something is wrong, while no check says nothing and reads as success.
+
+Found while stacking PR #3 onto PR #2's branch.
+
+### Change
+
+- `.github/workflows/harness-ci.yml` — dropped the `branches` filter from
+  `pull_request`. Every pull request now runs Ruff, Mypy, Pytest and the
+  documentation check regardless of what it targets. The `push` filter stays on
+  `main`, the only long-lived branch.
+
+### Verification
+
+- The YAML was parsed before pushing, in a throwaway container since no local
+  Python has pyyaml: it loads cleanly, `pull_request` carries no base filter,
+  and all five jobs (`lint`, `typecheck`, `tests`, `docs-check`,
+  `harness-gate`) are intact. A malformed workflow silently runs nothing, which
+  is the same failure being fixed, so parsing it first was the point.
+- PR #4 targets `main` and is green — the ordinary path did not regress.
+- The stacked case was exercised rather than reasoned about: throwaway PR #5,
+  with base `ci/run-checks-on-every-pr` and an empty commit, ran all five
+  checks and passed. Before this change it would have run none. PR #5 and its
+  branch were closed and deleted once observed.
+
+### Notes
+
+- For `pull_request` events GitHub reads the workflow from the merge ref, so the
+  fix applies to a PR whose base branch carries it — which is why #5 was a valid
+  probe before #4 was merged.
+- No backend change and no deploy in this pass.
