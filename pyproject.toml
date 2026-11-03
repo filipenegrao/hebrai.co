@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hebrai-co"
+version = "0.1.0"
+description = "Biblical Hebrew study app — FastAPI backend"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic==0.104.1",
+    "fastapi==0.136.1",
+    "uvicorn[standard]==0.46.0",
+    "psycopg2-binary==2.9.10",
+    "fsrs==6.3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-mock==3.14.0",
+    "httpx==0.28.1",
+    "ruff==0.17.3",
+    "mypy==2.1.0",
+]
+
+# The repository is not a Python package: `pip install -e ".[dev]"` exists only to
+# install the dependencies above. Without this, setuptools' flat-layout discovery
+# aborts on the multiple top-level directories (backend/, database/, deploy/, ...).
+[tool.setuptools]
+packages = []
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["frontend"]
+# `backend/` is the import root, so first-party modules (models, db, *_router)
+# sort as first-party rather than third-party.
+src = ["backend"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "B", "SIM", "RUF"]
+# B008 flags `Depends()` in an argument default, which is FastAPI's documented
+# dependency-injection idiom — not a bug to rewrite.
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+# Keeps the per-line ignores below from outliving the mismatch they cover.
+warn_unused_ignores = true
+exclude = '(^|/)(frontend|\.venv|node_modules)/'

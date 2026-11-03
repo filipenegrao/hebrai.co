@@ -1,9 +1,10 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from fastapi.testclient import TestClient
 
-from main import app
 from db import db_connection
+from main import app
 
 
 @pytest.fixture
@@ -111,7 +112,7 @@ def test_upsert_executes_correct_sql(client, mock_cursor):
         headers={"X-User-ID": "user1"},
     )
     assert mock_cursor.execute.call_count == 1
-    args, kwargs = mock_cursor.execute.call_args
+    args, _kwargs = mock_cursor.execute.call_args
     sql_upper = args[0].upper() if args else ""
     assert "INSERT INTO USER_SETTINGS" in sql_upper
     assert "ON CONFLICT" in sql_upper

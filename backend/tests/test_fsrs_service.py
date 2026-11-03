@@ -1,11 +1,10 @@
-import pytest
 from fsrs import Card as FSRSCard
 
 from fsrs_service import (
-    fsrs_state_to_card,
     card_to_fsrs_state,
-    schedule_review,
     determine_format,
+    fsrs_state_to_card,
+    schedule_review,
 )
 
 

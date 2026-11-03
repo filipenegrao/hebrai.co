@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel, Field, field_validator
+
 from db import db_connection
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -32,8 +33,8 @@ class UserSettings(BaseModel):
             raise ValueError(f"timezone must be at most {_TIMEZONE_MAX_LENGTH} characters")
         try:
             ZoneInfo(v)
-        except (ZoneInfoNotFoundError, KeyError):
-            raise ValueError(f"unknown timezone: {v!r}")
+        except (ZoneInfoNotFoundError, KeyError) as exc:
+            raise ValueError(f"unknown timezone: {v!r}") from exc
         return v
 
 

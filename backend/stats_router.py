@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Header
 from pydantic import BaseModel
+
 from db import db_connection
 
 router = APIRouter(prefix="/stats", tags=["stats"])
@@ -8,7 +9,7 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 class DailyStats(BaseModel):
     reviews_today: int
     new_words_today: int
-    retention_rate: float  # percentage 0–100
+    retention_rate: float  # percentage 0-100
     streak_days: int
 
 

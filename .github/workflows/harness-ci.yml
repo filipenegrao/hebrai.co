@@ -16,7 +16,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
-      - run: pip install ruff
+      # Pinned: ruff's default rule set changes between releases, which would make
+      # this job fail on a version bump alone. Keep in sync with the dev extra.
+      - run: pip install ruff==0.17.3
       - run: ruff check .
 
   typecheck:

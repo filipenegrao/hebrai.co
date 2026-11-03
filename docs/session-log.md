@@ -1919,3 +1919,40 @@ new-card `INSERT`s were discarded along with the failed request.
 - Host nginx already sets `proxy_read_timeout 180s`, so the ~3s per generated
   card leaves plenty of headroom for a 5-card session.
 - `anthropic==0.104.1` is old; bumping it is a separate follow-up.
+
+## 2026-11-03 — Harness CI toolchain made green
+
+### Scope
+
+Repository tooling and configuration. No application behavior changed.
+
+### Changes
+
+- `pyproject.toml` (new, repo root): runtime dependencies mirrored from `backend/requirements.txt`; `dev`
+  extra with `pytest`, `pytest-mock`, `httpx`, `ruff==0.17.3`, `mypy==2.1.0`; `[tool.setuptools] packages = []`
+  so the editable install only installs dependencies; `requires-python = ">=3.12"`; pytest `pythonpath` and
+  `testpaths` pointed at `backend`; ruff `select`/`ignore`/`line-length`/`src`; permissive mypy.
+- `.github/workflows/harness-ci.yml`: pinned `pip install ruff==0.17.3` in the `Ruff` job.
+- `backend/` — style only: import blocks sorted, 4 unused imports removed, 2 `raise ... from exc`,
+  1 tuple concatenation unpacked, 1 nested `with` combined, 1 unused unpacked name prefixed, 1 en dash
+  replaced in a comment, and 5 per-line `# type: ignore[code]` comments for third-party type mismatches.
+- `.gitignore`: added `*.egg-info/`, `.mypy_cache/`, `.ruff_cache/`, `.pytest_cache/`, `__pycache__/`.
+- `HANDOFF.md`, `STATUS.json`, `docs/progress.md`: updated per the harness convention.
+
+### Verification
+
+- `ruff check .` (ruff 0.17.3, the version CI resolves) — all checks passed
+- `mypy .` (mypy 2.1.0, dependencies installed) — no issues in 16 source files
+- `pytest` — 42 passed, environment variables unset
+- `pip install -e ".[dev]"` exercised in a clean venv, which is what proves the setuptools config
+- `python3 -c "import json; json.load(open('STATUS.json'))"` — valid
+
+### Notes
+
+- The three jobs had never been green. The workflow predates PR #1, but PR #1 was the repository's first pull
+  request, so today was the first time the checks ran at all.
+- Docker was not running on this machine, so verification used a clean venv with the CI-pinned tool versions
+  rather than `python:3.12-slim`. The jobs on the pull request itself are the authoritative check.
+- B008 is ignored deliberately, not worked around: `Depends()` in an argument default is the FastAPI idiom.
+- PR #1 merged while this work was in progress, so the branch was rebased onto the new `main` and the style
+  pass re-derived on top of it. No change of PR #1's was reverted or altered.

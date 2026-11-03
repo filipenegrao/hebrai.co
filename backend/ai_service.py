@@ -61,9 +61,14 @@ class _Provider:
         response = client.messages.create(
             model=model,
             max_tokens=4096,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]  # dicts built above match MessageParam
         )
-        text = "".join(block.text for block in response.content if getattr(block, "type", None) == "text").strip()
+        # The `type == "text"` guard narrows to TextBlock, which mypy cannot see through getattr.
+        text = "".join(
+            block.text  # type: ignore[union-attr]
+            for block in response.content
+            if getattr(block, "type", None) == "text"
+        ).strip()
         if not text:
             raise ValueError("Anthropic returned no text content")
         return _GenerateResponse(choices=[_Choice(message=_Message(content=text))])

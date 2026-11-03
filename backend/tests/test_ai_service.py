@@ -1,10 +1,11 @@
 import json
 import os
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+from ai_service import ProviderError, _build_prompt, _Choice, _GenerateResponse, _Message, generate_content, hash_prompt
 from models import Word
-from ai_service import ProviderError, hash_prompt, generate_content, _build_prompt, _GenerateResponse, _Choice, _Message
 
 
 @pytest.fixture
@@ -89,9 +90,8 @@ def test_generate_content_raises_on_malformed_json(sample_word):
     mock = MagicMock()
     mock.choices[0].message.content = "not valid json {"
 
-    with patch("ai_service.provider.generate", return_value=mock):
-        with pytest.raises(ProviderError, match="non-JSON"):
-            generate_content(sample_word, "flashcard")
+    with patch("ai_service.provider.generate", return_value=mock), pytest.raises(ProviderError, match="non-JSON"):
+        generate_content(sample_word, "flashcard")
 
 
 def test_generate_content_returns_placeholder_when_no_provider(sample_word):
@@ -137,9 +137,11 @@ def test_generate_content_uses_anthropic_model_env_override(sample_word):
         choices=[_Choice(message=_Message(content=json.dumps({"answer": "אֶרֶץ", "hint": "x", "prompt": "y"})))]
     )
 
-    with patch.dict(os.environ, {"ANTHROPIC_MODEL": "claude-test-model"}, clear=False):
-        with patch("ai_service.provider.generate", return_value=response) as generate:
-            generate_content(sample_word, "typing", provider_name="claude")
+    with (
+        patch.dict(os.environ, {"ANTHROPIC_MODEL": "claude-test-model"}, clear=False),
+        patch("ai_service.provider.generate", return_value=response) as generate,
+    ):
+        generate_content(sample_word, "typing", provider_name="claude")
 
     assert generate.call_args.kwargs["model"] == "claude-test-model"
 
