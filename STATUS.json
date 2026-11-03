@@ -1,6 +1,6 @@
 {
   "project": "hebrai.co",
-  "last_updated": "2026-11-03T20:54Z",
+  "last_updated": "2026-11-03T21:13Z",
   "version": "0.1.0",
   "release_phase": "dashboard-deploy",
   "domains": [
@@ -232,6 +232,13 @@
           "status": "done",
           "tests": true,
           "notes": "Added the missing root pyproject.toml so `pip install -e \".[dev]\"` resolves; the Mypy and Pytest jobs had been dying at install since the workflow was written. Runtime pins mirror backend/requirements.txt; the dev extra adds pytest, pytest-mock, httpx, ruff==0.17.3 and mypy==2.1.0. pytest is configured with pythonpath=[\"backend\"] and testpaths=[\"backend/tests\"]. Ruff selects E4/E7/E9, F, I, B, SIM, RUF at line-length 120 and ignores B008, which flags FastAPI's documented Depends() default idiom. Ruff is pinned in the workflow too, because its default rule set widened between 0.15 and 0.17 and an unpinned bump alone could turn the job red. Cleared all 24 findings (style only: import order, 4 unused imports, 2 raise-from, 1 tuple unpacking, 1 nested with, 1 unused unpacked name, 1 en dash in a comment). Mypy runs permissive (ignore_missing_imports, no strict) over the whole repo; the 15 third-party type mismatches it found are silenced with 5 narrow per-line `# type: ignore[code]` comments rather than module-wide disables, so new code stays checked. No backend behavior changed; 42 tests still pass."
+        },
+        {
+          "id": "ci-002",
+          "name": "Backend type mismatches resolved",
+          "status": "done",
+          "tests": true,
+          "notes": "The five per-line `# type: ignore` comments from ci-001 removed and replaced by real types; zero remain in backend/. fsrs_service: fsrs 6.3.1 models no repetition count (Card is a plain dataclass), so the app-side `reps` counter — already persisted in cards.fsrs_state JSONB — is declared on an AppCard(Card) subclass instead of assigned to an undeclared attribute, which also survives a future fsrs adding __slots__. Scheduling verified unchanged: with enable_fuzzing=False, review_card returns bit-identical state for AppCard and Card over seven rating sequences; the default fuzzing already makes two base Cards disagree on `due`. ai_service: messages annotated list[MessageParam] (the type anthropic 0.104.1's Messages.create accepts), imported under TYPE_CHECKING so the SDK stays lazily imported; content blocks narrowed with isinstance(block, TextBlock), verified against the pinned SDK's own response parsing via a mocked transport (thinking + text blocks) because _generate_anthropic has no test. models/session_router: shared ExerciseFormat Literal alias used for determine_format's return type, with format_override typed from the existing DB CHECK constraint rather than validated at runtime. No behavior change; 42 tests pass unedited. Sensors: ruff clean, mypy clean over 16 files, pytest 42 passed. Not verified in Docker (daemon down); no deploy."
         }
       ]
     }
