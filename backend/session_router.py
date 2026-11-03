@@ -5,10 +5,10 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 
-from db import db_connection
-from models import Word, CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse
-from fsrs_service import schedule_review, determine_format
 from ai_service import ProviderError, generate_content, hash_prompt
+from db import db_connection
+from fsrs_service import determine_format, schedule_review
+from models import CardWithContent, NextCardsResponse, ReviewRequest, ReviewResponse, Word
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,11 @@ def _validate_fsrs_state(fsrs_state: Any, card_id: int) -> dict:
         if val is not None:
             try:
                 datetime.fromisoformat(str(val))
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as exc:
                 raise HTTPException(
                     status_code=422,
                     detail=f"Card {card_id}: fsrs_state.{field} is not a valid ISO datetime",
-                )
+                ) from exc
     return fsrs_state
 
 
@@ -147,7 +147,7 @@ def get_next_cards(
                 )
                 result = cur.fetchone()
                 if result:
-                    new_rows.append((result[0], x_user_id, word.id, {}, None) + wr)
+                    new_rows.append((result[0], x_user_id, word.id, {}, None, *wr))
 
         cards_out: list[CardWithContent] = []
         for row in due_rows + new_rows:
@@ -159,7 +159,7 @@ def get_next_cards(
                 CardWithContent(
                     card_id=card_id,
                     word=word,
-                    format=fmt,
+                    format=fmt,  # type: ignore[arg-type]  # determine_format returns one of the literals
                     content=content,
                     ai_provider=provider,
                 )

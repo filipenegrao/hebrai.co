@@ -1,5 +1,7 @@
 from datetime import datetime
-from fsrs import Scheduler, Card as FSRSCard, Rating, State
+
+from fsrs import Card as FSRSCard
+from fsrs import Rating, Scheduler, State
 
 _scheduler = Scheduler()
 
@@ -9,7 +11,7 @@ _RATING_MAP = {1: Rating.Again, 2: Rating.Hard, 3: Rating.Good, 4: Rating.Easy}
 def fsrs_state_to_card(state: dict) -> FSRSCard:
     card = FSRSCard()
     if not state:
-        card.reps = 0
+        card.reps = 0  # type: ignore[attr-defined]  # fsrs 6 dropped Card.reps; kept as an app-side counter
         return card
 
     if "state" in state:
@@ -30,7 +32,7 @@ def fsrs_state_to_card(state: dict) -> FSRSCard:
     if last_review:
         card.last_review = datetime.fromisoformat(last_review)
 
-    card.reps = state.get("reps", 0)
+    card.reps = state.get("reps", 0)  # type: ignore[attr-defined]  # see fsrs_state_to_card above
     return card
 
 

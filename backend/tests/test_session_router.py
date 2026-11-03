@@ -1,11 +1,10 @@
-import json
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 
-from main import app
 from db import db_connection
-
+from main import app
 
 # ---------------------------------------------------------------------------
 # Local fixtures — override conftest client for this module
